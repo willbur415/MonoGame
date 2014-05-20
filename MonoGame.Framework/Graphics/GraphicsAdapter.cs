@@ -76,6 +76,12 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             _view = screen;
         }
+#elif (WINDOWS && OPENGL) || LINUX || ANGLE
+        OpenTKGamePlatform _platform;
+        internal GraphicsAdapter(OpenTKGamePlatform platform)
+        {
+            _platform = platform;
+        }
 #else
         internal GraphicsAdapter()
         {
@@ -106,9 +112,8 @@ namespace Microsoft.Xna.Framework.Graphics
                        SurfaceFormat.Color);
 #elif ANDROID
                 return new DisplayMode(_view.Width, _view.Height, 60, SurfaceFormat.Color);
-#elif (WINDOWS && OPENGL) || LINUX
-
-                return new DisplayMode(OpenTK.DisplayDevice.Default.Width, OpenTK.DisplayDevice.Default.Height, (int)OpenTK.DisplayDevice.Default.RefreshRate, SurfaceFormat.Color);
+#elif (WINDOWS && OPENGL) || LINUX || ANGLE
+                return _platform.CurrentDisplayMode;
 #else
                 return new DisplayMode(800, 600, 60, SurfaceFormat.Color);
 #endif
@@ -135,9 +140,12 @@ namespace Microsoft.Xna.Framework.Graphics
 						new GraphicsAdapter[] {new GraphicsAdapter(UIScreen.MainScreen)});
 #elif ANDROID
                     adapters = new ReadOnlyCollection<GraphicsAdapter>(new GraphicsAdapter[] { new GraphicsAdapter(((AndroidGameWindow)Game.Instance.Window).GameView) });
+#elif (WINDOWS && OPENGL) || LINUX || ANGLE
+                    adapters = new ReadOnlyCollection<GraphicsAdapter>(
+                        new GraphicsAdapter[] {new GraphicsAdapter(Game.Instance.Platform as OpenTKGamePlatform)});
 #else
                     adapters = new ReadOnlyCollection<GraphicsAdapter>(
-						new GraphicsAdapter[] {new GraphicsAdapter()});
+                        new GraphicsAdapter[] {new GraphicsAdapter())});
 #endif
                 }
                 return adapters;
@@ -252,60 +260,16 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
-
+#if (WINDOWS && OPENGL) || LINUX || ANGLE
+                return _platform.SupportedDisplayModes;
+#else
                 if (supportedDisplayModes == null)
                 {
                     List<DisplayMode> modes = new List<DisplayMode>(new DisplayMode[] { CurrentDisplayMode, });
-#if (WINDOWS && OPENGL) || LINUX
-                    
-					//IList<OpenTK.DisplayDevice> displays = OpenTK.DisplayDevice.AvailableDisplays;
-					var displays = new List<OpenTK.DisplayDevice>();
-
-					OpenTK.DisplayIndex[] displayIndices = {
-						OpenTK.DisplayIndex.First,
-						OpenTK.DisplayIndex.Second,
-						OpenTK.DisplayIndex.Third,
-						OpenTK.DisplayIndex.Fourth,
-						OpenTK.DisplayIndex.Fifth,
-						OpenTK.DisplayIndex.Sixth,
-					};
-
-					foreach(var displayIndex in displayIndices) 
-					{
-						var currentDisplay = OpenTK.DisplayDevice.GetDisplay(displayIndex);
-						if(currentDisplay!= null) displays.Add(currentDisplay);
-					}
-
-                    if (displays.Count > 0)
-                    {
-                        modes.Clear();
-                        foreach (OpenTK.DisplayDevice display in displays)
-                        {
-                            foreach (OpenTK.DisplayResolution resolution in display.AvailableResolutions)
-                            {                                
-                                SurfaceFormat format = SurfaceFormat.Color;
-                                switch (resolution.BitsPerPixel)
-                                {
-                                    case 32: format = SurfaceFormat.Color; break;
-                                    case 16: format = SurfaceFormat.Bgr565; break;
-                                    case 8: format = SurfaceFormat.Bgr565; break;
-                                    default:
-                                        break;
-                                }
-                                // Just report the 32 bit surfaces for now
-                                // Need to decide what to do about other surface formats
-                                if (format == SurfaceFormat.Color)
-                                {
-                                    modes.Add(new DisplayMode(resolution.Width, resolution.Height, (int)resolution.RefreshRate, format));
-                                }
-                            }
-
-                        }
-                    }
-#endif
                     supportedDisplayModes = new DisplayModeCollection(modes);
                 }
                 return supportedDisplayModes;
+#endif
             }
         }
 

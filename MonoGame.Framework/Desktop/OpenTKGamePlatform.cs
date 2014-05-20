@@ -88,7 +88,8 @@ namespace Microsoft.Xna.Framework
         // stored the current screen state, so we can check if it has changed.
         private bool isCurrentlyFullScreen = false;
         private Toolkit toolkit;
-        
+        private DisplayDevice CurrentDisplay;
+
 		public OpenTKGamePlatform(Game game)
             : base(game)
         {
@@ -149,7 +150,10 @@ namespace Microsoft.Xna.Framework
 #if LINUX
             Tao.Sdl.SdlMixer.Mix_CloseAudio();
 #endif
-            OpenTK.DisplayDevice.Default.RestoreResolution();
+            if (CurrentDisplay != null)
+            {
+                CurrentDisplay.RestoreResolution();
+            }
         }
 
         public override void BeforeInitialize()
@@ -183,12 +187,61 @@ namespace Microsoft.Xna.Framework
             ResetWindowBounds();
         }
 
+        internal DisplayMode CurrentDisplayMode
+        {
+            get
+            {
+                if (CurrentDisplay != null)
+                {
+                    return new DisplayMode(
+                        CurrentDisplay.Width, CurrentDisplay.Height,
+                        (int)CurrentDisplay.RefreshRate, SurfaceFormat.Color);
+                }
+                // Unknown display mode (running on a system without a monitor?)
+                // Few applications will expect this - return a reasonable default to avoid crashes.
+                return new DisplayMode(800, 480, 60, SurfaceFormat.Color);
+            }
+        }
+
+        internal DisplayModeCollection SupportedDisplayModes
+        {
+            get
+            {
+                DisplayModeCollection mode_collection;
+                if (CurrentDisplay != null)
+                {
+                    var modes = new List<DisplayMode>(CurrentDisplay.AvailableResolutions.Count);
+                    foreach (OpenTK.DisplayResolution resolution in CurrentDisplay.AvailableResolutions)
+                    {
+                        SurfaceFormat format = SurfaceFormat.Color;
+                        switch (resolution.BitsPerPixel)
+                        {
+                            case 32: format = SurfaceFormat.Color; break;
+                            case 16: format = SurfaceFormat.Bgr565; break;
+                            case 8: format = SurfaceFormat.Alpha8; break;
+                            default:
+                                break;
+                        }
+
+                        // Just report the 32 bit surfaces for now
+                        // Need to decide what to do about other surface formats
+                        if (format == SurfaceFormat.Color)
+                        {
+                            modes.Add(new DisplayMode(resolution.Width, resolution.Height, (int)resolution.RefreshRate, format));
+                        }
+                    }
+                    mode_collection = new DisplayModeCollection(modes);
+                }
+                else
+                {
+                    mode_collection = new DisplayModeCollection(new List<DisplayMode> { CurrentDisplayMode });
+                }
+                return mode_collection;
+            }
+        }
+
         internal void ResetWindowBounds()
         {
-            Rectangle bounds;
-
-            bounds = Window.ClientBounds;
-
             //Changing window style forces a redraw. Some games
             //have fail-logic and toggle fullscreen in their draw function,
             //so temporarily become inactive so it won't execute.
@@ -199,27 +252,73 @@ namespace Microsoft.Xna.Framework
             var graphicsDeviceManager = (GraphicsDeviceManager)
                 Game.Services.GetService(typeof(IGraphicsDeviceManager));
 
+            var bounds = new Rectangle(
+                0, 0,
+                graphicsDeviceManager.PreferredBackBufferWidth,
+                graphicsDeviceManager.PreferredBackBufferHeight);
+            var center = _view.Window.PointToScreen(
+                new System.Drawing.Point(
+                    (int)bounds.Center.X,
+                    (int)bounds.Center.Y));
+
+            // Find which DisplayDevice contains the center of the GameWindow
+            for (var i = DisplayIndex.First; i < DisplayIndex.Sixth; i++)
+            {
+                var d = DisplayDevice.GetDisplay(i);
+                if (d != null && d.Bounds.Contains(center))
+                {
+                    CurrentDisplay = d;
+                    break;
+                }
+            }
+
             if (graphicsDeviceManager.IsFullScreen)
             {
-                bounds = new Rectangle(0, 0,graphicsDeviceManager.PreferredBackBufferWidth,graphicsDeviceManager.PreferredBackBufferHeight);
-
-                if (OpenTK.DisplayDevice.Default.Width != graphicsDeviceManager.PreferredBackBufferWidth ||
-                    OpenTK.DisplayDevice.Default.Height != graphicsDeviceManager.PreferredBackBufferHeight)
+                // Change the resolution of CurrentDisplay to match the preferred
+                // backbuffer size.
+                if (CurrentDisplay != null)
                 {
-                    OpenTK.DisplayDevice.Default.ChangeResolution(graphicsDeviceManager.PreferredBackBufferWidth,
-                            graphicsDeviceManager.PreferredBackBufferHeight,
-                            OpenTK.DisplayDevice.Default.BitsPerPixel,
-                            OpenTK.DisplayDevice.Default.RefreshRate);
+                    DisplayMode selected = null;
+                    int score = Int32.MaxValue;
+                    int width = graphicsDeviceManager.PreferredBackBufferWidth;
+                    int height = graphicsDeviceManager.PreferredBackBufferHeight;
+                    float ratio = width / (float) height;
+
+                    if (CurrentDisplay.Width != width || CurrentDisplay.Height != height)
+                    {
+                        // Select the closest matching DisplayMode.
+                        // Note: when a requested resolution is not supported, XNA appears to perform
+                        // a mode switch to the same resolution as before. For example, on a portrait monitor:
+                        // 1200x1920 (default), 800x480 (preferred) -> mode switch to 1200x1920.
+                        // Should we do the same thing, or should we actually implement proper mode switching?
+                        foreach (var mode in SupportedDisplayModes)
+                        {
+                            int distance = 0;
+                            distance += Math.Abs(mode.Width * mode.Height - width * height);
+                            distance += (int)(Math.Abs(mode.AspectRatio - ratio) * 1000); // avoid wrong aspect ratios
+                            if (distance < score)
+                            {
+                                score = distance;
+                                selected = mode;
+                            }
+                        }
+
+                        if (selected != null)
+                        {
+                            CurrentDisplay.ChangeResolution(selected.Width, selected.Height, 32, selected.RefreshRate);
+                        }
+                    }
                 }
             }
             else
             {
-                
-                // switch back to the normal screen resolution
-                OpenTK.DisplayDevice.Default.RestoreResolution();
-                // now update the bounds 
-                bounds.Width = graphicsDeviceManager.PreferredBackBufferWidth;
-                bounds.Height = graphicsDeviceManager.PreferredBackBufferHeight;
+                if (CurrentDisplay != null)
+                {
+                    // Restore the origin resolution of CurrentDisplay
+                    CurrentDisplay.RestoreResolution();
+                    bounds.Width = graphicsDeviceManager.PreferredBackBufferWidth;
+                    bounds.Height = graphicsDeviceManager.PreferredBackBufferHeight;
+                }
             }
             
 

@@ -60,6 +60,11 @@ namespace Microsoft.Xna.Framework.Graphics
             get { return this.height; }
         }
 
+        /// <summary>
+        /// This method is an extension to XNA.
+        /// Gets a value indicating the maximum number of times
+        /// the monitor contents are updated per second.
+        /// </summary>
         public int RefreshRate {
             get { return this.refreshRate; }
         }

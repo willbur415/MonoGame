@@ -293,9 +293,17 @@ namespace Microsoft.Xna.Framework
                         // Should we do the same thing, or should we actually implement proper mode switching?
                         foreach (var mode in SupportedDisplayModes)
                         {
+                            // We wish to penalize wrong aspect ratios, so that we
+                            // only pick one if there is no matching resolution with
+                            // the correct aspect ratio.
+                            const int penalty = 1 << 20;
                             int distance = 0;
                             distance += Math.Abs(mode.Width * mode.Height - width * height);
-                            distance += (int)(Math.Abs(mode.AspectRatio - ratio) * 1000); // avoid wrong aspect ratios
+                            distance += (int)(Math.Abs(mode.AspectRatio - ratio) * penalty);
+
+                            // Prefer higher refresh rates that are a multiple of TargetElapsedTime
+                            var fps = 1.0 / Game.TargetElapsedTime.TotalSeconds;
+                            distance += 1000 - selected.RefreshRate; // pr
                             if (distance < score)
                             {
                                 score = distance;

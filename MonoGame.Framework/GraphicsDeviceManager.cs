@@ -404,6 +404,7 @@ namespace Microsoft.Xna.Framework
         public void ToggleFullScreen()
         {
             IsFullScreen = !IsFullScreen;
+            ApplyChanges(); // This takes effect immediately in XNA
         }
 
 #if WINDOWS_STOREAPP

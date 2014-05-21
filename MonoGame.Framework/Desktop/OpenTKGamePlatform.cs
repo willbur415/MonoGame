@@ -279,10 +279,11 @@ namespace Microsoft.Xna.Framework
                 if (CurrentDisplay != null)
                 {
                     DisplayMode selected = null;
-                    int score = Int32.MaxValue;
+                    double score = Int32.MaxValue;
                     int width = graphicsDeviceManager.PreferredBackBufferWidth;
                     int height = graphicsDeviceManager.PreferredBackBufferHeight;
                     float ratio = width / (float) height;
+                    var fps = 1.0 / Game.TargetElapsedTime.TotalSeconds;
 
                     if (CurrentDisplay.Width != width || CurrentDisplay.Height != height)
                     {
@@ -290,20 +291,22 @@ namespace Microsoft.Xna.Framework
                         // Note: when a requested resolution is not supported, XNA appears to perform
                         // a mode switch to the same resolution as before. For example, on a portrait monitor:
                         // 1200x1920 (default), 800x480 (preferred) -> mode switch to 1200x1920.
-                        // Should we do the same thing, or should we actually implement proper mode switching?
+                        // Note 2: we use a minimization algorithm to find the closest DisplayMode,
+                        // based on the following factors:
+                        // 1. difference in aspect ratios (heavily penalized to minimize stretching)
+                        // 2. difference in surface area of the desired mode vs the selected mode, in pixels
+                        // 3. difference in TargetElapsedTime (desired refresh rate) vs selected refresh rate
+                        //    (we penalize low refresh rates, and refresh rates that are not a whole multiple
+                        //    of the target fps (fps = 1.0 / TargetElapsedTime))
                         foreach (var mode in SupportedDisplayModes)
                         {
-                            // We wish to penalize wrong aspect ratios, so that we
-                            // only pick one if there is no matching resolution with
-                            // the correct aspect ratio.
-                            const int penalty = 1 << 20;
-                            int distance = 0;
+                            double distance = 0;
+                            distance += Math.Abs(mode.AspectRatio - ratio) * 1000000;
                             distance += Math.Abs(mode.Width * mode.Height - width * height);
-                            distance += (int)(Math.Abs(mode.AspectRatio - ratio) * penalty);
 
-                            // Prefer higher refresh rates that are a multiple of TargetElapsedTime
-                            var fps = 1.0 / Game.TargetElapsedTime.TotalSeconds;
-                            distance += 1000 - selected.RefreshRate; // pr
+                            var refresh_penalty = Math.Abs(mode.RefreshRate - fps) % fps;
+                            distance += 100 * refresh_penalty + 1000 - mode.RefreshRate;
+
                             if (distance < score)
                             {
                                 score = distance;

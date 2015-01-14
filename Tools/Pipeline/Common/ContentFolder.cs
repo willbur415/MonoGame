@@ -32,5 +32,11 @@ namespace MonoGame.Tools.Pipeline
         public string Icon { get; set; }
 
         public bool Exists { get; set; }
+#if WINDOWS
+        public System.Windows.Forms.TreeNode Node
+        {
+            get; set; 
+        }
+#endif
     }
 }

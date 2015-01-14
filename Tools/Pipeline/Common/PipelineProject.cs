@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -60,7 +59,9 @@ namespace MonoGame.Tools.Pipeline
         public string Icon { get; set; }
 
         public bool Exists { get; set; }
-
+#if WINDOWS
+        public System.Windows.Forms.TreeNode Node { get; set; }
+#endif
         #endregion
 
         public PipelineProject()

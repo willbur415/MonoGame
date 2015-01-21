@@ -19,6 +19,12 @@ rm $DIR/glib-sharp.dll.config
 rm $DIR/gtk-dotnet.dll
 rm $DIR/gtk-sharp.dll
 rm $DIR/gtk-sharp.dll.config
+rm $DIR/libatksharpglue-2.so
+rm $DIR/libgdksharpglue-2.so
+rm $DIR/libgladesharpglue-2.so
+rm $DIR/libglibsharpglue-2.so
+rm $DIR/libgtksharpglue-2.so
+rm $DIR/libpangosharpglue-2.so
 rm $DIR/Mono.Posix.dll
 rm $DIR/pango-sharp.dll
 rm $DIR/pango-sharp.dll.config

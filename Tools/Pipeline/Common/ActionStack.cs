@@ -23,7 +23,7 @@ namespace MonoGame.Tools.Pipeline
 
             public bool CanUndo { get; private set; }
             public bool CanRedo { get; private set; }
-            
+
             public event CanUndoRedoChanged OnCanUndoRedoChanged;
 
             public ActionStack()

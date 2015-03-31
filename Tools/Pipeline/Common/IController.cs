@@ -87,7 +87,7 @@ namespace MonoGame.Tools.Pipeline
         void CloseProject();
 
         bool SaveProject(bool saveAs);
-        
+
         void Build(bool rebuild);
 
         void RebuildItems(IEnumerable<IProjectItem> items);
@@ -102,9 +102,11 @@ namespace MonoGame.Tools.Pipeline
 
         void Include(string initialDirectory);
 
+        void IncludeReferences();
+
         void IncludeFolder(string initialDirectory);
 
-        void Exclude(IEnumerable<ContentItem> items, IEnumerable<string> folders);        
+        void Exclude(IEnumerable<ContentItem> items, IEnumerable<string> folders, List<string> refs);
 
         void NewItem(string name, string location, ContentItemTemplate template);
 

@@ -50,6 +50,11 @@ namespace MonoGame.Tools.Pipeline
                 Refresh ();
         }
 
+        public void Clear()
+        {
+            propertygridtable1.Clear();
+        }
+
         object CompareVariables(object a, object b)
         {
             if (a.ToString () == "???" || a.Equals(b))
@@ -74,7 +79,7 @@ namespace MonoGame.Tools.Pipeline
             foreach (var p in props) {
 
                 var attrs = p.GetCustomAttributes(true).Where(x => x is BrowsableAttribute).Cast<BrowsableAttribute>();
-                if (attrs.Any (x => !x.Browsable) || p.Name == "Name" || p.Name == "Location")
+                if (attrs.Any (x => !x.Browsable) || p.Name == "Name" || p.Name == "Location" || p.Name == "References")
                     continue;
 
                 object value = "???";
@@ -90,10 +95,10 @@ namespace MonoGame.Tools.Pipeline
                         .ToDictionary (t => t.ToString(), t => (object)t);
                     propertygridtable1.AddEntry (p.Name, value, 
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach (object o in currentObjects) 
-                                p.SetValue(o, data[((string)((FalseWidget)s).newvalue)], null);
-                            controller.OnProjectModified();
-                        }, data);
+                        foreach (object o in currentObjects) 
+                            p.SetValue(o, data[((string)((FalseWidget)s).newvalue)], null);
+                        controller.OnProjectModified();
+                    }, data);
                     continue;
                 }
                 if (p.PropertyType == typeof(List<string>)) {
@@ -102,14 +107,14 @@ namespace MonoGame.Tools.Pipeline
 
                     propertygridtable1.AddEntry (p.Name, value,
                         PropertyGridTable.EntryType.List ,(s,e) => { 
-                            var lines = new List<string>();
+                        var lines = new List<string>();
 
-                            lines.AddRange(((string)((FalseWidget)s).newvalue).Replace("\r\n", "~").Split('~'));
+                        lines.AddRange(((string)((FalseWidget)s).newvalue).Replace("\r\n", "~").Split('~'));
 
-                            foreach (object o in currentObjects) 
-                                p.SetValue(o, lines, null);
-                            controller.OnProjectModified();
-                        });
+                        foreach (object o in currentObjects) 
+                            p.SetValue(o, lines, null);
+                        controller.OnProjectModified();
+                    });
 
                     continue;
                 }
@@ -122,10 +127,10 @@ namespace MonoGame.Tools.Pipeline
                         .ToDictionary (t => t.ToString(), t => (object)t);
                     propertygridtable1.AddEntry (p.Name, value, 
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach (object o in currentObjects) 
-                                p.SetValue(o, data[((string)((FalseWidget)s).newvalue)], null);
-                            controller.OnProjectModified();
-                        }, data);
+                        foreach (object o in currentObjects) 
+                            p.SetValue(o, data[((string)((FalseWidget)s).newvalue)], null);
+                        controller.OnProjectModified();
+                    }, data);
                     continue;
                 }
                 if (p.PropertyType == typeof(TP.TargetPlatform)) {
@@ -137,10 +142,10 @@ namespace MonoGame.Tools.Pipeline
                         .ToDictionary (t => t.ToString(), t => (object)t);
                     propertygridtable1.AddEntry (p.Name, value, 
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach (object o in currentObjects) 
-                                p.SetValue(o, data[((string)((FalseWidget)s).newvalue)],null);
-                            controller.OnProjectModified();
-                        }, data);
+                        foreach (object o in currentObjects) 
+                            p.SetValue(o, data[((string)((FalseWidget)s).newvalue)],null);
+                        controller.OnProjectModified();
+                    }, data);
                     continue;
                 }
                 if (p.PropertyType == typeof(string)) {
@@ -150,10 +155,10 @@ namespace MonoGame.Tools.Pipeline
                     if (p.CanWrite)
                         propertygridtable1.AddEntry (p.Name, value, 
                             PropertyGridTable.EntryType.Text, (s,e) => { 
-                                foreach (object o in currentObjects)
-                                    p.SetValue(o, ((FalseWidget)s).newvalue, null);
-                                controller.OnProjectModified();
-                            });
+                            foreach (object o in currentObjects)
+                                p.SetValue(o, ((FalseWidget)s).newvalue, null);
+                            controller.OnProjectModified();
+                        });
                     else 
                         propertygridtable1.AddEntry (p.Name, value, 
                             PropertyGridTable.EntryType.Readonly);
@@ -165,10 +170,10 @@ namespace MonoGame.Tools.Pipeline
 
                     propertygridtable1.AddEntry (p.Name, value, 
                         PropertyGridTable.EntryType.Check,(s,e) => { 
-                            foreach (object o in currentObjects) 
-                                p.SetValue(o, Convert.ToBoolean(((string)((FalseWidget)s).newvalue)), null);
-                            controller.OnProjectModified();
-                        });
+                        foreach (object o in currentObjects) 
+                            p.SetValue(o, Convert.ToBoolean(((string)((FalseWidget)s).newvalue)), null);
+                        controller.OnProjectModified();
+                    });
                     continue;
                 }
                 if (p.PropertyType == typeof(ImporterTypeDescription)) {
@@ -179,19 +184,19 @@ namespace MonoGame.Tools.Pipeline
                     var data = PipelineTypes.Importers.ToDictionary (item => item.DisplayName, item => (object)item);
                     propertygridtable1.AddEntry (p.Name, value, 
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach(ImporterTypeDescription itd in PipelineTypes.Importers)
+                        foreach(ImporterTypeDescription itd in PipelineTypes.Importers)
+                        {
+                            if(itd.DisplayName == (string)((FalseWidget)s).newvalue)
                             {
-                                if(itd.DisplayName == (string)((FalseWidget)s).newvalue)
-                                {
-                                    foreach (object o in currentObjects) 
-                                        p.SetValue(o, itd, null);
-                                    controller.OnProjectModified();
-                                    Refresh ();
-                                    controller.OnProjectModified();
-                                    break;
-                                }
+                                foreach (object o in currentObjects) 
+                                    p.SetValue(o, itd, null);
+                                controller.OnProjectModified();
+                                Refresh ();
+                                controller.OnProjectModified();
+                                break;
                             }
-                        }, data);
+                        }
+                    }, data);
                     continue;
                 }
                 if (p.PropertyType == typeof(ProcessorTypeDescription)) {
@@ -202,19 +207,19 @@ namespace MonoGame.Tools.Pipeline
                     var data = PipelineTypes.Processors.ToDictionary (item => item.DisplayName, item => (object)item);
                     propertygridtable1.AddEntry (p.Name, value, 
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach(ProcessorTypeDescription ptd in PipelineTypes.Processors)
+                        foreach(ProcessorTypeDescription ptd in PipelineTypes.Processors)
+                        {
+                            if(ptd.DisplayName == (string)((FalseWidget)s).newvalue)
                             {
-                                if(ptd.DisplayName == (string)((FalseWidget)s).newvalue)
-                                {
-                                    foreach (object o in currentObjects) 
-                                        p.SetValue(o, ptd, null);
-                                    controller.OnProjectModified();
-                                    Refresh ();
-                                    controller.OnProjectModified();
-                                    break;
-                                }
+                                foreach (object o in currentObjects) 
+                                    p.SetValue(o, ptd, null);
+                                controller.OnProjectModified();
+                                Refresh ();
+                                controller.OnProjectModified();
+                                break;
                             }
-                        }, data);
+                        }
+                    }, data);
 
                     if (value.ToString () != "") {
 
@@ -252,12 +257,12 @@ namespace MonoGame.Tools.Pipeline
 
                     propertygridtable1.AddProcEntry (p1.Name, value, 
                         PropertyGridTable.EntryType.Check, (s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                ((ContentItem)o).ProcessorParams[p1.Name] = Convert.ToBoolean((string)((FalseWidget)s).newvalue);
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        });
+                        foreach (object o in contentItems) 
+                        {
+                            ((ContentItem)o).ProcessorParams[p1.Name] = Convert.ToBoolean((string)((FalseWidget)s).newvalue);
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    });
                     continue;
                 }
                 if (p1.Type == typeof(string)) {
@@ -266,12 +271,12 @@ namespace MonoGame.Tools.Pipeline
 
                     propertygridtable1.AddProcEntry (p1.Name, value, 
                         PropertyGridTable.EntryType.Text, (s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                ((ContentItem)o).ProcessorParams[p1.Name] = ((FalseWidget)s).newvalue;
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        });
+                        foreach (object o in contentItems) 
+                        {
+                            ((ContentItem)o).ProcessorParams[p1.Name] = ((FalseWidget)s).newvalue;
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    });
                     continue;
                 }
                 if (p1.Type == typeof(char)) {
@@ -284,16 +289,16 @@ namespace MonoGame.Tools.Pipeline
 
                     propertygridtable1.AddProcEntry (p1.Name, c, 
                         PropertyGridTable.EntryType.Text, (s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                if (!string.IsNullOrEmpty((string)((FalseWidget)s).newvalue))
-                                    ((ContentItem)o).ProcessorParams[p1.Name] = ((string)((FalseWidget)s).newvalue)[0];
-                                else 
-                                    ((ContentItem)o).ProcessorParams[p1.Name] = ' '.ToString();
+                        foreach (object o in contentItems) 
+                        {
+                            if (!string.IsNullOrEmpty((string)((FalseWidget)s).newvalue))
+                                ((ContentItem)o).ProcessorParams[p1.Name] = ((string)((FalseWidget)s).newvalue)[0];
+                            else 
+                                ((ContentItem)o).ProcessorParams[p1.Name] = ' '.ToString();
 
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        });
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    });
                     continue;
                 }
                 if (p1.Type == typeof(ConversionQuality)) {
@@ -305,12 +310,12 @@ namespace MonoGame.Tools.Pipeline
                     var defaultValue = (ConversionQuality)p1.DefaultValue;
                     propertygridtable1.AddProcEntry (p1.Name, (object)value ?? (object)defaultValue, 
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                ((ContentItem)o).ProcessorParams[p1.Name] = data[(string)((FalseWidget)s).newvalue];
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        }, data);
+                        foreach (object o in contentItems) 
+                        {
+                            ((ContentItem)o).ProcessorParams[p1.Name] = data[(string)((FalseWidget)s).newvalue];
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    }, data);
                     continue;
                 }
                 if (p1.Type == typeof(MaterialProcessorDefaultEffect)) {
@@ -322,12 +327,12 @@ namespace MonoGame.Tools.Pipeline
                     var defaultValue = (MaterialProcessorDefaultEffect)p1.DefaultValue;
                     propertygridtable1.AddProcEntry (p1.Name, (object)value ?? (object)defaultValue,
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                ((ContentItem)o).ProcessorParams[p1.Name] = data[(string)((FalseWidget)s).newvalue];
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        }, data);
+                        foreach (object o in contentItems) 
+                        {
+                            ((ContentItem)o).ProcessorParams[p1.Name] = data[(string)((FalseWidget)s).newvalue];
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    }, data);
                     continue;
                 }
                 if (p1.Type == typeof(TextureProcessorOutputFormat)) {
@@ -339,12 +344,12 @@ namespace MonoGame.Tools.Pipeline
                     var defaultValue = (TextureProcessorOutputFormat)p1.DefaultValue;
                     propertygridtable1.AddProcEntry (p1.Name, (object)value ?? (object)defaultValue,
                         PropertyGridTable.EntryType.Combo,(s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                ((ContentItem)o).ProcessorParams[p1.Name] = data[(string)((FalseWidget)s).newvalue];
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        }, data);
+                        foreach (object o in contentItems) 
+                        {
+                            ((ContentItem)o).ProcessorParams[p1.Name] = data[(string)((FalseWidget)s).newvalue];
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    }, data);
                     continue;
                 }
                 if (p1.Type == typeof(Microsoft.Xna.Framework.Color)) {
@@ -352,23 +357,23 @@ namespace MonoGame.Tools.Pipeline
                         value = new Microsoft.Xna.Framework.Color();
                     propertygridtable1.AddProcEntry (p1.Name, value, 
                         PropertyGridTable.EntryType.Color, (s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                try {
-                                    string[] cvalues = ((FalseWidget)s).newvalue.ToString().Replace (":", " ").Replace("}", " ").Split (' ');
-                                    var color = new Microsoft.Xna.Framework.Color();
+                        foreach (object o in contentItems) 
+                        {
+                            try {
+                                string[] cvalues = ((FalseWidget)s).newvalue.ToString().Replace (":", " ").Replace("}", " ").Split (' ');
+                                var color = new Microsoft.Xna.Framework.Color();
 
-                                    color.R = (byte)Convert.ToInt16 (cvalues [1]);
-                                    color.G = (byte)Convert.ToInt16 (cvalues [3]);
-                                    color.B = (byte)Convert.ToInt16 (cvalues [5]);
-                                    color.A = (byte)Convert.ToInt16 (cvalues [7]);
+                                color.R = (byte)Convert.ToInt16 (cvalues [1]);
+                                color.G = (byte)Convert.ToInt16 (cvalues [3]);
+                                color.B = (byte)Convert.ToInt16 (cvalues [5]);
+                                color.A = (byte)Convert.ToInt16 (cvalues [7]);
 
-                                    ((ContentItem)o).ProcessorParams[p1.Name] = color;
-                                    controller.OnItemModified ((ContentItem)o);
-                                }
-                                catch { }
+                                ((ContentItem)o).ProcessorParams[p1.Name] = color;
+                                controller.OnItemModified ((ContentItem)o);
                             }
-                        });
+                            catch { }
+                        }
+                    });
                     continue;
                 }
                 if (p1.Type == typeof(Single)) {
@@ -376,12 +381,12 @@ namespace MonoGame.Tools.Pipeline
                         value = "";
                     propertygridtable1.AddProcEntry (p1.Name, value.ToString(), 
                         PropertyGridTable.EntryType.Text, (s,e) => { 
-                            foreach (object o in contentItems) 
-                            {
-                                ((ContentItem)o).ProcessorParams[p1.Name] =  Single.Parse ((string)((FalseWidget)s).newvalue).ToString();
-                                controller.OnItemModified ((ContentItem)o);
-                            }
-                        });
+                        foreach (object o in contentItems) 
+                        {
+                            ((ContentItem)o).ProcessorParams[p1.Name] =  Single.Parse ((string)((FalseWidget)s).newvalue).ToString();
+                            controller.OnItemModified ((ContentItem)o);
+                        }
+                    });
                     continue;
                 }
                 propertygridtable1.AddProcEntry (p1.Name, null, PropertyGridTable.EntryType.Unkown);

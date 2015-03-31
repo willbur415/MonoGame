@@ -26,16 +26,16 @@ namespace MonoGame.Tools.Pipeline
         private readonly List<ContentItemTemplate> _templateItems;
 
         private static readonly string [] _mgcbSearchPaths = new []       
-        {
-            "",
-#if DEBUG
-            "../../../../../MGCB/bin/Windows/AnyCPU/Debug",
-#else
-            "../../../../../MGCB/bin/Windows/AnyCPU/Release",
-#endif
-            "../MGCB",
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-        };
+            {
+                "",
+                #if DEBUG
+                "../../../../../MGCB/bin/Windows/AnyCPU/Debug",
+                #else
+                "../../../../../MGCB/bin/Windows/AnyCPU/Release",
+                #endif
+                "../MGCB",
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+            };
 
         public IEnumerable<ContentItemTemplate> Templates
         {
@@ -157,9 +157,9 @@ namespace MonoGame.Tools.Pipeline
             if (OnProjectLoading != null)
                 OnProjectLoading();
 
-#if SHIPPING
+            #if SHIPPING
             try
-#endif
+            #endif
             {
                 _actionStack.Clear();
                 _project = new PipelineProject();
@@ -167,17 +167,17 @@ namespace MonoGame.Tools.Pipeline
                 parser.ImportProject(projectFilePath);
 
                 ResolveTypes();                
-                
+
                 ProjectOpen = true;
                 ProjectDirty = true;                
             }
-#if SHIPPING
+            #if SHIPPING
             catch (Exception e)
             {
-                View.ShowError("Open Project", "Failed to open project!");
-                return;
+            View.ShowError("Open Project", "Failed to open project!");
+            return;
             }
-#endif
+            #endif
 
             UpdateTree();
 
@@ -195,7 +195,7 @@ namespace MonoGame.Tools.Pipeline
             string projectFilePath;
             if (!View.AskOpenProject(out projectFilePath))
                 return;
-            
+
             OpenProject(projectFilePath);
         }
 
@@ -206,16 +206,19 @@ namespace MonoGame.Tools.Pipeline
             if (OnProjectLoading != null)
                 OnProjectLoading();
 
-#if SHIPPING
+            #if SHIPPING
             try
-#endif
+            #endif
             {
                 _actionStack.Clear();
                 _project = new PipelineProject();
-                
+
                 var parser = new PipelineProjectParser(this, _project);
                 var errorCallback = new MGBuildParser.ErrorCallback((msg, args) => View.OutputAppend(string.Format(Path.GetFileName(projectFilePath) + ": " + msg, args)));
                 parser.OpenProject(projectFilePath, errorCallback);
+
+                foreach(string reff in _project.References)
+                    View.AddTreeReference(reff);
 
                 ResolveTypes();
 
@@ -243,13 +246,13 @@ namespace MonoGame.Tools.Pipeline
                 History.Default.StartupProject = projectFilePath;
                 History.Default.Save();
             }
-#if SHIPPING
+            #if SHIPPING
             catch (Exception e)
             {
-                View.ShowError("Open Project", "Failed to open project!");
-                return;
+            View.ShowError("Open Project", "Failed to open project!");
+            return;
             }
-#endif
+            #endif
 
             UpdateTree();
 
@@ -558,8 +561,8 @@ namespace MonoGame.Tools.Pipeline
                     int daction = def;
 
                     if (daction == 1)
-                        if (File.Exists(newfile))
-                            daction = 2;
+                    if (File.Exists(newfile))
+                        daction = 2;
 
                     if (daction == 0)
                     {
@@ -696,9 +699,32 @@ namespace MonoGame.Tools.Pipeline
                 }
             }
 
-            var action2 = new IncludeAction(this, files, directories);
+            var action2 = new IncludeAction(this, files, directories, null);
             action2.Do();
             _actionStack.Add(action2);
+        }
+
+        public void IncludeReferences()
+        {
+            List<string> files;
+            if (!View.ChooseReferenceFile(_project.Location, out files))
+                return;
+
+            string pl = _project.Location;
+            if (!pl.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                pl += Path.DirectorySeparatorChar;
+
+            Uri folderUri = new Uri(pl);
+
+            for (int i = -0; i < files.Count; i++)
+            {
+                Uri pathUri = new Uri(files[i]);
+                files[i] = Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+            }
+
+            var action = new IncludeAction(this, null, null, files);
+            action.Do();
+            _actionStack.Add(action);
         }
 
         private List<string> GetFiles(string folder)
@@ -728,9 +754,9 @@ namespace MonoGame.Tools.Pipeline
             return ret;
         }
 
-        public void Exclude(IEnumerable<ContentItem> items, IEnumerable<string> folders)
+        public void Exclude(IEnumerable<ContentItem> items, IEnumerable<string> folders, List<string> refs)
         {
-            var action = new ExcludeAction(this, items, folders);
+            var action = new ExcludeAction(this, items, folders, refs);
             action.Do();
             _actionStack.Add(action);
         }
@@ -759,7 +785,7 @@ namespace MonoGame.Tools.Pipeline
                 return;
             }
 
-            var action = new IncludeAction(this, null, new List<string> { folder });
+            var action = new IncludeAction(this, null, new List<string> { folder }, null);
             action.Do();
             _actionStack.Add(action);
         }
@@ -844,7 +870,7 @@ namespace MonoGame.Tools.Pipeline
                         ProcessorName = lines[3],
                         TemplateFile = lines[4],
                     };
-                
+
                 if (_templateItems.Any(i => i.Label == item.Label))
                     continue;
 
@@ -865,7 +891,7 @@ namespace MonoGame.Tools.Pipeline
             #if WINDOWS
             filePath = filePath.Replace("/", "\\");
             if (filePath.StartsWith("\\"))
-                filePath = filePath.Substring(2);
+            filePath = filePath.Substring(2);
             #endif
 
             if (Path.IsPathRooted(filePath))

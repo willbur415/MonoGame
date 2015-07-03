@@ -125,7 +125,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void AddTreeItem(IProjectItem item)
         {
-            
+            projectView1.AddItem(projectView1.GetRoot(), item.OriginalPath, true, false, item.OriginalPath);
         }
 
         public void AddTreeFolder(string folder)

@@ -160,9 +160,11 @@ namespace MonoGame.Tools.Pipeline
             miOpen.Clicked += (sender, e) => _controller.OpenProject();
             miClose.Clicked += (sender, e) => _controller.CloseProject();
             miImport.Clicked += (sender, e) => _controller.ImportProject();
-            miSave.Clicked += (sender, e) => _controller.SaveProject(false);
-            miSaveAs.Clicked += (sender, e) => _controller.SaveProject(true);
+            miSave.Clicked += (sender, e) => Save(false);
+            miSaveAs.Clicked += (sender, e) => Save(true);
             miExit.Clicked += (sender, e) => this.Close();
+
+            miNewItem.Clicked += (sender, e) => NewItem();
         }
     }
 }

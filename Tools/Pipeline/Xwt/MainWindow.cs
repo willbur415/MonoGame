@@ -173,7 +173,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void AddTreeFolder(string folder)
         {
-            
+            projectView1.AddItem(projectView1.GetRoot(), folder, true, true, folder);
         }
 
         public void RemoveTreeItem(ContentItem contentItem)
@@ -223,10 +223,18 @@ namespace MonoGame.Tools.Pipeline
 
         public bool ChooseItemTemplate(out ContentItemTemplate template, out string name)
         {
-            var dialog = new NewTemplateDialog();
+            var dialog = new NewTemplateDialog(_controller.Templates.GetEnumerator ());
             dialog.TransientFor = this;
-            dialog.Run();
+
+            Command result = dialog.Run();
             dialog.Close();
+
+            if (result == Command.Ok)
+            {
+                template = dialog.TemplateFile;
+                name = dialog.Name;
+                return true;
+            }
 
             template = null;
             name = null;
@@ -235,7 +243,20 @@ namespace MonoGame.Tools.Pipeline
 
         public bool ChooseName(string title, string text, string oldname, bool docheck, out string newname)
         {
-            throw new NotImplementedException();
+            var dialog = new TextEditDialog(title, text, oldname, docheck);
+            dialog.TransientFor = this;
+
+            var result = dialog.Run();
+            dialog.Close();
+
+            if (result == Command.Ok)
+            {
+                newname = dialog.Text;
+                return true;
+            }
+
+            newname = null;
+            return false;
         }
 
         public bool CopyOrLinkFile(string file, bool exists, out CopyAction action, out bool applyforall)
@@ -310,22 +331,6 @@ namespace MonoGame.Tools.Pipeline
         public List<ContentItem> GetChildItems(string path)
         {
             throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region AlsoUpdateMenu
-
-        private void Save(bool saveas)
-        {
-            if (_controller.SaveProject(saveas))
-                UpdateMenu();
-        }
-
-        private void NewItem()
-        {
-            _controller.NewItem();
-            UpdateMenu();
         }
 
         #endregion

@@ -160,11 +160,24 @@ namespace MonoGame.Tools.Pipeline
             miOpen.Clicked += (sender, e) => _controller.OpenProject();
             miClose.Clicked += (sender, e) => _controller.CloseProject();
             miImport.Clicked += (sender, e) => _controller.ImportProject();
-            miSave.Clicked += (sender, e) => Save(false);
-            miSaveAs.Clicked += (sender, e) => Save(true);
+            miSave.Clicked += (sender, e) => _controller.SaveProject(false);
+            miSaveAs.Clicked += (sender, e) => _controller.SaveProject(true);
             miExit.Clicked += (sender, e) => this.Close();
 
-            miNewItem.Clicked += (sender, e) => NewItem();
+            miUndo.Clicked += (sender, e) => _controller.Undo();
+            miRedo.Clicked += (sender, e) => _controller.Redo();
+
+            miNewItem.Clicked += (sender, e) => _controller.NewItem();
+            miNewFolder.Clicked += (sender, e) => _controller.NewFolder();
+            miRename.Clicked += (sender, e) => _controller.Rename();
+
+            //update menus
+            miSave.Clicked += (sender, e) => UpdateMenu();
+            miSaveAs.Clicked += (sender, e) => UpdateMenu();
+            miNewItem.Clicked += (sender, e) => UpdateMenu();
+            miNewFolder.Clicked += (sender, e) => UpdateMenu();
+            miRename.Clicked += (sender, e) => UpdateMenu();
+
         }
     }
 }

@@ -156,6 +156,27 @@ namespace MonoGame.Tools.Pipeline
             return _treeStore.AddNode(pos).SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
         }
 
+        public void RemoveItem(TreePosition start, string path)
+        {
+            string[] split = path.Split ('/');
+
+            TreePosition pos = GetItem(start, split[0]);
+
+            if (pos == null)
+                return;
+
+            if (split.Length > 1)
+            {
+                string newpath = split[1];
+                for (int i = 2; i < split.Length; i++)
+                    newpath += "/" + split[i];
+
+                RemoveItem(pos, path);
+            }
+            else
+                _treeStore.GetNavigatorAt(pos).Remove();
+        }
+
         public void GetInfo(TreePosition pos, out FileType type, out string path, out string loc)
         {
             TreeNavigator nav = _treeStore.GetNavigatorAt(pos);
@@ -163,10 +184,13 @@ namespace MonoGame.Tools.Pipeline
 
             do
             {
-                path = nav.GetValue(_textCol) + "/" + path;
+                if(nav.GetValue(_idCol) != ID_BASE)
+                    path = nav.GetValue(_textCol) + "/" + path;
             }
             while(nav.MoveToParent());
-            path = path.Remove(path.Length - 1);
+
+            if(path != "")
+                path = path.Remove(path.Length - 1);
 
             var id = _treeStore.GetNavigatorAt(pos).GetValue(_idCol);
 
@@ -175,10 +199,10 @@ namespace MonoGame.Tools.Pipeline
                 loc = "";
                 type = FileType.Base;
             }
-            else if (id == ID_FOLDER)
+            else if (id == ID_FILE)
             {
                 loc = Path.GetDirectoryName(path);
-                type = FileType.Folder;
+                type = FileType.File;
             }
             else
             {

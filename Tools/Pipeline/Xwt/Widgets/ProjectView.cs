@@ -1,10 +1,12 @@
 ﻿using System;
 using Xwt;
 using Xwt.Drawing;
+using System.IO;
+using System.Collections.Generic;
 
 namespace MonoGame.Tools.Pipeline
 {
-    public class ProjectView : TreeView
+    class ProjectView : TreeView
     {
         private Image GetImage(bool folder)
         {
@@ -18,6 +20,7 @@ namespace MonoGame.Tools.Pipeline
         TreePosition _root;
         string _rootname;
         TreeStore _treeStore;
+        IController _controller;
 
         DataField<int> _idCol = new DataField<int>();
         DataField<Image> _imgCol = new DataField<Image>();
@@ -33,6 +36,11 @@ namespace MonoGame.Tools.Pipeline
             this.Columns.Add("", _imgCol, _textCol);
             this.HeadersVisible = false;
             this.SelectionMode = SelectionMode.Multiple;
+        }
+
+        public void Attach(IController controller)
+        {
+            this._controller = controller;
         }
 
         public void SetRoot(string rootname)
@@ -74,6 +82,28 @@ namespace MonoGame.Tools.Pipeline
             return null;
         }
 
+        public void ExpandPath(TreePosition start, string path)
+        {
+            this.ExpandRow(start, false);
+
+            string[] split = path.Split ('/');
+            TreePosition pos = GetItem(start, split[0]);
+
+            if (pos == null)
+                return;
+
+            if (split.Length > 1) {
+
+                string newpath = split [1];
+                for(int i = 2;i < split.Length;i++)
+                    newpath += "/" + split[i];
+
+                ExpandPath(pos, path);
+            }
+            else
+                this.ExpandRow(pos, false);
+        }
+
         public void AddItem(TreePosition start, string path, bool exists, bool folder, string fullpath)
         {
             int id = (folder || path.Contains("/")) ? ID_FOLDER : ID_FILE;
@@ -81,7 +111,7 @@ namespace MonoGame.Tools.Pipeline
 
             string[] split = path.Split ('/');
 
-            TreePosition pos = GetItem(start, split[0]) ?? _treeStore.AddNode(start).SetValue(_idCol, id).SetValue(_imgCol, icon).SetValue(_textCol, split[0]).CurrentPosition;
+            TreePosition pos = GetItem(start, split[0]) ?? AddAndSort(start, id, icon, split[0]);
 
             if (split.Length > 1) {
 
@@ -90,6 +120,70 @@ namespace MonoGame.Tools.Pipeline
                     newpath += "/" + split[i];
 
                 AddItem (pos, newpath, exists, folder, fullpath);
+            }
+        }
+
+        private TreePosition AddAndSort(TreePosition pos, int id, Image img, string text)
+        {
+            var nav = _treeStore.GetNavigatorAt(pos);
+
+            if (nav.MoveToChild())
+            {
+                int count = 0;
+
+                do
+                {
+                    if (nav.GetValue(_idCol) == id)
+                    {
+                        count++;
+
+                        if(nav.GetValue(_textCol).CompareTo(text) >= 0)
+                            return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+                    }
+                    else if(nav.GetValue(_idCol) == ID_FILE)
+                        return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+                }
+                while(nav.MoveNext());
+
+                if (count == 0 && id == ID_FOLDER)
+                {
+                    nav = _treeStore.GetNavigatorAt(pos);
+                    nav.MoveToChild();
+                    return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+                }
+            }
+
+            return _treeStore.AddNode(pos).SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+        }
+
+        public void GetInfo(TreePosition pos, out FileType type, out string path, out string loc)
+        {
+            TreeNavigator nav = _treeStore.GetNavigatorAt(pos);
+            path = "";
+
+            do
+            {
+                path = nav.GetValue(_textCol) + "/" + path;
+            }
+            while(nav.MoveToParent());
+            path = path.Remove(path.Length - 1);
+
+            var id = _treeStore.GetNavigatorAt(pos).GetValue(_idCol);
+
+            if (id == ID_BASE)
+            {
+                loc = "";
+                type = FileType.Base;
+            }
+            else if (id == ID_FOLDER)
+            {
+                loc = Path.GetDirectoryName(path);
+                type = FileType.Folder;
+            }
+            else
+            {
+                loc = path;
+                type = FileType.Folder;
             }
         }
     }

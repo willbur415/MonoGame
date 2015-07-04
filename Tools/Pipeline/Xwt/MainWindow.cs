@@ -1,5 +1,6 @@
 ﻿using System;
 using Xwt;
+using System.Collections.Generic;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -19,6 +20,7 @@ namespace MonoGame.Tools.Pipeline
 
             MessageDialog.RootWindow = this;
 
+            projectView1.SelectionChanged += (sender, e) => UpdateMenu();
             this.CloseRequested += (sender, args) => args.AllowClose = _controller.Exit();
             this.Closed += OnWindowClosed;
         }
@@ -28,6 +30,42 @@ namespace MonoGame.Tools.Pipeline
         public void Attach(IController controller)
         {
             _controller = controller;
+
+            _controller.OnProjectLoading += UpdateMenu;
+            _controller.OnProjectLoaded += UpdateMenu;
+            _controller.OnBuildStarted += UpdateMenu;
+            _controller.OnBuildFinished += UpdateMenu;
+
+            _controller.OnCanUndoRedoChanged += UpdateUndoRedo;
+
+            projectView1.Attach(_controller);
+            UpdateMenu();
+        }
+
+        public void ReloadRecentList(List<string> paths)
+        {
+            miOpenRecent.SubMenu.Items.Clear();
+
+            foreach (string path in paths)
+            {
+                var item = new MenuItem(path);
+                item.Clicked += (sender, e) => _controller.OpenProject(((MenuItem)sender).Label);
+                miOpenRecent.SubMenu.Items.Add(item);
+            }
+
+            if (paths.Count > 0)
+            {
+                var item = new MenuItem("Clear");
+                item.Clicked += (sender, e) => _controller.ClearRecentList();
+                miOpenRecent.SubMenu.Items.Add(new SeparatorMenuItem());
+                miOpenRecent.SubMenu.Items.Add(item);
+            }
+            else
+            {
+                var item = new MenuItem("No History");
+                item.Sensitive = false;
+                miOpenRecent.SubMenu.Items.Add(item);
+            }
         }
 
         public AskResult AskSaveOrCancel()
@@ -123,6 +161,11 @@ namespace MonoGame.Tools.Pipeline
                 projectView1.Close ();
         }
 
+        public void ExpandPath(string path)
+        {
+            projectView1.ExpandPath(projectView1.GetRoot(), path);
+        }
+
         public void AddTreeItem(IProjectItem item)
         {
             projectView1.AddItem(projectView1.GetRoot(), item.OriginalPath, true, false, item.OriginalPath);
@@ -168,12 +211,29 @@ namespace MonoGame.Tools.Pipeline
             
         }
 
-        public bool ChooseContentFile(string initialDirectory, out System.Collections.Generic.List<string> files)
+        public bool ChooseContentFile(string initialDirectory, out List<string> files)
         {
             throw new NotImplementedException();
         }
 
         public bool ChooseContentFolder(string initialDirectory, out string folder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ChooseItemTemplate(out ContentItemTemplate template, out string name)
+        {
+            var dialog = new NewTemplateDialog();
+            dialog.TransientFor = this;
+            dialog.Run();
+            dialog.Close();
+
+            template = null;
+            name = null;
+            return false;
+        }
+
+        public bool ChooseName(string title, string text, string oldname, bool docheck, out string newname)
         {
             throw new NotImplementedException();
         }
@@ -203,7 +263,98 @@ namespace MonoGame.Tools.Pipeline
             throw new NotImplementedException();
         }
 
+        public bool GetSelection(out FileType fileType, out string path, out string location)
+        {
+            var rows = projectView1.SelectedRows;
+
+            if (rows.Length != 1)
+            {
+                fileType = FileType.Base;
+                path = "";
+                location = "";
+
+                return false;
+            }
+
+            projectView1.GetInfo(projectView1.SelectedRow, out fileType, out path, out location);
+            return true;
+        }
+
+        public bool GetSelection(out FileType[] fileType, out string[] path, out string[] location)
+        {
+            var types = new List<FileType>();
+            var paths = new List<string>();
+            var locs = new List<string>();
+
+            var rows = projectView1.SelectedRows;
+
+            foreach (var r in rows)
+            {
+                FileType t;
+                string p, l;
+
+                projectView1.GetInfo(r, out t, out p, out l);
+
+                types.Add(t);
+                paths.Add(p);
+                locs.Add(l);
+            }
+
+            fileType = types.ToArray();
+            path = paths.ToArray();
+            location = locs.ToArray();
+
+            return (rows.Length > 0);
+        }
+
+        public List<ContentItem> GetChildItems(string path)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
+
+        #region AlsoUpdateMenu
+
+        private void Save(bool saveas)
+        {
+            if (_controller.SaveProject(saveas))
+                UpdateMenu();
+        }
+
+        private void NewItem()
+        {
+            _controller.NewItem();
+            UpdateMenu();
+        }
+
+        #endregion
+
+        public void UpdateMenu()
+        {
+            var ms = _controller.GetMenuSensitivityInfo();
+
+            miNew.Sensitive = ms.New;
+            miOpen.Sensitive = ms.Open;
+            miClose.Sensitive = ms.Close;
+            miSave.Sensitive = ms.Save;
+            miSaveAs.Sensitive = ms.SaveAs;
+            miAdd.Sensitive = ms.Add;
+            miRename.Sensitive = ms.Rename;
+            miDelete.Sensitive = ms.Delete;
+            miBuild.Sensitive = ms.Build;
+            miRebuild.Sensitive = ms.Rebuild;
+            miClean.Sensitive = ms.Clean;
+            miDebug.Sensitive = ms.Debug;
+            menuBuild.Sensitive = ms.BuildMenu;
+            UpdateUndoRedo(_controller.CanUndo, _controller.CanRedo);
+        }
+
+        void UpdateUndoRedo(bool canUndo, bool canRedo)
+        {
+            miUndo.Sensitive = canUndo;
+            miRedo.Sensitive = canRedo;
+        }
 
         protected void OnWindowClosed(object sender, EventArgs e)
         {

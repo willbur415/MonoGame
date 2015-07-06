@@ -56,6 +56,13 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
+        public PipelineProject CurrentProject {
+            get
+            {
+                return _project;
+            }
+        }
+
         public bool ProjectOpen { get; private set; }
 
         public bool ProjectDirty { get; set; }

@@ -43,12 +43,7 @@ namespace MonoGame.Tools.Pipeline
             var window = new MainWindow();
             new PipelineController(window);
             window.Show();
-
-            if (args != null && args.Length > 0)
-            {
-                var projectFilePath = string.Join(" ", args);
-                //projectFilePath
-            }
+            window.Open(args);
 
             Application.Run();
 #endif

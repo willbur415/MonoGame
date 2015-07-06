@@ -15,12 +15,12 @@ namespace MonoGame.Tools.Pipeline
 
         public Image ICON_BASE = Image.FromResource("MonoGame.Tools.Pipeline.Icons.settings.png");
 
-        public static int ID_BASE = 0, ID_FOLDER = 1, ID_FILE = 2;
+        public const int ID_BASE = 0, ID_FOLDER = 1, ID_FILE = 2;
 
         TreePosition _root;
         string _rootname;
         TreeStore _treeStore;
-        IController _controller;
+        MainWindow _window;
 
         DataField<int> _idCol = new DataField<int>();
         DataField<Image> _imgCol = new DataField<Image>();
@@ -36,11 +36,25 @@ namespace MonoGame.Tools.Pipeline
             this.Columns.Add("", _imgCol, _textCol);
             this.HeadersVisible = false;
             this.SelectionMode = SelectionMode.Multiple;
+            this.ButtonPressed += ProjectView_ButtonPressed;
+            this.ButtonReleased += ProjectView_ButtonReleased;
         }
 
-        public void Attach(IController controller)
+        void ProjectView_ButtonReleased (object sender, ButtonEventArgs e)
         {
-            this._controller = controller;
+            if (e.Button == PointerButton.Right)
+                _window.ShowMenu((int)e.X, (int)e.Y);
+        }
+
+        void ProjectView_ButtonPressed (object sender, ButtonEventArgs e)
+        {
+            // TODO: Add some right click logic
+            //if (e.Button == PointerButton.Right) e.Handled = true;
+        }
+
+        public void Attach(MainWindow window)
+        {
+            this._window = window;
         }
 
         public void SetRoot(string rootname)
@@ -61,6 +75,27 @@ namespace MonoGame.Tools.Pipeline
         {
             this._rootname = "";
             _treeStore.Clear();
+            _root = null;
+        }
+
+        public TreePosition GetItemFromPath(TreePosition start, string path)
+        {
+            string[] split = path.Split ('/');
+            TreePosition pos = GetItem(start, split[0]);
+
+            if (pos == null)
+                return null;
+
+            if (split.Length > 1)
+            {
+                string newpath = split[1];
+                for (int i = 2; i < split.Length; i++)
+                    newpath += "/" + split[i];
+
+                return GetItemFromPath(pos, newpath);
+            }
+
+            return pos;
         }
 
         public TreePosition GetItem(TreePosition pos, string name)
@@ -98,7 +133,7 @@ namespace MonoGame.Tools.Pipeline
                 for(int i = 2;i < split.Length;i++)
                     newpath += "/" + split[i];
 
-                ExpandPath(pos, path);
+                ExpandPath(pos, newpath);
             }
             else
                 this.ExpandRow(pos, false);
@@ -177,20 +212,34 @@ namespace MonoGame.Tools.Pipeline
                 _treeStore.GetNavigatorAt(pos).Remove();
         }
 
+        public List<ContentItem> GetItems(TreePosition pos)
+        {
+            var items = new List<ContentItem>();
+            var nav = _treeStore.GetNavigatorAt(pos);
+
+            if (nav.GetValue(_idCol) == ID_FILE)
+            {
+                var item = _window._controller.GetItem(GetPath(nav.CurrentPosition)) as ContentItem;
+
+                if (item != null)
+                    items.Add(item);
+            }
+
+            if (nav.MoveToChild())
+            {
+                do
+                {
+                    items.AddRange(GetItems(nav.CurrentPosition));
+                }
+                while(nav.MoveNext());
+            }
+
+            return items;
+        }
+
         public void GetInfo(TreePosition pos, out FileType type, out string path, out string loc)
         {
-            TreeNavigator nav = _treeStore.GetNavigatorAt(pos);
-            path = "";
-
-            do
-            {
-                if(nav.GetValue(_idCol) != ID_BASE)
-                    path = nav.GetValue(_textCol) + "/" + path;
-            }
-            while(nav.MoveToParent());
-
-            if(path != "")
-                path = path.Remove(path.Length - 1);
+            path = GetPath(pos);
 
             var id = _treeStore.GetNavigatorAt(pos).GetValue(_idCol);
 
@@ -209,6 +258,27 @@ namespace MonoGame.Tools.Pipeline
                 loc = path;
                 type = FileType.Folder;
             }
+        }
+
+        public string GetPath(TreePosition pos)
+        {
+            TreeNavigator nav = _treeStore.GetNavigatorAt(pos);
+            string path = "";
+
+            do
+            {
+                if(nav.GetValue(_idCol) != ID_BASE)
+                    path = nav.GetValue(_textCol) + "/" + path;
+            }
+            while(nav.MoveToParent());
+
+            if(path != "")
+                path = path.Remove(path.Length - 1);
+            
+            if (_treeStore.GetNavigatorAt(pos).GetValue(_idCol) == ID_BASE)
+                path = _treeStore.GetNavigatorAt(_root).GetValue(_textCol);
+
+            return path;
         }
     }
 }

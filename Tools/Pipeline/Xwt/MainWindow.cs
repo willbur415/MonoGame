@@ -191,6 +191,7 @@ namespace MonoGame.Tools.Pipeline
             _controller.OnCanUndoRedoChanged += UpdateUndoRedo;
 
             projectView1.Attach(this);
+            propertyGrid1.Attach(this);
             UpdateMenu();
         }
 

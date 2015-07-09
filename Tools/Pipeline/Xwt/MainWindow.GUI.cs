@@ -21,7 +21,7 @@ namespace MonoGame.Tools.Pipeline
 
         VPaned vpanned1;
         HPaned hpanned1;
-        ScrollView scrollView1, scrollView2;
+        ScrollView scrollView1;
         RichTextView outputTextView1;
         ProjectView projectView1;
         PropertyGrid propertyGrid1;
@@ -47,10 +47,8 @@ namespace MonoGame.Tools.Pipeline
             vpanned1.Panel1.Content = projectView1;
             vpanned1.Panel1.Resize = true;
 
-            scrollView2 = new ScrollView();
             propertyGrid1 = new PropertyGrid();
-            scrollView2.Content = propertyGrid1;
-            vpanned1.Panel2.Content = scrollView2;
+            vpanned1.Panel2.Content = propertyGrid1;
             vpanned1.Panel2.Resize = true;
 
             vpanned1.Position = 250;

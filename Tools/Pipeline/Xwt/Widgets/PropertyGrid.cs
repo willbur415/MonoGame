@@ -86,7 +86,6 @@ namespace MonoGame.Tools.Pipeline
         }
 
         public void Refresh() {
-            
             propertygridtable1.ClearA ();
             propertygridtable1.AddEntry ("Name", name, PropertyGridTable.EntryType.Readonly);
             propertygridtable1.AddEntry ("Location", location, PropertyGridTable.EntryType.Readonly);

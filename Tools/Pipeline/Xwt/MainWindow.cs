@@ -128,7 +128,7 @@ namespace MonoGame.Tools.Pipeline
             {
                 if (t[i] == FileType.Base) {
                     ps = true;
-                    name = CombineVariables (name, System.IO.Path.GetFileNameWithoutExtension(paths[i]));
+                    name = CombineVariables (name, Path.GetFileNameWithoutExtension(paths[i]));
                     location = CombineVariables (location, project.Location);
                 }
                 else {
@@ -351,7 +351,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void UpdateProperties(IProjectItem item)
         {
-            
+            UpdateMenu();
         }
 
         string output = "";

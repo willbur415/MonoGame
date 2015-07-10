@@ -111,13 +111,12 @@ namespace MonoGame.Tools.Pipeline
                         value = new List<string> ();
 
                     propertygridtable1.AddEntry (p.Name, value,
-                        PropertyGridTable.EntryType.List ,(s,e) => { 
-                        var lines = new List<string>();
-
-                        lines.AddRange(((string)((FalseWidget)s).newvalue).Replace("\r\n", "~").Split('~'));
+                        PropertyGridTable.EntryType.List ,(s,e) => {
+                        var lines = (List<string>)((FalseWidget)s).newvalue;
 
                         foreach (object o in currentObjects) 
                             p.SetValue(o, lines, null);
+                        
                         controller.OnProjectModified();
                     });
 

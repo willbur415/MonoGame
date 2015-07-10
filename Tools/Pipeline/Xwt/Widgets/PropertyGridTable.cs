@@ -115,6 +115,8 @@ namespace MonoGame.Tools.Pipeline
             if (subcat)
                 g = "Processor Settings";
 
+
+
             var pg = GetGroup(g);
 
             switch (type)
@@ -224,6 +226,14 @@ namespace MonoGame.Tools.Pipeline
                     sb.IncrementValue = 0.1;
                     sb.Value = Convert.ToDouble(value);
 
+                    sb.MouseScrolled += delegate(object sender, MouseScrolledEventArgs e)
+                        {
+                            var psv = ((ScrollView)this.Parent);
+                            psv.VerticalScrollControl.Value += psv.VerticalScrollControl.StepIncrement * ((e.Direction == ScrollDirection.Up) ? -1 : 1);
+
+                            e.Handled = true;
+                        };
+                    
                     sb.ValueChanged += delegate
                     {
                             if (eventHandler != null)
@@ -234,14 +244,21 @@ namespace MonoGame.Tools.Pipeline
                     break;
                 case EntryType.List:
                     var coll = new Button("Collection");
+                    List<string> cvalue = (List<string>)value;
 
                     coll.Clicked += delegate
                     {
-                            var dialog = new ReferenceDialog();
+                            var dialog = new ReferenceDialog(window, cvalue);
                             dialog.TransientFor = this.ParentWindow;
 
-                            dialog.Run();
+                            var result = dialog.Run();
                             dialog.Close();
+
+                            if(result == Command.Ok && eventHandler != null)
+                            {
+                                cvalue = dialog.References;
+                                eventHandler(new FalseWidget(dialog.References), EventArgs.Empty); 
+                            }
                     };
 
                     pg.AddProperty(label, coll);

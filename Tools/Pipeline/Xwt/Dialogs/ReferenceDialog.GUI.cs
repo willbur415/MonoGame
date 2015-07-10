@@ -34,6 +34,9 @@ namespace MonoGame.Tools.Pipeline
 
             this.Content = hbox1;
             this.Buttons.Add(new[] { Command.Ok, Command.Cancel });
+
+            btnAdd.Clicked += BtnAdd_Clicked;
+            btnRemove.Clicked += BtnRemove_Clicked;
         }
     }
 }

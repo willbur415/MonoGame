@@ -3,11 +3,11 @@
 
   <Platform Type="Linux">
     <Binary
-      Name="gtk-sharp"
-      Path="ThirdParty\Dependencies\Xwt\Xwt.dll" />
+      Name="Xwt"
+      Path="ThirdParty\Dependencies\Xwt\Gtk\Xwt.dll" />
     <Binary
-      Name="atk-sharp"
-      Path="ThirdParty\Dependencies\Xwt\Xwt.Gtk3.dll" />
+      Name="Xwt.Gtk3"
+      Path="ThirdParty\Dependencies\Xwt\Gtk\Xwt.Gtk3.dll" />
   </Platform>
 
   <Platform Type="MacOS">
@@ -22,9 +22,12 @@
   </Platform>
 
   <Platform Type="Windows">
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
+    <Binary
+      Name="Xwt"
+      Path="ThirdParty\Dependencies\Xwt\WPF\Xwt.dll" />
+    <Binary
+      Name="Xwt.WPF"
+      Path="ThirdParty\Dependencies\Xwt\WPF\Xwt.WPF.dll" />
   </Platform>
 	
 </ExternalProject>

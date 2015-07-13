@@ -80,7 +80,7 @@ namespace MonoGame.Tools.Pipeline
 
         public TreePosition GetItemFromPath(TreePosition start, string path)
         {
-            string[] split = path.Split ('/');
+            string[] split = path.Split (Path.DirectorySeparatorChar);
             TreePosition pos = GetItem(start, split[0]);
 
             if (pos == null)
@@ -90,7 +90,7 @@ namespace MonoGame.Tools.Pipeline
             {
                 string newpath = split[1];
                 for (int i = 2; i < split.Length; i++)
-                    newpath += "/" + split[i];
+                    newpath += Path.DirectorySeparatorChar + split[i];
 
                 return GetItemFromPath(pos, newpath);
             }
@@ -121,7 +121,7 @@ namespace MonoGame.Tools.Pipeline
         {
             this.ExpandRow(start, false);
 
-            string[] split = path.Split ('/');
+            string[] split = path.Split (Path.DirectorySeparatorChar);
             TreePosition pos = GetItem(start, split[0]);
 
             if (pos == null)
@@ -131,7 +131,7 @@ namespace MonoGame.Tools.Pipeline
 
                 string newpath = split [1];
                 for(int i = 2;i < split.Length;i++)
-                    newpath += "/" + split[i];
+                    newpath += Path.DirectorySeparatorChar + split[i];
 
                 ExpandPath(pos, newpath);
             }
@@ -141,10 +141,10 @@ namespace MonoGame.Tools.Pipeline
 
         public void AddItem(TreePosition start, string path, bool exists, bool folder, string fullpath)
         {
-            int id = (folder || path.Contains("/")) ? ID_FOLDER : ID_FILE;
-            Image icon = GetImage(folder || path.Contains("/"));
+            int id = (folder || path.Contains(Path.DirectorySeparatorChar.ToString())) ? ID_FOLDER : ID_FILE;
+            Image icon = GetImage(folder || path.Contains(Path.DirectorySeparatorChar.ToString()));
 
-            string[] split = path.Split ('/');
+            string[] split = path.Split (Path.DirectorySeparatorChar);
 
             TreePosition pos = GetItem(start, split[0]) ?? AddAndSort(start, id, icon, split[0]);
 
@@ -152,7 +152,7 @@ namespace MonoGame.Tools.Pipeline
 
                 string newpath = split [1];
                 for(int i = 2;i < split.Length;i++)
-                    newpath += "/" + split[i];
+                    newpath += Path.DirectorySeparatorChar + split[i];
 
                 AddItem (pos, newpath, exists, folder, fullpath);
             }
@@ -193,7 +193,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void RemoveItem(TreePosition start, string path)
         {
-            string[] split = path.Split ('/');
+            string[] split = path.Split (Path.DirectorySeparatorChar);
 
             TreePosition pos = GetItem(start, split[0]);
 
@@ -204,7 +204,7 @@ namespace MonoGame.Tools.Pipeline
             {
                 string newpath = split[1];
                 for (int i = 2; i < split.Length; i++)
-                    newpath += "/" + split[i];
+                    newpath += Path.DirectorySeparatorChar + split[i];
 
                 RemoveItem(pos, path);
             }
@@ -268,7 +268,7 @@ namespace MonoGame.Tools.Pipeline
             do
             {
                 if(nav.GetValue(_idCol) != ID_BASE)
-                    path = nav.GetValue(_textCol) + "/" + path;
+                    path = nav.GetValue(_textCol) + Path.DirectorySeparatorChar + path;
             }
             while(nav.MoveToParent());
 

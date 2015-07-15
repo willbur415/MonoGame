@@ -37,7 +37,8 @@ namespace MonoGame.Tools.Pipeline
             if (args != null && args.Length > 0)
                 projectPath = string.Join(" ", args);
 
-            _controller.OpenProject(projectPath);
+            if(!string.IsNullOrEmpty(projectPath))
+                _controller.OpenProject(projectPath);
         }
 
         public void Open(bool loc)

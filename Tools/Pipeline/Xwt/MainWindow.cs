@@ -12,6 +12,8 @@ namespace MonoGame.Tools.Pipeline
         public IController _controller;
         FileDialogFilter MonoGameContentProjectFileFilter, XnaContentProjectFileFilter, AllFilesFilter;
 
+        event EventHandler<EventArgs> MenuUpdated;
+
         public MainWindow()
         {
             Build();
@@ -623,6 +625,9 @@ namespace MonoGame.Tools.Pipeline
             menuBuild.Sensitive = ms.BuildMenu;
             miCancel.Visible = miCancelSeparator.Visible = ms.Cancel;
             UpdateUndoRedo(_controller.CanUndo, _controller.CanRedo);
+
+            if (MenuUpdated != null)
+                MenuUpdated(this, new EventArgs());
         }
 
         void UpdateUndoRedo(bool canUndo, bool canRedo)

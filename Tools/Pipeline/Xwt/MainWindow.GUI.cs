@@ -14,7 +14,7 @@ namespace MonoGame.Tools.Pipeline
         CheckBoxMenuItem miDebug;
         MenuItem miHelp, miAbout;
 
-        Menu contextMenu;
+        Menu menu, contextMenu;
         MenuItem cmiOpen, cmiAdd, cmiOpenDirectory, cmiRebuild, cmiRename, cmiDelete;
         SeparatorMenuItem cmiAddSeperator, cmiRebuildSeparator;
         MenuItem cmiNewItem, cmiNewFolder, cmiExistingItem, cmiExistingFolder;
@@ -64,7 +64,7 @@ namespace MonoGame.Tools.Pipeline
 
         private void BuildMenu()
         {
-            var menu = new Menu();
+            menu = new Menu();
 
             menuFile = new MenuItem("File");
             menuFile.SubMenu = new Menu();

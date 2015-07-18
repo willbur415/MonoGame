@@ -61,7 +61,7 @@ namespace MonoGame.Tools.Pipeline
 
         public static Xwt.Drawing.Image GetFileImage(string path)
         {
-            FileInfo info = new FileInfo(g_file_query_info(g_file_new_for_path(path), "standard::*", 0, new IntPtr(), new IntPtr()));
+            var info = new FileInfo(g_file_query_info(g_file_new_for_path(path), "standard::*", 0, new IntPtr(), new IntPtr()));
 
             try
             {

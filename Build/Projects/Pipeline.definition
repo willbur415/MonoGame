@@ -135,6 +135,28 @@
     <Compile Include="Xwt\Platform\NativeMethods.Linux.cs">
       <Platforms>Linux</Platforms>
     </Compile>
+    <Compile Include="Xwt\MainWindow.GUI.Linux.cs">
+      <Platforms>Linux</Platforms>
+    </Compile>
+
+    <!-- The resources for icons and buttons -->
+    <EmbeddedResource Include="App.ico" />
+    <EmbeddedResource Include="Icons\blueprint.png" />
+    <EmbeddedResource Include="Icons\missing.png" />
+    <EmbeddedResource Include="Icons\folder_closed.png" />
+    <EmbeddedResource Include="Icons\folder_open.png" />
+    <EmbeddedResource Include="Icons\folder_missing.png" />
+    <EmbeddedResource Include="Icons\settings.png" />
+    <EmbeddedResource Include="Xwt\MainWindow.HeaderBar.glade">
+      <Platforms>Linux</Platforms>
+    </EmbeddedResource>
+
+    <!-- Copy config files to output directory -->
+    <None Include="..\..\ThirdParty\Dependencies\Xwt\Gtk\Xwt.Gtk3.dll.config">
+      <Platforms>Linux</Platforms>
+      <Link>Xwt.Gtk3.dll.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\..\ThirdParty\Dependencies\Gtk3\atk-sharp.dll.config">
       <Platforms>Linux</Platforms>
       <Link>atk-sharp.dll.config</Link>
@@ -158,22 +180,6 @@
     <None Include="..\..\ThirdParty\Dependencies\Gtk3\gtk-sharp.dll.config">
       <Platforms>Linux</Platforms>
       <Link>gtk-sharp.dll.config</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-
-    <!-- The resources for icons and buttons -->
-    <EmbeddedResource Include="App.ico" />
-    <EmbeddedResource Include="Icons\blueprint.png" />
-    <EmbeddedResource Include="Icons\missing.png" />
-    <EmbeddedResource Include="Icons\folder_closed.png" />
-    <EmbeddedResource Include="Icons\folder_open.png" />
-    <EmbeddedResource Include="Icons\folder_missing.png" />
-    <EmbeddedResource Include="Icons\settings.png" />
-
-    <!-- Copy config files to output directory -->
-    <None Include="..\..\ThirdParty\Dependencies\Xwt\Gtk\Xwt.Gtk3.dll.config">
-      <Platforms>Linux</Platforms>
-      <Link>Xwt.Gtk3.dll.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 

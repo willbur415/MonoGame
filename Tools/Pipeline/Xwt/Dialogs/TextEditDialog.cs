@@ -5,6 +5,8 @@ namespace MonoGame.Tools.Pipeline
 {
     public partial class TextEditDialog: Dialog
     {
+        event EventHandler<EventArgs> OkEnabled;
+
         public string Text;
         bool strict;
 
@@ -28,10 +30,18 @@ namespace MonoGame.Tools.Pipeline
             {
                 if (Global.CheckString(entry1.Text, Global.NotAllowedCharacters))
                 {
-                    Text = entry1.Text;
-                    label2.Visible = false;
-                    dbOk.Sensitive = true;
-                    this.Height = 100;
+                    if (entry1.Text != "")
+                    {
+                        Text = entry1.Text;
+                        label2.Visible = false;
+                        dbOk.Sensitive = true;
+                        this.Height = 100;
+                    }
+                    else
+                    {
+                        label2.Visible = false;
+                        dbOk.Sensitive = false;
+                    }
                 }
                 else
                 {
@@ -46,6 +56,9 @@ namespace MonoGame.Tools.Pipeline
                     label2.Visible = true;
                     dbOk.Sensitive = false;
                 }
+
+                if(OkEnabled != null)
+                    OkEnabled(this, new EventArgs());
             }
         }
     }

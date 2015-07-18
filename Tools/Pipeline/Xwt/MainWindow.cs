@@ -79,8 +79,14 @@ namespace MonoGame.Tools.Pipeline
 
         public void ShowAboudDialog()
         {
+            #if !LINUX
             var adialog = new AboutDialog();
             adialog.TransientFor = this;
+            #else
+            var adialog = new Gtk.AboutDialog();
+            adialog.Logo = new Gdk.Pixbuf(null, "MonoGame.Tools.Pipeline.App.ico");
+            adialog.TransientFor = (Gtk.Window)(new Xwt.GtkBackend.GtkEngine()).GetNativeParentWindow(this.Content);
+            #endif
 
             adialog.ProgramName = AssemblyAttributes.AssemblyProduct;
             adialog.Version = AssemblyAttributes.AssemblyVersion;
@@ -90,7 +96,11 @@ namespace MonoGame.Tools.Pipeline
             adialog.WebsiteLabel = "MonoGame Website";
 
             adialog.Run();
+            #if !LINUX
             adialog.Close();
+            #else
+            adialog.Destroy();
+            #endif
         }
 
         string CombineVariables(string vara, string varb)

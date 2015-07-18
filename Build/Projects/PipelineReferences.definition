@@ -8,6 +8,21 @@
     <Binary
       Name="Xwt.Gtk3"
       Path="ThirdParty\Dependencies\Xwt\Gtk\Xwt.Gtk3.dll" />
+    <Binary
+      Name="gtk-sharp"
+      Path="ThirdParty\Dependencies\Gtk3\gtk-sharp.dll" />
+    <Binary
+      Name="atk-sharp"
+      Path="ThirdParty\Dependencies\Gtk3\atk-sharp.dll" />
+    <Binary
+      Name="gdk-sharp"
+      Path="ThirdParty\Dependencies\Gtk3\gdk-sharp.dll" />
+    <Binary
+      Name="glade-sharp"
+      Path="ThirdParty\Dependencies\Gtk3\gio-sharp.dll" />
+    <Binary
+      Name="glib-sharp"
+      Path="ThirdParty\Dependencies\Gtk3\glib-sharp.dll" />
   </Platform>
 
   <Platform Type="MacOS">

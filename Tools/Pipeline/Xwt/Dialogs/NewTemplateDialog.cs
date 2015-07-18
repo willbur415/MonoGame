@@ -7,6 +7,8 @@ namespace MonoGame.Tools.Pipeline
 {
     public partial class NewTemplateDialog: Dialog
     {
+        event EventHandler<EventArgs> OkEnabled;
+
         public string Name;
         public ContentItemTemplate TemplateFile;
 
@@ -63,6 +65,9 @@ namespace MonoGame.Tools.Pipeline
                     Name = entry1.Text;
 
                     dbOk.Sensitive = true;
+
+                    if(OkEnabled != null)
+                        OkEnabled(this, new EventArgs());
                     return;
                 }
             }
@@ -80,6 +85,8 @@ namespace MonoGame.Tools.Pipeline
             }
 
             dbOk.Sensitive = false;
+            if(OkEnabled != null)
+                OkEnabled(this, new EventArgs());
         }
     }
 }

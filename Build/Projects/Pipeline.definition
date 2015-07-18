@@ -68,10 +68,10 @@
 
     <!-- The Xwt specific stuff -->
     <Compile Include="Xwt\Dialogs\AboutDialog.cs">
-      <Platforms>Windows,MacOS,Linux</Platforms>
+      <Platforms>Windows,MacOS</Platforms>
     </Compile>
     <Compile Include="Xwt\Dialogs\AboutDialog.GUI.cs">
-      <Platforms>Windows,MacOS,Linux</Platforms>
+      <Platforms>Windows,MacOS</Platforms>
     </Compile>
     <Compile Include="Xwt\Dialogs\AddItemDialog.cs">
       <Platforms>Windows,MacOS,Linux</Platforms>
@@ -118,6 +118,48 @@
     <Compile Include="Xwt\MainWindow.GUI.cs">
       <Platforms>Windows,MacOS,Linux</Platforms>
     </Compile>
+
+    <!-- Linux specific stuff -->
+    <Compile Include="Xwt\Dialogs\AddItemDialog.GUI.Linux.cs">
+      <Platforms>Linux</Platforms>
+    </Compile>
+    <Compile Include="Xwt\Dialogs\NewTemplateDialog.GUI.Linux.cs">
+      <Platforms>Linux</Platforms>
+    </Compile>
+    <Compile Include="Xwt\Dialogs\ReferenceDialog.GUI.Linux.cs">
+      <Platforms>Linux</Platforms>
+    </Compile>
+    <Compile Include="Xwt\Dialogs\TextEditDialog.GUI.Linux.cs">
+      <Platforms>Linux</Platforms>
+    </Compile>
+    <Compile Include="Xwt\Platform\NativeMethods.Linux.cs">
+      <Platforms>Linux</Platforms>
+    </Compile>
+    <None Include="..\..\ThirdParty\Dependencies\Gtk3\atk-sharp.dll.config">
+      <Platforms>Linux</Platforms>
+      <Link>atk-sharp.dll.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\ThirdParty\Dependencies\Gtk3\gdk-sharp.dll.config">
+      <Platforms>Linux</Platforms>
+      <Link>gdk-sharp.dll.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\ThirdParty\Dependencies\Gtk3\gio-sharp.dll.config">
+      <Platforms>Linux</Platforms>
+      <Link>gio-sharp.dll.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\ThirdParty\Dependencies\Gtk3\glib-sharp.dll.config">
+      <Platforms>Linux</Platforms>
+      <Link>glib-sharp.dll.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\ThirdParty\Dependencies\Gtk3\gtk-sharp.dll.config">
+      <Platforms>Linux</Platforms>
+      <Link>gtk-sharp.dll.config</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
 
     <!-- The resources for icons and buttons -->
     <EmbeddedResource Include="App.ico" />

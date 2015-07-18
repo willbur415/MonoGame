@@ -9,6 +9,7 @@ namespace MonoGame.Tools.Pipeline
         VBox vbox1;
         ListView listView1;
         Button btnAdd, btnRemove;
+        DialogButton dbOk, dbCancel;
 
         private void Build()
         {
@@ -33,7 +34,12 @@ namespace MonoGame.Tools.Pipeline
             hbox1.PackStart(vbox1);
 
             this.Content = hbox1;
-            this.Buttons.Add(new[] { Command.Ok, Command.Cancel });
+
+            dbOk = new DialogButton(Command.Ok);
+            this.Buttons.Add(dbOk);
+
+            dbCancel = new DialogButton(Command.Cancel);
+            this.Buttons.Add(dbCancel);
 
             btnAdd.Clicked += BtnAdd_Clicked;
             btnRemove.Clicked += BtnRemove_Clicked;

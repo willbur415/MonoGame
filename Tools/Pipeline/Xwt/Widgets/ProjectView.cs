@@ -8,12 +8,12 @@ namespace MonoGame.Tools.Pipeline
 {
     class ProjectView : TreeView
     {
-        private Image GetImage(bool folder, bool exists)
+        private Image GetImage(bool folder, bool exists, string path)
         {
             if (folder)
-                return (exists) ? Image.FromResource("MonoGame.Tools.Pipeline.Icons.folder_closed.png") : Image.FromResource("MonoGame.Tools.Pipeline.Icons.folder_missing.png");
+                return (exists) ? NativeMethods.GetFolderImage() : Image.FromResource("MonoGame.Tools.Pipeline.Icons.folder_missing.png");
             else
-                return (exists) ? Image.FromResource("MonoGame.Tools.Pipeline.Icons.blueprint.png") : Image.FromResource("MonoGame.Tools.Pipeline.Icons.missing.png");
+                return (exists) ? NativeMethods.GetFileImage(_window._controller.GetFullPath(path)) : Image.FromResource("MonoGame.Tools.Pipeline.Icons.missing.png");
         }
 
         public Image ICON_BASE = Image.FromResource("MonoGame.Tools.Pipeline.Icons.settings.png");
@@ -146,7 +146,7 @@ namespace MonoGame.Tools.Pipeline
         public void AddItem(TreePosition start, string path, bool exists, bool folder, string fullpath)
         {
             int id = (folder || path.Contains("/")) ? ID_FOLDER : ID_FILE;
-            Image icon = GetImage(folder || path.Contains("/"), exists);
+            Image icon = GetImage(folder || path.Contains("/"), exists, fullpath);
 
             string[] split = path.Split ('/');
 
@@ -154,7 +154,7 @@ namespace MonoGame.Tools.Pipeline
             if(!exists)
             {
                 var nav = _treeStore.GetNavigatorAt(pos);
-                nav.SetValue(_existsCol, false).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, false));
+                nav.SetValue(_existsCol, false).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, false, fullpath));
             }
 
             if (split.Length > 1) {
@@ -316,7 +316,7 @@ namespace MonoGame.Tools.Pipeline
                 if(!CheckChildren(nav.CurrentPosition))
                     return;
 
-                nav.SetValue(_existsCol, true).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, true));
+                nav.SetValue(_existsCol, true).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, true, GetPath(nav.CurrentPosition)));
                 nav.MoveToParent();
             }
             while(nav.GetValue(_idCol) != ID_BASE);
@@ -328,7 +328,7 @@ namespace MonoGame.Tools.Pipeline
 
             do
             {
-                nav.SetValue(_existsCol, false).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, false));
+                nav.SetValue(_existsCol, false).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, false, GetPath(nav.CurrentPosition)));
                 nav.MoveToParent();
             }
             while(nav.GetValue(_idCol) != ID_BASE);

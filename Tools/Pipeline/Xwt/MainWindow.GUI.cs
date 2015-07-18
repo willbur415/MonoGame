@@ -43,7 +43,6 @@ namespace MonoGame.Tools.Pipeline
             hpanned1.Panel1.Content = vpanned1;
 
             projectView1 = new ProjectView();
-            projectView1.WidthRequest = 200;
             vpanned1.Panel1.Content = projectView1;
             vpanned1.Panel1.Resize = true;
 
@@ -58,6 +57,7 @@ namespace MonoGame.Tools.Pipeline
             scrollView1.Content = outputTextView1;
             hpanned1.Panel2.Content = scrollView1;
             hpanned1.Panel2.Resize = true;
+            hpanned1.Position = 200;
 
             this.Content = hpanned1;
         }

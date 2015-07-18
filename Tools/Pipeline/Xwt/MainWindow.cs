@@ -187,7 +187,10 @@ namespace MonoGame.Tools.Pipeline
             _controller.OnProjectLoading += UpdateMenu;
             _controller.OnProjectLoaded += UpdateMenu;
             _controller.OnBuildStarted += UpdateMenu;
-            _controller.OnBuildFinished += UpdateMenu;
+            _controller.OnBuildFinished += () => Application.Invoke(delegate
+                {
+                    UpdateMenu();
+                });
 
             _controller.OnCanUndoRedoChanged += UpdateUndoRedo;
 

@@ -325,7 +325,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void AddTreeItem(IProjectItem item)
         {
-            projectView1.AddItem(projectView1.GetRoot(), item.OriginalPath, true, false, item.OriginalPath);
+            projectView1.AddItem(projectView1.GetRoot(), item.OriginalPath, item.Exists, false, item.OriginalPath);
         }
 
         public void AddTreeFolder(string folder)
@@ -516,7 +516,15 @@ namespace MonoGame.Tools.Pipeline
 
         public void ItemExistanceChanged(IProjectItem item)
         {
-            //TODO: Implement Me :)
+            Application.Invoke(delegate
+                {
+                    var tp = projectView1.GetItemFromPath(projectView1.GetRoot(), item.OriginalPath);
+
+                    if(!item.Exists)
+                        projectView1.SetDoesntExist(tp);
+                    else
+                        projectView1.SetExists(tp);
+                });
         }
 
         public bool GetSelection(out FileType fileType, out string path, out string location)

@@ -8,9 +8,12 @@ namespace MonoGame.Tools.Pipeline
 {
     class ProjectView : TreeView
     {
-        private Image GetImage(bool folder)
+        private Image GetImage(bool folder, bool exists)
         {
-            return (folder) ? Image.FromResource("MonoGame.Tools.Pipeline.Icons.folder_closed.png") : Image.FromResource("MonoGame.Tools.Pipeline.Icons.blueprint.png");
+            if (folder)
+                return (exists) ? Image.FromResource("MonoGame.Tools.Pipeline.Icons.folder_closed.png") : Image.FromResource("MonoGame.Tools.Pipeline.Icons.folder_missing.png");
+            else
+                return (exists) ? Image.FromResource("MonoGame.Tools.Pipeline.Icons.blueprint.png") : Image.FromResource("MonoGame.Tools.Pipeline.Icons.missing.png");
         }
 
         public Image ICON_BASE = Image.FromResource("MonoGame.Tools.Pipeline.Icons.settings.png");
@@ -25,12 +28,13 @@ namespace MonoGame.Tools.Pipeline
         DataField<int> _idCol = new DataField<int>();
         DataField<Image> _imgCol = new DataField<Image>();
         DataField<string> _textCol = new DataField<string>();
+        DataField<bool> _existsCol = new DataField<bool>();
 
         public ProjectView()
         {
             _rootname = "";
 
-            _treeStore = new TreeStore(_idCol, _imgCol, _textCol);
+            _treeStore = new TreeStore(_idCol, _imgCol, _textCol, _existsCol);
             this.DataSource = _treeStore;
 
             this.Columns.Add("", _imgCol, _textCol);
@@ -142,11 +146,16 @@ namespace MonoGame.Tools.Pipeline
         public void AddItem(TreePosition start, string path, bool exists, bool folder, string fullpath)
         {
             int id = (folder || path.Contains("/")) ? ID_FOLDER : ID_FILE;
-            Image icon = GetImage(folder || path.Contains("/"));
+            Image icon = GetImage(folder || path.Contains("/"), exists);
 
             string[] split = path.Split ('/');
 
-            TreePosition pos = GetItem(start, split[0]) ?? AddAndSort(start, id, icon, split[0]);
+            TreePosition pos = GetItem(start, split[0]) ?? AddAndSort(start, id, icon, split[0], exists);
+            if(!exists)
+            {
+                var nav = _treeStore.GetNavigatorAt(pos);
+                nav.SetValue(_existsCol, false).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, false));
+            }
 
             if (split.Length > 1) {
 
@@ -158,7 +167,7 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-        private TreePosition AddAndSort(TreePosition pos, int id, Image img, string text)
+        private TreePosition AddAndSort(TreePosition pos, int id, Image img, string text, bool exists)
         {
             var nav = _treeStore.GetNavigatorAt(pos);
 
@@ -173,10 +182,10 @@ namespace MonoGame.Tools.Pipeline
                         count++;
 
                         if(nav.GetValue(_textCol).CompareTo(text) >= 0)
-                            return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+                            return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).SetValue(_existsCol, exists).CurrentPosition;
                     }
                     else if(nav.GetValue(_idCol) == ID_FILE)
-                        return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+                        return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).SetValue(_existsCol, exists).CurrentPosition;
                 }
                 while(nav.MoveNext());
 
@@ -184,11 +193,11 @@ namespace MonoGame.Tools.Pipeline
                 {
                     nav = _treeStore.GetNavigatorAt(pos);
                     nav.MoveToChild();
-                    return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+                    return nav.InsertBefore().SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).SetValue(_existsCol, exists).CurrentPosition;
                 }
             }
 
-            return _treeStore.AddNode(pos).SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).CurrentPosition;
+            return _treeStore.AddNode(pos).SetValue(_idCol, id).SetValue(_imgCol, img).SetValue(_textCol, text).SetValue(_existsCol, exists).CurrentPosition;
         }
 
         public void RemoveItem(TreePosition start, string path)
@@ -279,6 +288,50 @@ namespace MonoGame.Tools.Pipeline
                 path = _treeStore.GetNavigatorAt(_root).GetValue(_textCol);
 
             return path;
+        }
+
+        public bool CheckChildren(TreePosition pos)
+        {
+            var nav = _treeStore.GetNavigatorAt(pos);
+
+            if (nav.MoveToChild())
+            {
+                do
+                {
+                    if(!nav.GetValue(_existsCol))
+                        return false;
+                }
+                while(nav.MoveNext());
+            }
+
+            return true;
+        }
+
+        public void SetExists(TreePosition pos)
+        {
+            var nav = _treeStore.GetNavigatorAt(pos);
+
+            do
+            {
+                if(!CheckChildren(nav.CurrentPosition))
+                    return;
+
+                nav.SetValue(_existsCol, true).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, true));
+                nav.MoveToParent();
+            }
+            while(nav.GetValue(_idCol) != ID_BASE);
+        }
+
+        public void SetDoesntExist(TreePosition pos)
+        {
+            var nav = _treeStore.GetNavigatorAt(pos);
+
+            do
+            {
+                nav.SetValue(_existsCol, false).SetValue(_imgCol, GetImage(nav.GetValue(_idCol) == ID_FOLDER, false));
+                nav.MoveToParent();
+            }
+            while(nav.GetValue(_idCol) != ID_BASE);
         }
     }
 }

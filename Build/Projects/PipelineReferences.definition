@@ -3,6 +3,12 @@
 
   <Platform Type="Linux">
     <Binary
+      Name="Xwt"
+      Path="ThirdParty\Dependencies\Xwt\Gtk\Xwt.dll" />
+    <Binary
+      Name="Xwt.Gtk3"
+      Path="ThirdParty\Dependencies\Xwt\Gtk\Xwt.Gtk3.dll" />
+    <Binary
       Name="gtk-sharp"
       Path="ThirdParty\Dependencies\Gtk3\gtk-sharp.dll" />
     <Binary
@@ -17,15 +23,6 @@
     <Binary
       Name="glib-sharp"
       Path="ThirdParty\Dependencies\Gtk3\glib-sharp.dll" />
-    <Binary
-      Name="gtk-dotnet"
-      Path="ThirdParty\Dependencies\Gtk3\gtk-dotnet.dll" />
-    <Binary
-      Name="pango-sharp"
-      Path="ThirdParty\Dependencies\Gtk3\pango-sharp.dll" />
-    <Binary
-      Name="Mono.Posix"
-      Path="ThirdParty\Dependencies\Gtk\Mono.Posix.dll" />
   </Platform>
 
   <Platform Type="MacOS">
@@ -40,9 +37,13 @@
   </Platform>
 
   <Platform Type="Windows">
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing"/>
+    <Binary
+      Name="Xwt"
+      Path="ThirdParty\Dependencies\Xwt\WPF\Xwt.dll" />
+    <Binary
+      Name="Xwt.WPF"
+      Path="ThirdParty\Dependencies\Xwt\WPF\Xwt.WPF.dll" />
   </Platform>
 	
 </ExternalProject>

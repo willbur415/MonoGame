@@ -24,6 +24,9 @@
       <Reference Include="System.Core" />
       <Reference Include="System.Drawing" />
       <Binary
+        Name="NVorbis"
+        Path="ThirdParty/Dependencies/NVorbis/NVorbis.dll" />
+      <Binary
         Name="Tao.Sdl"
         Path="ThirdParty/GamepadConfig/Tao.Sdl.dll" />
       <Binary

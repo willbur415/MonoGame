@@ -61,6 +61,8 @@ namespace Microsoft.Xna.Framework.Audio
         internal void InitializeSound()
         {
             controller = OpenALSoundController.GetInstance;
+            if (soundBuffer != null)
+                soundBuffer.Dispose();
             soundBuffer = new OALSoundBuffer();
             soundBuffer.Reserved += HandleSoundBufferReserved;
             soundBuffer.Recycled += HandleSoundBufferRecycled;

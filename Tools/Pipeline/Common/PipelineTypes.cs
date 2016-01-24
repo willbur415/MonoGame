@@ -404,19 +404,18 @@ namespace MonoGame.Tools.Pipeline
 
             foreach (var asm in assemblies)
             {
-#if SHIPPING
+                if (!asm.ToString().Contains("MonoGame"))
+                    continue;
+
                 try
-#endif
                 {
                     var types = asm.GetTypes();
                     ProcessTypes(types);
                 }
-#if SHIPPING
-                catch (Exception e)
+                catch
                 {
-                    // ??
+                    
                 }
-#endif
             }
 
             foreach (var path in assemblyPaths)

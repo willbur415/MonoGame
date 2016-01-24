@@ -87,6 +87,8 @@ Test/*.csproj
 *.mpack
 
 #Nuget Packages
+packages/
+packages.config
 **/*.nupkg
 
 #Zip files

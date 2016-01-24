@@ -36,8 +36,6 @@
     <Compile Include="..\MGCB\CommandLineParser.cs">
       <Link>Common\CommandLineParser.cs</Link>
     </Compile>
-    <None Include="App.config" />
-    <None Include="app.manifest" />
 
     <Compile Include="Common\ActionStack.cs" />
     <Compile Include="Common\AssemblyAttributes.cs" />
@@ -47,6 +45,7 @@
     <Compile Include="Common\ContentItem.Importer.cs" />
     <Compile Include="Common\ContentItemTemplate.cs" />
     <Compile Include="Common\ContentItemState.cs" />
+    <Compile Include="Common\DirectoryItem.cs" />
     <Compile Include="Common\FileType.cs" />
     <Compile Include="Common\ProjectState.cs" />
     <Compile Include="Common\Selection.cs" />
@@ -68,228 +67,46 @@
     <Compile Include="Common\PipelineProject.cs" />
     <Compile Include="Common\PipelineTypes.cs" />
     <Compile Include="Common\Extensions.cs" />
-
-    <Compile Include="Windows\UpdateAction.cs" />
-
-    <!-- The Windows specific stuff -->
-    <Compile Include="Windows\BuildIcons.cs">
-      <Platforms>Windows</Platforms>
+    
+    <!-- GUI Stuff -->
+    <Compile Include="Controls\BuildOutput.cs" />
+    <Compile Include="Controls\BuildOutput.eto.cs">
+      <DependentUpon>BuildOutput.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\ContentIcons.cs">
-      <Platforms>Windows</Platforms>
+    <Compile Include="Controls\ProjectControl.cs" />
+    <Compile Include="Controls\ProjectControl.eto.cs">
+      <DependentUpon>ProjectControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\EditorIcons.cs">
-      <Platforms>Windows</Platforms>
+    <Compile Include="Controls\PropertyGridControl.cs" />
+    <Compile Include="Controls\PropertyGridControl.eto.cs">
+      <DependentUpon>PropertyGridControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\FolderEditing.cs">
-      <Platforms>Windows</Platforms>
+    <Compile Include="Controls\PropertyGridTable.cs" />
+    <Compile Include="Controls\PropertyGridTable.eto.cs">
+      <DependentUpon>PropertyGridTable.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\MainView.cs">
-      <Platforms>Windows</Platforms>
-      <SubType>Form</SubType>
+	 <Compile Include="MainForm.eto.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\MainView.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>MainView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\NewContentDialog.cs">
-      <Platforms>Windows</Platforms>
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Windows\NewContentDialog.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>NewContentDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Windows\MultiSelectTreeview.cs">
-      <Platforms>Windows</Platforms>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Windows\Controls\FilterOutputControl.cs">
-      <Platforms>Windows</Platforms>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Windows\Controls\TabControlEx.cs">
-      <Platforms>Windows</Platforms>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Windows\PipelineProjectProxy.cs">
-      <Platforms>Windows</Platforms>
-    </Compile>
-    <Compile Include="Windows\TreeViewExtensions.cs">
-      <Platforms>Windows</Platforms>
-    </Compile>
-    <Compile Include="Windows\SortedEnumTypeConverter.cs">
-      <Platforms>Windows</Platforms>
-    </Compile>
-	<Compile Include="Windows\AboutDialog.cs">
-      <Platforms>Windows</Platforms>
-    </Compile> 
-	<Compile Include="Windows\AboutDialog.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>AboutDialog.cs</DependentUpon>
-    </Compile>
-	<Compile Include="Windows\ReferenceDialog.cs">
-      <Platforms>Windows</Platforms>
-    </Compile> 
-	<Compile Include="Windows\ReferenceDialog.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>ReferenceDialog.cs</DependentUpon>
-    </Compile>
-	<Compile Include="Windows\AddFileDialog.cs">
-      <Platforms>Windows</Platforms>
-    </Compile> 
-	<Compile Include="Windows\AddFileDialog.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>AddFileDialog.cs</DependentUpon>
-    </Compile>
-	 <EmbeddedResource Include="Windows\AddFileDialog.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>AddFileDialog.cs</DependentUpon>
-    </EmbeddedResource>
-	<Compile Include="Windows\AddFolderDialog.cs">
-      <Platforms>Windows</Platforms>
-    </Compile> 
-	<Compile Include="Windows\AddFolderDialog.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>AddFolderDialog.cs</DependentUpon>
-    </Compile>
-	 <EmbeddedResource Include="Windows\AddFolderDialog.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>AddFolderDialog.cs</DependentUpon>
-    </EmbeddedResource>
-	<Compile Include="Windows\TextEditDialog.cs">
-      <Platforms>Windows</Platforms>
-    </Compile> 
-	<Compile Include="Windows\TextEditDialog.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>TextEditDialog.cs</DependentUpon>
-    </Compile>
-	 <EmbeddedResource Include="Windows\TextEditDialog.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>TextEditDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Windows\MainView.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>MainView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Platforms>Windows</Platforms>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-	 <EmbeddedResource Include="Windows\AboutDialog.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>AboutDialog.cs</DependentUpon>
-    </EmbeddedResource>
-	 <EmbeddedResource Include="Windows\ReferenceDialog.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>ReferenceDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="Properties\Settings.settings">
-      <Platforms>Windows</Platforms>
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <Platforms>Windows</Platforms>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Windows\NewContentDialog.resx">
-      <Platforms>Windows</Platforms>
-      <DependentUpon>NewContentDialog.cs</DependentUpon>
-    </EmbeddedResource>
-
-    <!-- The Gtk specific stuff -->
-    <Compile Include="Gtk\MainWindow.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\ProjectView.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\PropertyGridTable.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\PropertiesView.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\BuildOutput.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\BuildOutput.GUI.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\AddItemDialog.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\NewTemplateDialog.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\TextEditorDialog.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\CollectionEditorDialog.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\CustomFolderDialog.GUI.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\CustomFolderDialog.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Stetic.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\MainWindow.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\NewTemplateDialog.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\ProjectView.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\PropertiesView.GUI.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\CollectionEditorDialog.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Widgets\PropertyGridTable.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\AddItemDialog.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Dialogs\TextEditorDialog.GUI.cs">  
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Global.cs">
-      <Platforms>MacOS,Linux</Platforms>
-    </Compile>
-    <Compile Include="Gtk\IgeMacIntegration.cs">
-      <Platforms>MacOS</Platforms>
-    </Compile>
-    <Compile Include="Gtk\Gtk3Integration.cs">
-      <Platforms>Linux</Platforms>
-    </Compile>
+	<Compile Include="MainForm.cs" />
 
     <!-- The resources for icons and buttons -->
     <EmbeddedResource Include="App.ico" />
-    <EmbeddedResource Include="Icons\blueprint.png" />
-    <EmbeddedResource Include="Icons\missing.png" />
-    <EmbeddedResource Include="Icons\folder_closed.png" />
-    <EmbeddedResource Include="Icons\folder_open.png" />
-    <EmbeddedResource Include="Icons\folder_missing.png" />
-    <EmbeddedResource Include="Icons\settings.png" />
+    <EmbeddedResource Include="Icons\Treeview\File.png">
+      <LogicalName>Treeview.File.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Treeview\FileMissing.png">
+      <LogicalName>Treeview.FileMissing.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Treeview\Folder.png">
+      <LogicalName>Treeview.Folder.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Treeview\FolderMissing.png">
+      <LogicalName>Treeview.FolderMissing.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Treeview\Root.png">
+      <LogicalName>Treeview.Root.png</LogicalName>
+    </EmbeddedResource>
     
     <!-- The resources for output filtering -->
     <EmbeddedResource Include="Icons\build_begin_end.png" />
@@ -308,6 +125,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\Toolbar\Save.png">
       <LogicalName>Toolbar.Save.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Toolbar\Undo.png">
+      <LogicalName>Toolbar.Undo.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Toolbar\Redo.png">
+      <LogicalName>Toolbar.Redo.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\Toolbar\NewItem.png">
       <LogicalName>Toolbar.NewItem.png</LogicalName>
@@ -330,13 +153,11 @@
     <EmbeddedResource Include="Icons\Toolbar\Clean.png">
       <LogicalName>Toolbar.Clean.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Icons\Toolbar\CancelBuild.png">
+      <LogicalName>Toolbar.CancelBuild.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Icons\Toolbar\FilterOutput.png">
       <LogicalName>Toolbar.FilterOutput.png</LogicalName>
-    </EmbeddedResource>
-    
-    <!-- Linux specific resources -->
-    <EmbeddedResource Include="Gtk\MainWindow.HeaderBar.glade">
-      <Platforms>Linux</Platforms>
     </EmbeddedResource>
 
     <!-- Copy the template resources to the output -->

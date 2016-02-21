@@ -116,6 +116,9 @@ namespace Microsoft.Xna.Framework
             this._screenDeviceName = "";
 
             Instance = this;
+
+            // We need a dummy handle for GraphicDevice until our window gets created
+            this._handle = SDL.Window.Create("", 0, 0, GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, SDL.Window.State.Hidden);
         }
 
         internal void CreateWindow()
@@ -131,6 +134,7 @@ namespace Microsoft.Xna.Framework
             if (_resizable)
                 initflags |= SDL.Window.State.Resizable;
 
+            SDL.Window.Destroy(_handle);
             this._handle = SDL.Window.Create(title, 
                 SDL.Window.PosCentered, SDL.Window.PosCentered, 
                 GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, 
@@ -149,10 +153,7 @@ namespace Microsoft.Xna.Framework
         public void SetCursorVisible(bool visible)
         {
             _mouseVisible = visible;
-            var err = SDL.Mouse.ShowCursor(visible ? 1 : 0);
-            
-            if (err < 0)
-                Console.WriteLine("Failed to set cursor! SDL Error: " + SDL.GetError());
+            SDL.Mouse.ShowCursor(visible ? 1 : 0);
         }
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)
@@ -177,7 +178,8 @@ namespace Microsoft.Xna.Framework
                 SDL.Window.SetFullscreen(Handle, (_willBeFullScreen) ? fullscreenFlag : 0);
             }
 
-            SDL.Window.SetSize(Handle, clientWidth, clientHeight);
+            if (!_willBeFullScreen)
+                SDL.Window.SetSize(Handle, clientWidth, clientHeight);
 
             var centerX = Math.Max(prevBounds.X - ((IsBorderless || _isFullScreen) ? 0 : BorderX) + ((prevBounds.Width - clientWidth) / 2), 0);
             var centerY = Math.Max(prevBounds.Y - ((IsBorderless || _isFullScreen) ? 0 : BorderY) + ((prevBounds.Height - clientHeight) / 2), 0);

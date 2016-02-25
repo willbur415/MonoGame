@@ -140,6 +140,8 @@ namespace Microsoft.Xna.Framework
                 GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, 
                 initflags);
 
+            SDL.SetHint ("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
+
             SetCursorVisible(_mouseVisible);
 
             // TODO, per platform border size detection

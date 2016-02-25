@@ -86,8 +86,19 @@ internal static class SDL
         return GetString(SDL_GetError());
     }
 
+    [DllImport (nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_GetHint")]
+    public static extern IntPtr SDL_GetHint (string name);
+
+    public static string GetHint (string name)
+    {
+        return GetString (SDL_GetHint (name));
+    }
+
     [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_Quit")]
     public static extern void Quit();
+
+    [DllImport (nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_SetHint")]
+    public static extern int SetHint (string name, string value);
 
     public static class Window
     {

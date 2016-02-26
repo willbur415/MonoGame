@@ -25,16 +25,6 @@ internal static class SDL
         return Encoding.UTF8.GetString(bytes);
     }
 
-    public struct SDL_version
-    {
-        public byte major;
-        public byte minor;
-        public byte patch;
-    }
-
-    [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void SDL_GetVersion(out SDL_version ver);
-
     [Flags]
     public enum InitFlags
     {
@@ -79,11 +69,21 @@ internal static class SDL
         public int Height;
     }
 
+    public struct Version
+    {
+        public byte Major;
+        public byte Minor;
+        public byte Patch;
+    }
+
     [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_Init")]
     public static extern int Init(int flags);
 
     [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_DisableScreenSaver")]
     public static extern void DisableScreenSaver();
+
+    [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_GetVersion")]
+    public static extern void GetVersion(out Version version);
 
     [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_PollEvent")]
     public static extern int PollEvent(out Event _event);

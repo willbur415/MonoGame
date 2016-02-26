@@ -27,15 +27,19 @@ namespace Microsoft.Xna.Framework
             this._keys = new List<Keys>();
             Keyboard.SetKeys(_keys);
 
-            var initsdl = SDL.Init((int)(
+            SDL.Version sversion;
+            SDL.GetVersion (out sversion);
+            var version = 100 * sversion.Major + 10 * sversion.Minor + sversion.Patch;
+
+            if (version < 204)
+                throw new Exception ("SDL 2.0.4 or higher is needed.");
+
+            SDL.Init((int)(
                 SDL.InitFlags.Video |
                 SDL.InitFlags.Joystick | 
                 SDL.InitFlags.GameController |
                 SDL.InitFlags.Haptic
             ));
-
-            if (initsdl < 0)
-                throw new Exception("SDL could not initialize! SDL Error: " + SDL.GetError());
 
             SDL.DisableScreenSaver();
 

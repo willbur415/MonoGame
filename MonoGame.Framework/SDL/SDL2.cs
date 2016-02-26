@@ -25,6 +25,16 @@ internal static class SDL
         return Encoding.UTF8.GetString(bytes);
     }
 
+    public struct SDL_version
+    {
+        public byte major;
+        public byte minor;
+        public byte patch;
+    }
+
+    [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern void SDL_GetVersion(out SDL_version ver);
+
     [Flags]
     public enum InitFlags
     {
@@ -193,7 +203,7 @@ internal static class SDL
 
     public static class Display
     {
-        public struct SDL_DisplayMode
+        public struct Mode
         {
             public uint Format;
             public int Width;
@@ -205,8 +215,11 @@ internal static class SDL
         [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_GetDisplayBounds")]
         public static extern int GetBounds(int displayIndex, out Rectangle rect);
 
+        [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_GetCurrentDisplayMode")]
+        public static extern int GetCurrentDisplayMode(int displayIndex, out Mode mode);
+
         [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_GetDisplayMode")]
-        public static extern int GetDisplayMode(int displayIndex, int modeIndex, out SDL_DisplayMode mode);
+        public static extern int GetDisplayMode(int displayIndex, int modeIndex, out Mode mode);
 
         [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_GetDisplayName")]
         private static extern IntPtr SDL_GetDisplayName(int index);

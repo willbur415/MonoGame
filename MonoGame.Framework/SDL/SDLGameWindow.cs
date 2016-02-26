@@ -109,6 +109,7 @@ namespace Microsoft.Xna.Framework
         private IntPtr _handle;
         private bool _disposed, _resizable, _borderless, _willBeFullScreen, _mouseVisible;
         private string _screenDeviceName;
+        private SDL.Rectangle _display;
 
         public SDLGameWindow(Game game)
         {
@@ -117,12 +118,16 @@ namespace Microsoft.Xna.Framework
 
             Instance = this;
 
+            _display = GetMouseDiaplay ();
+
             // We need a dummy handle for GraphicDevice until our window gets created
-            this._handle = SDL.Window.Create("", 0, 0, GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, SDL.Window.State.Hidden);
+            this._handle = SDL.Window.Create("", _display.X + 50, _display.Y + 50, GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, SDL.Window.State.Hidden);
         }
 
         internal void CreateWindow()
         {
+            var width = GraphicsDeviceManager.DefaultBackBufferWidth;
+            var height = GraphicsDeviceManager.DefaultBackBufferHeight;
             var title = MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle();
 
             var initflags = 
@@ -136,9 +141,9 @@ namespace Microsoft.Xna.Framework
 
             SDL.Window.Destroy(_handle);
             this._handle = SDL.Window.Create(title, 
-                SDL.Window.PosCentered, SDL.Window.PosCentered, 
-                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, 
-                initflags);
+                _display.X + _display.Width / 2 - width / 2, 
+                _display.Y + _display.Height / 2 - height / 2, 
+                width, height, initflags);
 
             SDL.SetHint ("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
 
@@ -150,6 +155,27 @@ namespace Microsoft.Xna.Framework
         ~SDLGameWindow()
         {
             Dispose(false);
+        }
+
+        private SDL.Rectangle GetMouseDiaplay()
+        {
+            SDL.Rectangle rect = new SDL.Rectangle();
+
+            int x, y;
+            SDL.Mouse.GetGlobalState (out x, out y);
+
+            var displayCount = SDL.Display.GetNumVideoDisplays();
+            for (int i = 0; i < displayCount; i++) 
+            {
+                SDL.Display.GetBounds(i, out rect);
+
+                if (x >= rect.X && x < rect.X + rect.Width && 
+                    y >= rect.Y && y < rect.Y + rect.Height) {
+                    return rect;
+                }
+            }
+
+            return rect;
         }
 
         public void SetCursorVisible(bool visible)
@@ -168,7 +194,6 @@ namespace Microsoft.Xna.Framework
             this._screenDeviceName = screenDeviceName;
 
             var prevBounds = ClientBounds;
-
             var displayIndex = SDL.Window.GetDisplayIndex(Handle);
 
             SDL.Rectangle displayRect;

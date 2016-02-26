@@ -92,8 +92,8 @@ namespace Microsoft.Xna.Framework.Graphics
 #elif DESKTOPGL
                 int displayIndex = SDL.Display.GetWindowDisplayIndex(SDLGameWindow.Instance.Handle);
 
-                SDL.Display.SDL_DisplayMode mode;
-                SDL.Display.GetDisplayMode(displayIndex, 0, out mode);
+                SDL.Display.Mode mode;
+                SDL.Display.GetCurrentDisplayMode(displayIndex, out mode);
 
                 return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
 #elif WINDOWS
@@ -295,7 +295,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                         for (int i = 0;i < modeCount;i++)
                         {
-                            SDL.Display.SDL_DisplayMode mode;
+                            SDL.Display.Mode mode;
                             SDL.Display.GetDisplayMode(displayIndex, i, out mode);
 
                             // We are only using one format, Color

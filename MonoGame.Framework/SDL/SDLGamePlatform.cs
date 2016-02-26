@@ -80,27 +80,32 @@ namespace Microsoft.Xna.Framework
             {
                 SDL.Event ev;
 
-                while (SDL.PollEvent(out ev) == 1)
+                while (SDL.PollEvent (out ev) == 1) 
                 {
                     if (ev.Type == SDL.EventType.Quit)
                         isExiting++;
                     else if (ev.Type == SDL.EventType.JoyDeviceAdded)
-                        Joystick.AddDevice(ev.JoystickDevice.Which);
+                        Joystick.AddDevice (ev.JoystickDevice.Which);
                     else if (ev.Type == SDL.EventType.JoyDeviceRemoved)
-                        Joystick.RemoveDevice(ev.JoystickDevice.Which);
+                        Joystick.RemoveDevice (ev.JoystickDevice.Which);
                     else if (ev.Type == SDL.EventType.MouseWheel)
                         Mouse.ScrollY += ev.Wheel.Y * 120;
                     else if (ev.Type == SDL.EventType.KeyDown)
                     {
-                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
+                        var key = KeyboardUtil.ToXna (ev.Key.Keysym.Sym);
 
-                        if (!_keys.Contains(key))
-                            _keys.Add(key);
+                        if (!_keys.Contains (key))
+                            _keys.Add (key);
                     }
                     else if (ev.Type == SDL.EventType.KeyUp)
                     {
-                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
-                        _keys.Remove(key);
+                        var key = KeyboardUtil.ToXna (ev.Key.Keysym.Sym);
+                        _keys.Remove (key);
+                    }
+                    else if (ev.Type == SDL.EventType.WindowEvent)
+                    {
+                        if (ev.Window.EventID == SDL.Window.EventID.Resized)
+                            _view.ClientResize (ev.Window.Data1, ev.Window.Data2);
                     }
                 }
 

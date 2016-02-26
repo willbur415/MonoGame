@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Microsoft.Xna.Framework
 {
@@ -16,7 +17,7 @@ namespace Microsoft.Xna.Framework
             }
             set
             {
-                if (!_handle.Equals(IntPtr.Zero))
+                if (_init)
                     throw new Exception("SDL does not support changing resizable parameter of the window after it's already been created.");
                 
                 _resizable = value;
@@ -107,7 +108,8 @@ namespace Microsoft.Xna.Framework
 
         private Game _game;
         private IntPtr _handle;
-        private bool _disposed, _resizable, _borderless, _willBeFullScreen, _mouseVisible;
+        private bool _init, _disposed;
+        private bool _resizable, _borderless, _willBeFullScreen, _mouseVisible;
         private string _screenDeviceName;
         private SDL.Rectangle _display;
 
@@ -121,7 +123,7 @@ namespace Microsoft.Xna.Framework
             _display = GetMouseDiaplay ();
 
             // We need a dummy handle for GraphicDevice until our window gets created
-            this._handle = SDL.Window.Create("", _display.X + 50, _display.Y + 50, GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, SDL.Window.State.Hidden);
+            this._handle = SDL.Window.Create("", _display.X + _display.Width / 4, _display.Y + _display.Height / 4, GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight, SDL.Window.State.Hidden);
         }
 
         internal void CreateWindow()
@@ -150,6 +152,8 @@ namespace Microsoft.Xna.Framework
             SetCursorVisible(_mouseVisible);
 
             // TODO, per platform border size detection
+
+            _init = true;
         }
 
         ~SDLGameWindow()
@@ -216,11 +220,26 @@ namespace Microsoft.Xna.Framework
                 centerX += displayRect.X;
                 centerY += displayRect.Y;
             }
-            
-            SDL.Window.SetPosition(Handle, centerX, centerY);
+
+            // If this window is resizable, there is a bug in SDL where
+            // after the window gets resized, window position information
+            // becomes wrong (for me it always returned 10 8). Solution is 
+            // to not try and set the window position because it will be wrong.
+            if (!AllowUserResizing)
+                SDL.Window.SetPosition (Handle, centerX, centerY);
 
             _isFullScreen = _willBeFullScreen;
             OnClientSizeChanged();
+        }
+
+        public void ClientResize(int width, int height)
+        {
+            _game.GraphicsDevice.PresentationParameters.BackBufferWidth = width;
+            _game.GraphicsDevice.PresentationParameters.BackBufferHeight = height;
+
+            _game.GraphicsDevice.Viewport = new Viewport(0, 0, width, height);
+
+            OnClientSizeChanged ();
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)

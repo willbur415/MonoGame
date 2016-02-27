@@ -219,12 +219,19 @@ namespace Microsoft.Xna.Framework
             
             if (_willBeFullScreen != _isFullScreen)
             {
-                var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? SDL.Window.State.Fullscreen : SDL.Window.State.FullscreenDesktop;
-                SDL.Window.SetFullscreen(Handle, (_willBeFullScreen) ? fullscreenFlag : 0);
+                // SDL.Window.State.Fullscreen is causing a freeze after state switch, using only DESKTOP temporary
+                // var fullscreenFlag = _game.graphicsDeviceManager.HardwareModeSwitch ? SDL.Window.State.Fullscreen : SDL.Window.State.FullscreenDesktop;
+                SDL.Window.SetFullscreen(Handle, (_willBeFullScreen) ? SDL.Window.State.FullscreenDesktop : 0);
             }
 
             if (!_willBeFullScreen)
-                SDL.Window.SetSize(Handle, clientWidth, clientHeight);
+                SDL.Window.SetSize (Handle, clientWidth, clientHeight);
+            else {
+                _game.GraphicsDevice.PresentationParameters.BackBufferWidth = displayRect.Width;
+                _game.GraphicsDevice.PresentationParameters.BackBufferHeight = displayRect.Height;
+
+                _game.GraphicsDevice.Viewport = new Viewport(0, 0, displayRect.Width, displayRect.Height);
+            }
 
             var centerX = Math.Max(prevBounds.X - ((IsBorderless || _isFullScreen) ? 0 : BorderX) + ((prevBounds.Width - clientWidth) / 2), 0);
             var centerY = Math.Max(prevBounds.Y - ((IsBorderless || _isFullScreen) ? 0 : BorderY) + ((prevBounds.Height - clientHeight) / 2), 0);
@@ -243,7 +250,7 @@ namespace Microsoft.Xna.Framework
                 SDL.Window.SetPosition (Handle, centerX, centerY);
 
             _isFullScreen = _willBeFullScreen;
-            OnClientSizeChanged();
+            OnClientSizeChanged ();
         }
 
         public void ClientResize(int width, int height)

@@ -80,7 +80,7 @@ namespace Microsoft.Xna.Framework
             {
                 SDL.Event ev;
 
-                while (SDL.PollEvent (out ev) == 1) 
+                if (SDL.PollEvent (out ev) == 1) 
                 {
                     if (ev.Type == SDL.EventType.Quit)
                         isExiting++;

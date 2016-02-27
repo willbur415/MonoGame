@@ -159,7 +159,7 @@ namespace Microsoft.Xna.Framework
                 using (BinaryReader br = new BinaryReader (stream)) {
                     var src = SDL.RWFromMem (br.ReadBytes ((int)stream.Length), (int)stream.Length);
                     var icon = SDL.LoadBMP_RW (src, 1);
-                    SDL.SetWindowIcon (_handle, icon);
+                    SDL.Window.SetIcon (_handle, icon);
                 }
             }
 

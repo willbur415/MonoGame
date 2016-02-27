@@ -1081,7 +1081,8 @@
     <Compile Include="Input\KeyboardUtil.SDL.cs">
       <Platforms>Angle,Linux,WindowsGL</Platforms>
     </Compile>
-	 <EmbeddedResource Include="../Installers/monogame.ico">
+	 <EmbeddedResource Include="MonoGame.bmp">
+      <LogicalName>MonoGame.bmp</LogicalName>
       <Platforms>Angle,Linux,WindowsGL</Platforms>
     </EmbeddedResource>
 	 <EmbeddedResource Include="SDL\gamecontrollerdb.txt">

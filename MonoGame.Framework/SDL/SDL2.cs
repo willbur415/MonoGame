@@ -104,11 +104,20 @@ internal static class SDL
         return GetString (SDL_GetHint (name));
     }
 
+    [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_LoadBMP_RW")]
+    public static extern IntPtr LoadBMP_RW(IntPtr src, int freesrc);
+
     [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_Quit")]
     public static extern void Quit();
 
+    [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_RWFromMem")]
+    public static extern IntPtr RWFromMem(byte[] mem, int size);
+
     [DllImport (nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_SetHint")]
     public static extern int SetHint (string name, string value);
+
+    [DllImport (nativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SDL_SetWindowIcon")]
+    public static extern void SetWindowIcon (IntPtr window, IntPtr icon);
 
     public static class Window
     {

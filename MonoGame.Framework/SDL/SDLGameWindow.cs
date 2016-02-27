@@ -3,6 +3,9 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.IO;
+using System.Reflection;
+
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Microsoft.Xna.Framework
@@ -148,6 +151,17 @@ namespace Microsoft.Xna.Framework
                 width, height, initflags);
 
             SDL.SetHint ("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
+
+            using (var stream = Assembly.GetEntryAssembly ().GetManifestResourceStream (Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.bmp") ??
+                   Assembly.GetEntryAssembly ().GetManifestResourceStream ("Icon.bmp") ??
+                   Assembly.GetExecutingAssembly ().GetManifestResourceStream ("MonoGame.bmp")) {
+
+                using (BinaryReader br = new BinaryReader (stream)) {
+                    var src = SDL.RWFromMem (br.ReadBytes ((int)stream.Length), (int)stream.Length);
+                    var icon = SDL.LoadBMP_RW (src, 1);
+                    SDL.SetWindowIcon (_handle, icon);
+                }
+            }
 
             SetCursorVisible(_mouseVisible);
 

@@ -261,8 +261,8 @@ namespace Microsoft.Xna.Framework
             ((MonoGame.Framework.WinFormsGamePlatform)_game.Platform).ResetWindowBounds();
 
 #elif DESKTOPGL
-            var displayIndex = SDL.Window.GetDisplayIndex(SDLGameWindow.Instance.Handle);
-            var displayName = SDL.Display.GetDisplayName(displayIndex);
+            var displayIndex = Sdl.Window.GetDisplayIndex(SdlGameWindow.Instance.Handle);
+            var displayName = Sdl.Display.GetDisplayName(displayIndex);
 
             _graphicsDevice.PresentationParameters.BackBufferFormat = _preferredBackBufferFormat;
             _graphicsDevice.PresentationParameters.BackBufferWidth = _preferredBackBufferWidth;

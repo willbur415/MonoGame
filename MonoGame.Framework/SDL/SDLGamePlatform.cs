@@ -5,49 +5,50 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Microsoft.Xna.Framework
 {
-    class SDLGamePlatform : GamePlatform
+    internal class SdlGamePlatform : GamePlatform
     {
-        private OpenALSoundController soundControllerInstance = null;
-        private int isExiting;
-        private SDLGameWindow _view;
-        private List<Keys> _keys;
-        private Game _game;
+        public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
 
-        public SDLGamePlatform(Game game)
+        private readonly Game _game;
+        private readonly OpenALSoundController _soundControllerInstance;
+        private readonly List<Keys> _keys;
+
+        private int _isExiting;
+        private SdlGameWindow _view;
+
+        public SdlGamePlatform(Game game)
             : base(game)
         {
-            this._game = game;
-            this._keys = new List<Keys>();
+            _game = game;
+            _keys = new List<Keys>();
             Keyboard.SetKeys(_keys);
 
-            SDL.Version sversion;
-            SDL.GetVersion (out sversion);
-            var version = 100 * sversion.Major + 10 * sversion.Minor + sversion.Patch;
+            Sdl.Version sversion;
+            Sdl.GetVersion(out sversion);
+            var version = 100*sversion.Major + 10*sversion.Minor + sversion.Patch;
 
             if (version < 204)
-                throw new Exception ("SDL 2.0.4 or higher is needed.");
+                throw new Exception("SDL 2.0.4 or higher is needed.");
 
-            SDL.Init((int)(
-                SDL.InitFlags.Video |
-                SDL.InitFlags.Joystick | 
-                SDL.InitFlags.GameController |
-                SDL.InitFlags.Haptic
-            ));
+            Sdl.Init((int) (
+                Sdl.InitFlags.Video |
+                Sdl.InitFlags.Joystick |
+                Sdl.InitFlags.GameController |
+                Sdl.InitFlags.Haptic
+                ));
 
-            SDL.DisableScreenSaver();
+            Sdl.DisableScreenSaver();
 
-            this.Window = _view = new SDLGameWindow(_game);
+            Window = _view = new SdlGameWindow(_game);
 
             try
             {
-                soundControllerInstance = OpenALSoundController.GetInstance;
+                _soundControllerInstance = OpenALSoundController.GetInstance;
             }
             catch (DllNotFoundException ex)
             {
@@ -62,11 +63,6 @@ namespace Microsoft.Xna.Framework
             return base.BeforeRun();
         }
 
-        public override GameRunBehavior DefaultRunBehavior
-        {
-            get { return GameRunBehavior.Synchronous; }
-        }
-
         protected override void OnIsMouseVisibleChanged()
         {
             _view.SetCursorVisible(_game.IsMouseVisible);
@@ -74,44 +70,58 @@ namespace Microsoft.Xna.Framework
 
         public override void RunLoop()
         {
-            SDL.Window.Show(Window.Handle);
+            Sdl.Window.Show(Window.Handle);
 
             while (true)
             {
-                SDL.Event ev;
+                Sdl.Event ev;
 
-                if (SDL.PollEvent (out ev) == 1) 
+                while (Sdl.PollEvent(out ev) == 1)
                 {
-                    if (ev.Type == SDL.EventType.Quit)
-                        isExiting++;
-                    else if (ev.Type == SDL.EventType.JoyDeviceAdded)
-                        Joystick.AddDevice (ev.JoystickDevice.Which);
-                    else if (ev.Type == SDL.EventType.JoyDeviceRemoved)
-                        Joystick.RemoveDevice (ev.JoystickDevice.Which);
-                    else if (ev.Type == SDL.EventType.MouseWheel)
-                        Mouse.ScrollY += ev.Wheel.Y * 120;
-                    else if (ev.Type == SDL.EventType.KeyDown)
+                    if (ev.Type == Sdl.EventType.Quit)
+                        _isExiting++;
+                    else if (ev.Type == Sdl.EventType.JoyDeviceAdded)
+                        Joystick.AddDevice(ev.JoystickDevice.Which);
+                    else if (ev.Type == Sdl.EventType.JoyDeviceRemoved)
+                        Joystick.RemoveDevice(ev.JoystickDevice.Which);
+                    else if (ev.Type == Sdl.EventType.MouseWheel)
+                        Mouse.ScrollY += ev.Wheel.Y*120;
+                    else if (ev.Type == Sdl.EventType.KeyDown)
                     {
-                        var key = KeyboardUtil.ToXna (ev.Key.Keysym.Sym);
+                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
 
-                        if (!_keys.Contains (key))
-                            _keys.Add (key);
+                        if (!_keys.Contains(key))
+                            _keys.Add(key);
                     }
-                    else if (ev.Type == SDL.EventType.KeyUp)
+                    else if (ev.Type == Sdl.EventType.KeyUp)
                     {
-                        var key = KeyboardUtil.ToXna (ev.Key.Keysym.Sym);
-                        _keys.Remove (key);
+                        var key = KeyboardUtil.ToXna(ev.Key.Keysym.Sym);
+                        _keys.Remove(key);
                     }
-                    else if (ev.Type == SDL.EventType.WindowEvent)
+                    else if (ev.Type == Sdl.EventType.TextInput)
                     {
-                        if (ev.Window.EventID == SDL.Window.EventID.Resized)
-                            _view.ClientResize (ev.Window.Data1, ev.Window.Data2);
+                        string text;
+                        unsafe
+                        {
+                            text = new string((char*) ev.Text.Text);
+                        }
+
+                        if (text.Length == 0)
+                            continue;
+
+                        foreach (var c in text)
+                            _view.CallTextInput(c);
+                    }
+                    else if (ev.Type == Sdl.EventType.WindowEvent)
+                    {
+                        if (ev.Window.EventID == Sdl.Window.EventId.Resized)
+                            _view.ClientResize(ev.Window.Data1, ev.Window.Data2);
                     }
                 }
 
                 Game.Tick();
 
-                if (isExiting > 0)
+                if (_isExiting > 0)
                     break;
             }
 
@@ -125,15 +135,14 @@ namespace Microsoft.Xna.Framework
 
         public override void Exit()
         {
-            Interlocked.Increment(ref isExiting);
+            Interlocked.Increment(ref _isExiting);
         }
 
         public override bool BeforeUpdate(GameTime gameTime)
         {
             // Update our OpenAL sound buffer pools
-            if (soundControllerInstance != null)
-                soundControllerInstance.Update();
-            
+            _soundControllerInstance?.Update();
+
             return true;
         }
 
@@ -144,12 +153,10 @@ namespace Microsoft.Xna.Framework
 
         public override void EnterFullScreen()
         {
-            
         }
 
         public override void ExitFullScreen()
         {
-            
         }
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)
@@ -162,16 +169,14 @@ namespace Microsoft.Xna.Framework
             _view.EndScreenDeviceChange(screenDeviceName, clientWidth, clientHeight);
         }
 
-        public override void Log(string Message)
+        public override void Log(string message)
         {
-            Console.WriteLine(Message);
+            Console.WriteLine(message);
         }
 
         public override void Present()
         {
-            var device = Game.GraphicsDevice;
-            if (device != null)
-                device.Present();
+            Game.GraphicsDevice?.Present();
         }
 
         protected override void Dispose(bool disposing)
@@ -183,7 +188,7 @@ namespace Microsoft.Xna.Framework
 
                 Joystick.CloseDevices();
 
-                SDL.Quit();
+                Sdl.Quit();
             }
 
             base.Dispose(disposing);

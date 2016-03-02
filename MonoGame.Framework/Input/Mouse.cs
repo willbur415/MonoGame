@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
     public static class Mouse
     {
-        internal static GameWindow PrimaryWindow = null;
+        internal static GameWindow PrimaryWindow;
 
         private static readonly MouseState _defaultState = new MouseState();
 
@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework.Input
         internal static bool BorderSet;
         internal static int ScrollY;
 
-        internal static void setWindows(GameWindow window)
+        internal static void SetWindows(GameWindow window)
         {
             PrimaryWindow = window;
         }
@@ -95,16 +95,16 @@ namespace Microsoft.Xna.Framework.Input
             int x, y;
             
             //var clientBounds = PrimaryWindow.ClientBounds;
-            var state = SDL.Mouse.GetState(out x, out y); // once we have border and titlebar detection code, replace this with GlobalMouseState
+            var state = Sdl.Mouse.GetState(out x, out y); // once we have border and titlebar detection code, replace this with GlobalMouseState
             
             window.MouseState.X = x; // - clientBounds.X;
             window.MouseState.Y = y; // - clientBounds.Y;
 
-            window.MouseState.LeftButton = (state.HasFlag(SDL.Mouse.Button.Left)) ? ButtonState.Pressed : ButtonState.Released;
-            window.MouseState.MiddleButton = (state.HasFlag(SDL.Mouse.Button.Middle)) ? ButtonState.Pressed : ButtonState.Released;
-            window.MouseState.RightButton = (state.HasFlag(SDL.Mouse.Button.Right)) ? ButtonState.Pressed : ButtonState.Released;
-            window.MouseState.XButton1 = (state.HasFlag(SDL.Mouse.Button.X1Mask)) ? ButtonState.Pressed : ButtonState.Released;
-            window.MouseState.XButton2 = (state.HasFlag(SDL.Mouse.Button.X2Mask)) ? ButtonState.Pressed : ButtonState.Released;
+            window.MouseState.LeftButton = (state.HasFlag(Sdl.Mouse.Button.Left)) ? ButtonState.Pressed : ButtonState.Released;
+            window.MouseState.MiddleButton = (state.HasFlag(Sdl.Mouse.Button.Middle)) ? ButtonState.Pressed : ButtonState.Released;
+            window.MouseState.RightButton = (state.HasFlag(Sdl.Mouse.Button.Right)) ? ButtonState.Pressed : ButtonState.Released;
+            window.MouseState.XButton1 = (state.HasFlag(Sdl.Mouse.Button.X1Mask)) ? ButtonState.Pressed : ButtonState.Released;
+            window.MouseState.XButton2 = (state.HasFlag(Sdl.Mouse.Button.X2Mask)) ? ButtonState.Pressed : ButtonState.Released;
 
             window.MouseState.ScrollWheelValue = ScrollY;
 #endif
@@ -157,7 +157,7 @@ namespace Microsoft.Xna.Framework.Input
 #endif
 
 #if DESKTOPGL || ANGLE
-            SDL.Mouse.WarpInWindow(PrimaryWindow.Handle, x, y);
+            Sdl.Mouse.WarpInWindow(PrimaryWindow.Handle, x, y);
 #elif WINDOWS
             SetCursorPos(pt.X, pt.Y);
 #elif MONOMAC

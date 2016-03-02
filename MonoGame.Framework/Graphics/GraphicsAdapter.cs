@@ -90,10 +90,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 View view = ((AndroidGameWindow)Game.Instance.Window).GameView;
                 return new DisplayMode(view.Width, view.Height, SurfaceFormat.Color);
 #elif DESKTOPGL
-                int displayIndex = SDL.Display.GetWindowDisplayIndex(SDLGameWindow.Instance.Handle);
+                var displayIndex = Sdl.Display.GetWindowDisplayIndex(SdlGameWindow.Instance.Handle);
 
-                SDL.Display.Mode mode;
-                SDL.Display.GetCurrentDisplayMode(displayIndex, out mode);
+                Sdl.Display.Mode mode;
+                Sdl.Display.GetCurrentDisplayMode(displayIndex, out mode);
 
                 return new DisplayMode(mode.Width, mode.Height, SurfaceFormat.Color);
 #elif WINDOWS
@@ -286,17 +286,17 @@ namespace Microsoft.Xna.Framework.Graphics
                     var modes = new List<DisplayMode>(new[] { CurrentDisplayMode, });
 
 #if DESKTOPGL
-                    var displayCount = SDL.Display.GetNumVideoDisplays();
+                    var displayCount = Sdl.Display.GetNumVideoDisplays();
                     modes.Clear();
                     
                     for (int displayIndex = 0; displayIndex < displayCount;displayIndex++)
                     {
-                        var modeCount = SDL.Display.GetNumDisplayModes(displayIndex);
+                        var modeCount = Sdl.Display.GetNumDisplayModes(displayIndex);
 
                         for (int i = 0;i < modeCount;i++)
                         {
-                            SDL.Display.Mode mode;
-                            SDL.Display.GetDisplayMode(displayIndex, i, out mode);
+                            Sdl.Display.Mode mode;
+                            Sdl.Display.GetDisplayMode(displayIndex, i, out mode);
 
                             // We are only using one format, Color
                             // mode.Format gets the Color format from SDL

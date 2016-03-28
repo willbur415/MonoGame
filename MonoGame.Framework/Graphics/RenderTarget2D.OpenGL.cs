@@ -9,7 +9,7 @@ using MonoMac.OpenGL;
 using OpenGL;
 #endif
 #elif DESKTOPGL
-using OpenTK.Graphics.OpenGL;
+using OpenGL;
 using System;
 using System.Collections.Generic;
 #elif GLES

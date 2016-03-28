@@ -15,7 +15,7 @@ using OpenGL;
 #elif GLES
 using OpenTK.Graphics.ES20;
 #elif OPENGL
-using OpenTK.Graphics.OpenGL;
+using OpenGL;
 #elif WINDOWS_STOREAPP || WINDOWS_UAP
 using Windows.UI.Xaml.Controls;
 #endif

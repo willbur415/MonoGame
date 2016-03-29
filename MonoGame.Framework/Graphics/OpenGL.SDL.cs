@@ -1,6 +1,12 @@
-﻿using System;
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
+
+using System;
 using System.Runtime.InteropServices;
 using System.Security;
+
+using Microsoft.Xna.Framework;
 
 namespace OpenGL
 {
@@ -11,10 +17,9 @@ namespace OpenGL
             BoundApi = RenderApi.GL;
         }
 
-
-        static partial void CreateContext (ref IGraphicsContext context)
+        private static IGraphicsContext PlatformCreateContext (IWindowInfo info)
         {
-            context = null;
+            return new GraphicsContext(info);
         }
     }
 

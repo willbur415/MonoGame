@@ -7,10 +7,11 @@ using System.Runtime.InteropServices;
 using Eto;
 using Eto.GtkSharp.Forms;
 using Eto.GtkSharp.Forms.Controls;
+using Eto.GtkSharp.Forms.ToolBar;
 
 namespace MonoGame.Tools.Pipeline
 {
-    public partial class Gtk3Wrapper
+    static partial class Gtk3Wrapper
     {
         public const string gtklibpath = "libgtk-3.so.0";
 
@@ -25,6 +26,9 @@ namespace MonoGame.Tools.Pipeline
 
         [DllImport(gtklibpath, CallingConvention = CallingConvention.Cdecl)]
         public static extern void gtk_header_bar_pack_end(IntPtr bar, IntPtr child);
+
+        [DllImport(gtklibpath, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void gtk_header_bar_set_show_close_button(IntPtr handle, bool show);
     }
 
     public static class Styles
@@ -38,6 +42,12 @@ namespace MonoGame.Tools.Pipeline
                 Gtk3Wrapper.gtk_window_set_titlebar(h.Control.Handle, headerBar);
                 h.Title = title;
 
+                if (h.AbortButton.Text == "Close")
+                {
+                    Gtk3Wrapper.gtk_header_bar_set_show_close_button(headerBar, true);
+                    return;
+                }
+
                 var defButton = (Gtk.Button)h.DefaultButton.ControlObject;
                 defButton.StyleContext.AddClass("suggested-action");
 
@@ -48,6 +58,12 @@ namespace MonoGame.Tools.Pipeline
             Style.Add<LabelHandler>("Wrap", h => h.Control.MaxWidthChars = 55);
 
             Style.Add<LinkButtonHandler>("Center", h => h.Control.SetAlignment(0.5f, 0.5f));
+
+            Style.Add<ToolBarHandler>("ToolBar", h =>
+            {
+                h.Control.ToolbarStyle = Gtk.ToolbarStyle.Icons;
+                h.Control.IconSize = Gtk.IconSize.SmallToolbar;
+            });
         }
     }
 }

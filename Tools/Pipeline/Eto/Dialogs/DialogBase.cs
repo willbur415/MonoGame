@@ -17,9 +17,9 @@ namespace MonoGame.Tools.Pipeline
             _result = DialogResult.Cancel;
         }
 
-        public DialogResult Run()
+        public DialogResult Run(Window window)
         {
-            this.ShowModal();
+            this.ShowModal(window);
             return _result;
         }
     }

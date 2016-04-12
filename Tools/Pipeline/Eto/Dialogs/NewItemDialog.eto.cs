@@ -20,6 +20,7 @@ namespace MonoGame.Tools.Pipeline
             Width = 370;
             Height = 285;
             Title = "New File";
+            Resizable = true;
 
             layout1 = new DynamicLayout();
             layout1.Padding = new Padding(6);
@@ -42,6 +43,7 @@ namespace MonoGame.Tools.Pipeline
             labelExt = new Label();
             labelExt.Text = " .spriteFont";
             labelExt.VerticalAlignment = VerticalAlignment.Center;
+            labelExt.Width = 80;
             layout2.Add(labelExt, false, true);
 
             table1.Add(layout2, 1, 0, true, false);

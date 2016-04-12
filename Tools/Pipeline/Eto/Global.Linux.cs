@@ -1,10 +1,22 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Eto.Drawing;
 using Eto.GtkSharp.Drawing;
 using Gtk;
 
 namespace MonoGame.Tools.Pipeline
 {
+    static partial class Gtk3Wrapper
+    {
+        public const string giolibpath = "libgio-2.0.so.0";
+
+        [DllImport(giolibpath, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr g_file_query_info(IntPtr gfile, string attributes, int flag, IntPtr cancelable, IntPtr error);
+
+        [DllImport(giolibpath, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr g_file_new_for_path(string path);
+    }
+
     static partial class Global
     {
         static IconTheme theme = IconTheme.Default;

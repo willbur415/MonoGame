@@ -77,8 +77,12 @@ namespace MonoGame.Tools.Pipeline
 
         void ItemExistanceChanged(IProjectItem item);
 
-        bool GetSelection(out FileType fileType, out string path, out string location);
+        bool GetSelection(out IProjectItem item);
 
-        bool GetSelection(out FileType[] fileType, out string[] path, out string[] location);
+        bool GetSelection(out IProjectItem[] items);
+
+        void UpdateMenus(MenuInfo info);
+
+        void UpdateRecentList(List<string> recentList);
     }
 }

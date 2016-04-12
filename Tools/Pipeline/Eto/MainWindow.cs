@@ -3,15 +3,18 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Eto.Forms;
+using Eto;
 
 namespace MonoGame.Tools.Pipeline
 {
 #if WINDOWS
     partial class MainView : IView
 #else
-    partial class MainWindow : IView
+    partial class MainWindow : Form, IView
 #endif
     {
+        public static IController Controller;
+
         private FileDialogFilter _mgcbFileFilter, _allFileFilter, _xnaFileFilter;
         private string[] monoLocations = {
             "/usr/bin/mono",
@@ -19,18 +22,37 @@ namespace MonoGame.Tools.Pipeline
             "/Library/Frameworks/Mono.framework/Versions/Current/bin/mono"
         };
 
-        private void Init()
+        public MainWindow()
         {
+            InitializeComponent();
+
             _mgcbFileFilter = new FileDialogFilter("MonoGame Content Build Project (*.mgcb)", new[] { ".mgcb" });
             _allFileFilter = new FileDialogFilter("All Files (*.*)", new[] { ".*" });
             _xnaFileFilter = new FileDialogFilter("XNA Content Projects (*.contentproj)", new[] { ".contentproj" });
         }
 
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = !Controller.Exit();
+            base.OnClosing(e);
+        }
+
+        public override void Close()
+        {
+            Application.Instance.Quit();
+            base.Close();
+        }
+
 #region IView implements
+
+        public void Attach(IController controller)
+        {
+            Controller = controller;
+        }
 
         public AskResult AskSaveOrCancel()
         {
-            var result = MessageBox.Show("Do you want to save the project first?", "Save Project", MessageBoxButtons.YesNoCancel, MessageBoxType.Question);
+            var result = MessageBox.Show(this, "Do you want to save the project first?", "Save Project", MessageBoxButtons.YesNoCancel, MessageBoxType.Question);
 
             if (result == Eto.Forms.DialogResult.Yes)
                 return AskResult.Yes;
@@ -48,7 +70,7 @@ namespace MonoGame.Tools.Pipeline
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _mgcbFileFilter;
 
-            var result = dialog.ShowDialog(null) == Eto.Forms.DialogResult.Ok;
+            var result = dialog.ShowDialog(this) == DialogResult.Ok;
             filePath = dialog.FileName;
 
             if (result && dialog.CurrentFilter == _mgcbFileFilter && !filePath.EndsWith(".mgcb"))
@@ -64,7 +86,7 @@ namespace MonoGame.Tools.Pipeline
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _mgcbFileFilter;
 
-            var result = dialog.ShowDialog(null) == Eto.Forms.DialogResult.Ok;
+            var result = dialog.ShowDialog(this) == DialogResult.Ok;
             projectFilePath = dialog.FileName;
 
             return result;
@@ -77,7 +99,7 @@ namespace MonoGame.Tools.Pipeline
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _xnaFileFilter;
 
-            var result = dialog.ShowDialog(null) == Eto.Forms.DialogResult.Ok;
+            var result = dialog.ShowDialog(this) == DialogResult.Ok;
             projectFilePath = dialog.FileName;
 
             return result;
@@ -85,24 +107,85 @@ namespace MonoGame.Tools.Pipeline
 
         public void ShowError(string title, string message)
         {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, MessageBoxType.Error);
+            MessageBox.Show(this, message, title, MessageBoxButtons.OK, MessageBoxType.Error);
         }
 
         public void ShowMessage(string message)
         {
-            MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxType.Information);
+            MessageBox.Show(this, message, "Info", MessageBoxButtons.OK, MessageBoxType.Information);
+        }
+
+        public void BeginTreeUpdate()
+        {
+            
+        }
+
+        public void SetTreeRoot(IProjectItem item)
+        {
+            if (item == null)
+                projectControl.SetRoot("");
+            else
+                projectControl.SetRoot(item.Name);
+        }
+
+        public void AddTreeItem(IProjectItem item)
+        {
+            projectControl.Add(projectControl.GetRoot(), item);
+        }
+
+        public void AddTreeFolder(string folder)
+        {
+            var item = new DirectoryItem(Path.GetFileName(folder), Path.GetDirectoryName(folder));
+            item.OriginalPath = folder;
+
+            projectControl.Add(projectControl.GetRoot(), item);
+        }
+
+        public void RemoveTreeItem(ContentItem contentItem)
+        {
+            
+        }
+
+        public void RemoveTreeFolder(string folder)
+        {
+            
+        }
+
+        public void UpdateTreeItem(IProjectItem item)
+        {
+            
+        }
+
+        public void EndTreeUpdate()
+        {
+            
+        }
+
+        public void UpdateProperties(IProjectItem item)
+        {
+            
+        }
+
+        public void OutputAppend(string text)
+        {
+            Application.Instance.Invoke(() => buildOutput.WriteLine(text));
+        }
+
+        public void OutputClear()
+        {
+            Application.Instance.Invoke(() => buildOutput.ClearOutput());
         }
 
         public bool ShowDeleteDialog(string[] folders, string[] files)
         {
-            var dialog = new DeleteDialog(_controller, folders, files);
-            return dialog.Run() == Eto.Forms.DialogResult.Ok;
+            var dialog = new DeleteDialog(Controller, folders, files);
+            return dialog.Run(this) == Eto.Forms.DialogResult.Ok;
         }
 
         public bool ShowEditDialog(string title, string text, string oldname, bool file, out string newname)
         {
             var dialog = new EditDialog(title, text, oldname, file);
-            var result = dialog.Run() == Eto.Forms.DialogResult.Ok;
+            var result = dialog.Run(this) == Eto.Forms.DialogResult.Ok;
 
             newname = dialog.Text;
 
@@ -117,7 +200,7 @@ namespace MonoGame.Tools.Pipeline
             dialog.Filters.Add(_allFileFilter);
             dialog.CurrentFilter = _allFileFilter;
 
-            var result = dialog.ShowDialog(null) == Eto.Forms.DialogResult.Ok;
+            var result = dialog.ShowDialog(this) == DialogResult.Ok;
 
             files = new List<string>();
             files.AddRange(dialog.Filenames);
@@ -129,7 +212,7 @@ namespace MonoGame.Tools.Pipeline
         {
             var dialog = new SelectFolderDialog();
             dialog.Directory = initialDirectory;
-            var result = dialog.ShowDialog(null) == Eto.Forms.DialogResult.Ok;
+            var result = dialog.ShowDialog(this) == DialogResult.Ok;
 
             folder = dialog.Directory;
 
@@ -138,8 +221,8 @@ namespace MonoGame.Tools.Pipeline
 
         public bool ChooseItemTemplate(string folder, out ContentItemTemplate template, out string name)
         {
-            var dialog = new NewItemDialog(_controller.Templates.GetEnumerator(), folder);
-            var result = dialog.Run() == Eto.Forms.DialogResult.Ok;
+            var dialog = new NewItemDialog(Controller.Templates.GetEnumerator(), folder);
+            var result = dialog.Run(this) == DialogResult.Ok;
 
             template = dialog.Selected;
             name = dialog.Name;
@@ -150,7 +233,7 @@ namespace MonoGame.Tools.Pipeline
         public bool CopyOrLinkFile(string file, bool exists, out CopyAction action, out bool applyforall)
         {
             var dialog = new AddItemDialog(file, exists, FileType.File);
-            var result = dialog.Run() == Eto.Forms.DialogResult.Ok;
+            var result = dialog.Run(this) == DialogResult.Ok;
 
             action = dialog.Responce;
             applyforall = dialog.ApplyForAll;
@@ -163,7 +246,7 @@ namespace MonoGame.Tools.Pipeline
             var afd = new AddItemDialog(folder, exists, FileType.Folder);
             applyforall = false;
 
-            if (afd.Run() == Eto.Forms.DialogResult.Ok)
+            if (afd.Run(this) == DialogResult.Ok)
             {
                 action = afd.Responce;
                 return true;
@@ -200,7 +283,7 @@ namespace MonoGame.Tools.Pipeline
 
                 proc.StartInfo.FileName = monoLoc;
 
-                if (_controller.LaunchDebugger)
+                if (Controller.LaunchDebugger)
                 {
                     var port = Environment.GetEnvironmentVariable("MONO_DEBUGGER_PORT");
                     port = !string.IsNullOrEmpty(port) ? port : "55555";
@@ -221,6 +304,192 @@ namespace MonoGame.Tools.Pipeline
             return proc;
         }
 
+        public void ItemExistanceChanged(IProjectItem item)
+        {
+            
+        }
+
+        public bool GetSelection(out IProjectItem item)
+        {
+            return projectControl.GetSelectedItem(out item);
+        }
+
+        public bool GetSelection(out IProjectItem[] items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateMenus(MenuInfo info)
+        {
+            cmdNew.Enabled = info.New;
+            cmdOpen.Enabled = info.Open;
+            cmdImport.Enabled = info.Import;
+            cmdSave.Enabled = info.Save;
+            cmdSaveAs.Enabled = info.SaveAs;
+            cmdClose.Enabled = info.Close;
+            cmdExit.Enabled = info.Exit;
+
+            cmdUndo.Enabled = info.Undo;
+            cmdRedo.Enabled = info.Redo;
+            menuAdd.Enabled = info.Add;
+            cmdNewItem.Enabled = info.Add;
+            cmdNewFolder.Enabled = info.Add;
+            cmdExistingItem.Enabled = info.Add;
+            cmdExistingFolder.Enabled = info.Add;
+            cmdExclude.Enabled = info.Exclude;
+            cmdRename.Enabled = info.Rename;
+            cmdDelete.Enabled = info.Delete;
+
+            cmdBuild.Enabled = info.Build;
+            cmdRebuild.Enabled = info.Rebuild;
+            cmdClean.Enabled = info.Clean;
+            cmdCancelBuild.Enabled = info.Cancel;
+        }
+
+        public void UpdateRecentList(List<string> recentList)
+        {
+            while (menuRecent.Items.Count > 0)
+                menuRecent.Items.Remove(menuRecent.Items[0]);
+
+            foreach (var recent in recentList)
+            {
+                var item = new ButtonMenuItem();
+                item.Text = recent;
+                item.Click += (sender, e) => Controller.OpenProject(recent);
+
+                menuRecent.Items.Add(item);
+            }
+
+            if (menuRecent.Items.Count > 0)
+            {
+                menuRecent.Items.Add(new SeparatorMenuItem());
+                var clearItem = new ButtonMenuItem();
+                clearItem.Text = "Clear";
+                clearItem.Click += (sender, e) => Controller.ClearRecentList();
+                menuRecent.Items.Add(clearItem);
+            }
+        }
+
 #endregion
+
+#region Commands
+
+        private void CmdNew_Executed(object sender, EventArgs e)
+        {
+            Controller.NewProject();
+        }
+
+        private void CmdOpen_Executed(object sender, EventArgs e)
+        {
+            Controller.OpenProject();
+        }
+
+        private void CmdClose_Executed(object sender, EventArgs e)
+        {
+            Controller.CloseProject();
+        }
+
+        private void CmdImport_Executed(object sender, EventArgs e)
+        {
+            Controller.ImportProject();
+        }
+
+        private void CmdSave_Executed(object sender, EventArgs e)
+        {
+            Controller.SaveProject(false);
+        }
+
+        private void CmdSaveAs_Executed(object sender, EventArgs e)
+        {
+            Controller.SaveProject(true);
+        }
+
+        private void CmdExit_Executed(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CmdUndo_Executed(object sender, EventArgs e)
+        {
+            Controller.Undo();
+        }
+
+        private void CmdRedo_Executed(object sender, EventArgs e)
+        {
+            Controller.Redo();
+        }
+
+        private void CmdRename_Executed(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CmdDelete_Executed(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CmdNewItem_Executed(object sender, EventArgs e)
+        {
+            Controller.NewItem();
+        }
+
+        private void CmdNewFolder_Executed(object sender, EventArgs e)
+        {
+            Controller.NewFolder();
+        }
+
+        private void CmdExistingItem_Executed(object sender, EventArgs e)
+        {
+            Controller.Include();
+        }
+
+        private void CmdExistingFolder_Executed(object sender, EventArgs e)
+        {
+            Controller.IncludeFolder();
+        }
+
+        private void CmdBuild_Executed(object sender, EventArgs e)
+        {
+            Controller.Build(false);
+        }
+
+        private void CmdRebuild_Executed(object sender, EventArgs e)
+        {
+            Controller.Build(true);
+        }
+
+        private void CmdClean_Executed(object sender, EventArgs e)
+        {
+            Controller.Clean();
+        }
+
+        private void CmdCancelBuild_Executed(object sender, EventArgs e)
+        {
+            Controller.CancelBuild();
+        }
+
+        private void CmdDebugMode_Executed(object sender, EventArgs e)
+        {
+            Controller.LaunchDebugger = cmdDebugMode.Checked;
+        }
+
+        private void CmdFilterOutput_Executed(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CmdHelp_Executed(object sender, EventArgs e)
+        {
+            Process.Start("http://www.monogame.net/documentation/?page=Pipeline");
+        }
+
+        private void CmdAbout_Executed(object sender, EventArgs e)
+        {
+            var adialog = new AboutDialog();
+            adialog.Run(this);
+        }
+
+        #endregion
     }
 }

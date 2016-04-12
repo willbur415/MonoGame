@@ -86,6 +86,8 @@ namespace MonoGame.Tools.Pipeline
 
         void OpenProject(string projectFilePath);
 
+        void ClearRecentList();
+
         void CloseProject();
 
         bool SaveProject(bool saveAs);

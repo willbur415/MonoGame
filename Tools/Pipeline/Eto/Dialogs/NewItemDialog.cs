@@ -85,12 +85,12 @@ namespace MonoGame.Tools.Pipeline
 
         private void List1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ReloadSensitive();
             if (list1.SelectedIndex < 0)
                 return;
 
             Selected = (ContentItemTemplate)((ImageListItem)list1.SelectedValue).Tag;
             labelExt.Text = Path.GetExtension(Selected.TemplateFile);
+            ReloadSensitive();
         }
     }
 }

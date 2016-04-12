@@ -22,6 +22,7 @@ namespace MonoGame.Tools.Pipeline
             Height = 300;
 
             DefaultButton.Visible = false;
+            AbortButton.Visible &= !Global.UseHeaderBar;
             AbortButton.Text = "Close";
 
             dynamic1 = new DynamicLayout();

@@ -56,7 +56,7 @@ namespace MonoGame.Tools.Pipeline
             return true;
         }
 
-        public static Bitmap GetDirectoryIcon()
+        public static Bitmap GetDirectoryIcon(bool exists)
         {
             try
             {
@@ -64,10 +64,10 @@ namespace MonoGame.Tools.Pipeline
             }
             catch { }
 
-            return Bitmap.FromResource("MonoGame.Tools.Pipeline.Icons.folder_open.png");
+            return Bitmap.FromResource("Treeview.Folder.png");
         }
 
-        public static Bitmap GetFileIcon(string path)
+        public static Bitmap GetFileIcon(string path, bool exists)
         {
             try
             {
@@ -75,7 +75,7 @@ namespace MonoGame.Tools.Pipeline
             }
             catch { }
 
-            return Bitmap.FromResource("MonoGame.Tools.Pipeline.Icons.blueprint.png");
+            return Bitmap.FromResource("Treeview.File.png");
         }
     }
 }

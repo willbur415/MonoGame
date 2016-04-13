@@ -36,7 +36,7 @@ namespace MonoGame.Tools.Pipeline
                 
                 try
                 {
-                    ret.Image = new Bitmap(Path.Combine(Path.GetDirectoryName(enums.Current.TemplateFile), enums.Current.Icon));
+                    ret.Image = new Bitmap(new Bitmap(Path.Combine(Path.GetDirectoryName(enums.Current.TemplateFile), enums.Current.Icon)), 16, 16);
                 }
                 catch { }
 

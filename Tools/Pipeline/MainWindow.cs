@@ -7,11 +7,7 @@ using Eto;
 
 namespace MonoGame.Tools.Pipeline
 {
-#if WINDOWS
-    partial class MainView : IView
-#else
     partial class MainWindow : Form, IView
-#endif
     {
         public static IController Controller;
 
@@ -29,6 +25,14 @@ namespace MonoGame.Tools.Pipeline
             _mgcbFileFilter = new FileDialogFilter("MonoGame Content Build Project (*.mgcb)", new[] { ".mgcb" });
             _allFileFilter = new FileDialogFilter("All Files (*.*)", new[] { ".*" });
             _xnaFileFilter = new FileDialogFilter("XNA Content Projects (*.contentproj)", new[] { ".contentproj" });
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            ToolBar.Style = "ToolBar2";
+            ToolBar.Style = "ToolBar";
+
+            base.OnShown(e);
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

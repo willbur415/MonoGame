@@ -22,8 +22,8 @@ namespace MonoGame.Tools.Pipeline
             InitializeComponent();
 
             _iconRoot = Icon.FromResource("Treeview.Root.png");
-
-            treeView1.Columns.Add(new GridColumn { DataCell = new ImageTextCell(0, 1), HeaderText = "Image and Text", AutoSize = true, Resizable = true, Editable = false });
+            
+            treeView1.Columns.Add(new GridColumn { DataCell = new ImageTextCell(0, 1), HeaderText = "Image and Text", Editable = true, Width = 200 });
             treeView1.DataStore = _treeBase = new TreeGridItem();
         }
 
@@ -40,7 +40,7 @@ namespace MonoGame.Tools.Pipeline
                 item = (treeView1.SelectedItem as TreeGridItem).Tag as IProjectItem;
             else
                 item = new DirectoryItem("", "");
-            
+
             return ret;
         }
 

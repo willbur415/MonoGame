@@ -209,6 +209,7 @@ namespace MonoGame.Tools.Pipeline
         private void InitalizeMenu()
         {
             Menu = new MenuBar();
+            Menu.Style = "Menu";
 
             menuFile = new ButtonMenuItem();
             menuFile.Text = "File";

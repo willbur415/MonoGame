@@ -44,8 +44,12 @@ namespace MonoGame.Tools.Pipeline
 
         public bool Debug { get; set; }
 
-        public bool OpenFile { get; set; }
+        public bool OpenItem { get; set; }
 
-        public bool OpenFileLocation { get; set; }
+        public bool OpenItemWith { get; set; }
+
+        public bool OpenItemLocation { get; set; }
+
+        public bool RebuildItem { get; set; }
     }
 }

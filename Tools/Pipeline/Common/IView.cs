@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -25,6 +26,8 @@ namespace MonoGame.Tools.Pipeline
     {
         void Attach(IController controller);
 
+        void Invoke(Action action);
+
         AskResult AskSaveOrCancel();
 
         bool AskSaveName(ref string filePath, string title);
@@ -47,11 +50,7 @@ namespace MonoGame.Tools.Pipeline
 
         void AddTreeItem(IProjectItem item);
 
-        void AddTreeFolder(string folder);
-
-        void RemoveTreeItem(ContentItem contentItem);
-
-        void RemoveTreeFolder(string folder);
+        void RemoveTreeItem(IProjectItem contentItem);
 
         void UpdateTreeItem(IProjectItem item);
 

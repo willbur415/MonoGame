@@ -8,13 +8,17 @@ namespace MonoGame.Tools.Pipeline
     partial class MainWindow
     {
         Command cmdNew, cmdOpen, cmdClose, cmdImport, cmdSave, cmdSaveAs, cmdExit;
-        Command cmdUndo, cmdRedo, cmdExclude, cmdRename, cmdDelete;
+        Command cmdUndo, cmdRedo, cmdAdd, cmdExclude, cmdRename, cmdDelete;
         Command cmdNewItem, cmdNewFolder, cmdExistingItem, cmdExistingFolder;
         Command cmdBuild, cmdRebuild, cmdClean, cmdCancelBuild;
         CheckCommand cmdDebugMode, cmdFilterOutput;
         Command cmdHelp, cmdAbout;
+        Command cmdOpenItem, cmdOpenItemWith, cmdOpenItemLocation, cmdRebuildItem;
+
         ButtonMenuItem menuFile, menuRecent, menuEdit, menuAdd, menuBuild, menuHelp;
         ToolItem toolBuild, toolRebuild, toolClean, toolCancelBuild;
+        MenuItem cmOpenItem, cmOpenItemWith, cmOpenItemLocation, cmRebuildItem, cmExclude, cmRename, cmDelete;
+        ButtonMenuItem cmAdd;
 
         ProjectControl projectControl;
         PropertyGridControl propertyGridControl;
@@ -31,6 +35,7 @@ namespace MonoGame.Tools.Pipeline
 
             InitalizeCommands();
             InitalizeMenu();
+            InitalizeContextMenu();
             InitalizeToolbar();
 
             splitterHorizontal = new Splitter();
@@ -40,6 +45,7 @@ namespace MonoGame.Tools.Pipeline
             splitterVertical = new Splitter();
             splitterVertical.Orientation = Orientation.Vertical;
             splitterVertical.Position = 230;
+            splitterVertical.FixedPanel = SplitterFixedPanel.None;
 
             projectControl = new ProjectControl();
             splitterVertical.Panel1 = projectControl;
@@ -81,6 +87,11 @@ namespace MonoGame.Tools.Pipeline
 
             cmdHelp.Executed += CmdHelp_Executed;
             cmdAbout.Executed += CmdAbout_Executed;
+
+            cmdOpenItem.Executed += CmdOpenItem_Executed;
+            cmdOpenItemWith.Executed += CmdOpenItemWith_Executed;
+            cmdOpenItemLocation.Executed += CmdOpenItemLocation_Executed;
+            cmdRebuildItem.Executed += CmdRebuildItem_Executed;
         }
 
         private void InitalizeCommands()
@@ -133,8 +144,11 @@ namespace MonoGame.Tools.Pipeline
             cmdRedo.Image = Icon.FromResource("Toolbar.Redo.png");
             cmdRedo.Shortcut = Application.Instance.CommonModifier | Keys.Y;
 
+            cmdAdd = new Command();
+            cmdAdd.MenuText = "Add";
+
             cmdExclude = new Command();
-            cmdExclude.MenuText = "Exclude from Project";
+            cmdExclude.MenuText = "Exclude From Project";
 
             cmdRename = new Command();
             cmdRename.MenuText = "Rename";
@@ -195,6 +209,7 @@ namespace MonoGame.Tools.Pipeline
             cmdFilterOutput.MenuText = "Filter Output";
             cmdFilterOutput.ToolTip = "Filter Output";
             cmdFilterOutput.Image = Icon.FromResource("Toolbar.FilterOutput.png");
+            cmdFilterOutput.Checked = true;
 
             // Help Commands
 
@@ -204,6 +219,20 @@ namespace MonoGame.Tools.Pipeline
 
             cmdAbout = new Command();
             cmdAbout.MenuText = "About";
+
+            // Context Menu
+
+            cmdOpenItem = new Command();
+            cmdOpenItem.MenuText = "Open";
+
+            cmdOpenItemWith = new Command();
+            cmdOpenItemWith.MenuText = "Open With";
+
+            cmdOpenItemLocation = new Command();
+            cmdOpenItemLocation.MenuText = "Open Containing Directory";
+
+            cmdRebuildItem = new Command();
+            cmdRebuildItem.MenuText = "Rebuild";
         }
 
         private void InitalizeMenu()
@@ -234,8 +263,7 @@ namespace MonoGame.Tools.Pipeline
             menuEdit.Items.Add(cmdRedo);
             menuEdit.Items.Add(new SeparatorMenuItem());
 
-            menuAdd = new ButtonMenuItem();
-            menuAdd.Text = "Add";
+            menuAdd = (ButtonMenuItem)cmdAdd.CreateMenuItem();
             menuAdd.Items.Add(cmdNewItem);
             menuAdd.Items.Add(cmdNewFolder);
             menuAdd.Items.Add(new SeparatorMenuItem());
@@ -268,6 +296,25 @@ namespace MonoGame.Tools.Pipeline
 
             Menu.QuitItem = cmdExit;
             Menu.AboutItem = cmdAbout;
+        }
+
+        private void InitalizeContextMenu()
+        {
+            cmOpenItem = cmdOpenItem.CreateMenuItem();
+            cmOpenItemWith = cmdOpenItemWith.CreateMenuItem();
+
+            cmAdd = (ButtonMenuItem)cmdAdd.CreateMenuItem();
+            cmAdd.Items.Add(cmdNewItem.CreateMenuItem());
+            cmAdd.Items.Add(cmdNewFolder.CreateMenuItem());
+            cmAdd.Items.Add(new SeparatorMenuItem());
+            cmAdd.Items.Add(cmdExistingItem.CreateMenuItem());
+            cmAdd.Items.Add(cmdExistingFolder.CreateMenuItem());
+
+            cmOpenItemLocation = cmdOpenItemLocation.CreateMenuItem();
+            cmRebuildItem = cmdRebuildItem.CreateMenuItem();
+            cmExclude = cmdExclude.CreateMenuItem();
+            cmRename = cmdRename.CreateMenuItem();
+            cmDelete = cmdDelete.CreateMenuItem();
         }
 
         private void InitalizeToolbar()

@@ -52,7 +52,7 @@ namespace MonoGame.Tools.Pipeline
 
                 foreach(string f in _folder)
                     if(f != "")
-                        _con.View.AddTreeFolder(f);
+                        _con.View.AddTreeItem(new DirectoryItem(f));
 
                 for (var i = 0; i < _files.Length; i++ )
                 {
@@ -109,7 +109,7 @@ namespace MonoGame.Tools.Pipeline
 
                 foreach(string f in _folder)
                     if(f != "")
-                        _con.View.RemoveTreeFolder(f);
+                        _con.View.RemoveTreeItem(new DirectoryItem(f));
 
                 _con.View.EndTreeUpdate();
                 _con.ProjectDirty = true;

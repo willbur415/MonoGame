@@ -161,19 +161,19 @@
 	
 	<!--- The resources for treeview -->
     <EmbeddedResource Include="Icons\TreeView\Root.png">
-      <LogicalName>Treeview.Root.png</LogicalName>
+      <LogicalName>TreeView.Root.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\TreeView\File.png">
-      <LogicalName>Treeview.File.png</LogicalName>
+      <LogicalName>TreeView.File.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\TreeView\FileMissing.png">
-      <LogicalName>Treeview.FileMissing.png</LogicalName>
+      <LogicalName>TreeView.FileMissing.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\TreeView\Folder.png">
-      <LogicalName>Treeview.Folder.png</LogicalName>
+      <LogicalName>TreeView.Folder.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Icons\TreeView\FolderMissing.png">
-      <LogicalName>Treeview.FolderMissing.png</LogicalName>
+      <LogicalName>TreeView.FolderMissing.png</LogicalName>
     </EmbeddedResource>
     
     <!-- The resources for output filtering -->

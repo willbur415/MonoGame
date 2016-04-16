@@ -64,7 +64,7 @@ namespace MonoGame.Tools.Pipeline
             }
             catch { }
 
-            return Bitmap.FromResource("Treeview.Folder.png");
+            return Bitmap.FromResource("TreeView.Folder.png");
         }
 
         public static Bitmap GetFileIcon(string path, bool exists)
@@ -75,7 +75,7 @@ namespace MonoGame.Tools.Pipeline
             }
             catch { }
 
-            return Bitmap.FromResource("Treeview.File.png");
+            return Bitmap.FromResource("TreeView.File.png");
         }
     }
 }

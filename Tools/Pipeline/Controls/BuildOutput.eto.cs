@@ -12,7 +12,7 @@ namespace MonoGame.Tools.Pipeline
     public partial class BuildOutput : Scrollable
     {
         TextArea textArea;
-        TreeGridView filterView;
+        TreeGridView treeView;
 
         private void InitializeComponent()
         {
@@ -20,7 +20,8 @@ namespace MonoGame.Tools.Pipeline
             textArea.Wrap = false;
             textArea.ReadOnly = true;
 
-            filterView = new TreeGridView();
+            treeView = new TreeGridView();
+            treeView.ShowHeader = false;
 
             Content = textArea;
         }

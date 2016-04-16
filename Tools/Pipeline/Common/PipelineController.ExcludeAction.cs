@@ -70,7 +70,7 @@ namespace MonoGame.Tools.Pipeline
 
                 foreach (string f in _folder)
                 {
-                    _con.View.RemoveTreeFolder(f);
+                    _con.View.RemoveTreeItem(new DirectoryItem(f));
 
                     try
                     {
@@ -97,7 +97,7 @@ namespace MonoGame.Tools.Pipeline
                 _con.View.BeginTreeUpdate();
 
                 foreach(string f in _folder)
-                    _con.View.AddTreeFolder(f);
+                    _con.View.AddTreeItem(new DirectoryItem(f));
 
                 foreach (var obj in _state)
                 {

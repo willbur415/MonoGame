@@ -29,6 +29,8 @@ namespace MonoGame.Tools.Pipeline
 
             Text = text;
             _file = file;
+
+            TextBox1_TextChanged(this, EventArgs.Empty);
         }
 
         protected override void OnShown(EventArgs e)

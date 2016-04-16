@@ -59,16 +59,6 @@ namespace MonoGame.Tools.Pipeline
         event Action OnProjectLoaded;
 
         /// <summary>
-        /// Triggered when the project finishes building.
-        /// </summary>
-        event Action OnBuildStarted;
-
-        /// <summary>
-        /// Triggered when the project finishes building.
-        /// </summary>
-        event Action OnBuildFinished;
-
-        /// <summary>
         /// Notify controller that a property of Project or its contents has been modified.
         /// </summary>
         void OnProjectModified();
@@ -94,7 +84,7 @@ namespace MonoGame.Tools.Pipeline
         
         void Build(bool rebuild);
 
-        void RebuildItems(IEnumerable<IProjectItem> items);
+        void RebuildItems(IProjectItem[] items);
 
         void Clean();
 
@@ -141,5 +131,9 @@ namespace MonoGame.Tools.Pipeline
         string GetFullPath(string filePath);
 
         string GetRelativePath(string filePath);
+
+        void UpdateMenu();
+
+        void SelectionChanged();
     }
 }

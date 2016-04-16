@@ -13,7 +13,7 @@ namespace MonoGame.Tools.Pipeline
         private void InitializeComponent()
         {
             treeView1 = new TreeGridView();
-            treeView1.AllowMultipleSelection = true;
+            //treeView1.AllowMultipleSelection = true;
             treeView1.ShowHeader = false;
 
             Content = treeView1;

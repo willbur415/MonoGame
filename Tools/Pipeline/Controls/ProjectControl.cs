@@ -7,28 +7,29 @@ using System.Collections.Generic;
 
 using Eto.Forms;
 using Eto.Drawing;
+using System.IO;
 
 namespace MonoGame.Tools.Pipeline
 {
     partial class ProjectControl : Scrollable
     {
+        Icon _iconRoot;
         TreeGridItem _treeBase, _treeRoot;
         PropertyGridControl _propertyGridControl;
-
-        Icon _iconRoot;
 
         public ProjectControl()
         {
             InitializeComponent();
 
-            _iconRoot = Icon.FromResource("Treeview.Root.png");
+            _iconRoot = Icon.FromResource("TreeView.Root.png");
             
-            treeView1.Columns.Add(new GridColumn { DataCell = new ImageTextCell(0, 1), HeaderText = "Image and Text", Editable = true, Width = 200 });
+            treeView1.Columns.Add(new GridColumn { DataCell = new ImageTextCell(0, 1), Editable = false });
             treeView1.DataStore = _treeBase = new TreeGridItem();
         }
 
-        public void Init(PropertyGridControl propertyGridControl)
+        public void Init(ContextMenu menu, PropertyGridControl propertyGridControl)
         {
+            treeView1.ContextMenu = menu;
             _propertyGridControl = propertyGridControl;
         }
 
@@ -44,9 +45,18 @@ namespace MonoGame.Tools.Pipeline
             return ret;
         }
 
+        public bool GetSelectedItems(out IProjectItem[] items)
+        {
+            IProjectItem item;
+            var ret = GetSelectedItem(out item);
+
+            items = new[] { item };
+            return ret;
+        }
+
         private void TreeView1_SelectionChanged(object sender, EventArgs e)
         {
-            
+            MainWindow.Controller.SelectionChanged();
         }
 
         public TreeGridItem GetRoot()
@@ -57,13 +67,12 @@ namespace MonoGame.Tools.Pipeline
                 _treeRoot.Values = new object[] { _iconRoot, "" };
 
                 _treeBase.Children.Add(_treeRoot);
-                treeView1.DataStore = _treeBase;
             }
 
             return _treeRoot;
         }
 
-        public void SetRoot(string name)
+        public void SetRoot(string name, IProjectItem item)
         {
             if (name == "")
             {
@@ -71,86 +80,76 @@ namespace MonoGame.Tools.Pipeline
                 return;
             }
 
-            GetRoot().SetValue(1, name);
+            var root = GetRoot();
+            root.SetValue(1, name);
+            root.Tag = item;
         }
 
-        public TreeGridItem GetItem(TreeGridItem root, string text, bool folder)
+        public void UpdateTree()
+        {
+            treeView1.DataStore = _treeBase;
+        }
+
+        public TreeGridItem GetorAddItem(TreeGridItem root, IProjectItem item)
         {
             var enumerator = root.Children.GetEnumerator();
+            var folder = item is DirectoryItem;
 
             var items = new List<string>();
             int pos = 0;
 
             while (enumerator.MoveNext())
             {
-                var item = enumerator.Current as TreeGridItem;
-                var itemtext = item.GetValue(1).ToString();
+                var citem = enumerator.Current as TreeGridItem;
+                var itemtext = citem.GetValue(1).ToString();
 
-                if (itemtext == text)
-                    return item;
+                if (itemtext == item.Name)
+                    return citem;
 
-                var itemFolder = !(item.Tag is ContentItem);
-
-                if (itemFolder)
+                if (folder)
                 {
-                    if (folder)
+                    if (citem.Tag is DirectoryItem)
                         items.Add(itemtext);
-                    else
-                        pos++;
                 }
-                else if (!folder)
-                    items.Add(itemtext);
-            }
-
-            items.Add(text);
-            items.Sort();
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (items[i] == text)
+                else
                 {
-                    pos += i;
-                    break;
+                    if (citem.Tag is DirectoryItem)
+                        pos++;
+                    else
+                        items.Add(itemtext);
                 }
             }
+
+            items.Add(item.Name);
+            items.Sort();
+            pos += items.IndexOf(item.Name);
+
+            Image icon;
+            if (item is DirectoryItem)
+                icon = Global.GetDirectoryIcon(item.Exists);
+            else
+                icon = Global.GetFileIcon(MainWindow.Controller.GetFullPath(item.OriginalPath), item.Exists);
 
             var ret = new TreeGridItem();
-            ret.Values = new object[] { null, text };
-            ret.Tag = new DirectoryItem(text, root.GetValue(1).ToString());
+            ret.Values = new object[] { icon, item.Name };
+            ret.Tag = item;
             root.Children.Insert(pos, ret);
-            treeView1.DataStore = _treeBase;
 
             return ret;
         }
 
         public void Add(TreeGridItem root, IProjectItem citem)
         {
-            Add(root, citem, citem.OriginalPath);
+            Add(root, citem, citem.OriginalPath, "");
         }
 
-        public void Add(TreeGridItem root, IProjectItem citem, string path)
+        public void Add(TreeGridItem root, IProjectItem citem, string path, string currentPath)
         {
             var split = path.Split('/');
-            var item = GetItem(root, split[0], !(citem is ContentItem));
+            var item = GetorAddItem(root, split.Length > 1 ? new DirectoryItem(split[0], currentPath) { Exists = citem.Exists } : citem);
 
             if (path.Contains("/"))
-            {
-                if (!citem.Exists)
-                    item.SetValue(0, Global.GetDirectoryIcon(false));
-                else if (citem.Exists && item.GetValue(0) == null)
-                    item.SetValue(0, Global.GetDirectoryIcon(true));
-
-                Add(item, citem, string.Join("/", split, 1, split.Length - 1));
-            }
-            else
-            {
-                if (citem is ContentItem)
-                    item.SetValue(0, Global.GetFileIcon(MainWindow.Controller.GetFullPath(citem.OriginalPath), citem.Exists));
-                else
-                    item.SetValue(0, Global.GetDirectoryIcon(citem.Exists));
-
-                item.Tag = citem;
-            }
+                Add(item, citem, string.Join("/", split, 1, split.Length - 1), (currentPath + Path.DirectorySeparatorChar + split[0]).TrimStart(Path.DirectorySeparatorChar));
         }
     }
 }

@@ -86,12 +86,10 @@ namespace MonoGame.Tools.Pipeline
 
         public event Action OnProjectLoaded;
 
-        public event Action OnBuildStarted;
-
-        public event Action OnBuildFinished;
-
         private PipelineController(IView view)
         {
+            PipelineSettings.Default.Load();
+
             _actionStack = new ActionStack();
             Selection = new Selection();
 
@@ -105,7 +103,6 @@ namespace MonoGame.Tools.Pipeline
             LoadTemplates(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Templates"));
             UpdateMenu();
 
-            PipelineSettings.Default.Load();
             view.UpdateRecentList(PipelineSettings.Default.ProjectHistory);
         }
 
@@ -381,7 +378,7 @@ namespace MonoGame.Tools.Pipeline
             BuildCommand(commands);
         }
 
-        public void RebuildItems(IEnumerable<IProjectItem> items)
+        public void RebuildItems(IProjectItem[] items)
         {
             // Make sure we save first!
             if (!AskSaveProject())
@@ -419,14 +416,12 @@ namespace MonoGame.Tools.Pipeline
             if (!AskSaveProject())
                 return;
 
-            if (OnBuildStarted != null)
-                OnBuildStarted();
-
             View.OutputClear();
 
             _buildTask = Task.Factory.StartNew(() => DoBuild(commands));
-            if (OnBuildFinished != null)
-                _buildTask.ContinueWith((e) => OnBuildFinished());
+            _buildTask.ContinueWith((e) => View.Invoke(UpdateMenu));
+
+            UpdateMenu();
         }
 
         public void Clean()
@@ -437,9 +432,6 @@ namespace MonoGame.Tools.Pipeline
             if (!AskSaveProject())
                 return;
 
-            if (OnBuildStarted != null)
-                OnBuildStarted();
-
             View.OutputClear();
 
             var commands = string.Format("/clean /intermediateDir:\"{0}\" /outputDir:\"{1}\"", _project.IntermediateDir, _project.OutputDir);
@@ -447,8 +439,9 @@ namespace MonoGame.Tools.Pipeline
                 commands += " /launchdebugger";
 
             _buildTask = Task.Factory.StartNew(() => DoBuild(commands));
-            if (OnBuildFinished != null)
-                _buildTask.ContinueWith((e) => OnBuildFinished());          
+            _buildTask.ContinueWith((e) => View.Invoke(UpdateMenu));
+
+            UpdateMenu();       
         }
 
         private string FindMGCB()
@@ -574,7 +567,10 @@ namespace MonoGame.Tools.Pipeline
             var ret = AskSaveProject();
 
             if (ret)
+            {
                 _watcher.Stop();
+                PipelineSettings.Default.Save();
+            }
 
             return ret;
         }
@@ -920,39 +916,6 @@ namespace MonoGame.Tools.Pipeline
 
         #endregion
 
-        private void UpdateMenu()
-        {
-            IProjectItem item;
-
-            var oneselected = View.GetSelection(out item);
-            var notBuilding = !ProjectBuilding;
-            var projectOpenAndNotBuilding = ProjectOpen && notBuilding;
-
-            var info = new MenuInfo();
-
-            info.New = notBuilding;
-            info.Open = notBuilding;
-            info.Import = notBuilding;
-            info.Save = projectOpenAndNotBuilding;
-            info.SaveAs = projectOpenAndNotBuilding;
-            info.Close = projectOpenAndNotBuilding;
-            info.Exit = notBuilding;
-
-            info.Undo = CanUndo;
-            info.Redo = CanRedo;
-            info.Add = ProjectOpen;
-            info.Exclude = oneselected;
-            info.Rename = oneselected;
-            info.Delete = oneselected;
-
-            info.Build = projectOpenAndNotBuilding;
-            info.Rebuild = projectOpenAndNotBuilding;
-            info.Clean = projectOpenAndNotBuilding;
-            info.Cancel = ProjectBuilding;
-
-            View.UpdateMenus(info);
-        }
-
         private void ResolveTypes()
         {
             PipelineTypes.Load(_project);
@@ -1027,6 +990,57 @@ namespace MonoGame.Tools.Pipeline
                 return path;
 
             return Uri.UnescapeDataString(relativeUri.ToString().Replace('/', Path.DirectorySeparatorChar));
+        }
+
+        public void SelectionChanged()
+        {
+            UpdateContextMenu();
+            View.UpdateMenus(info);
+        }
+
+        MenuInfo info;
+
+        public void UpdateMenu()
+        {;
+            var notBuilding = !ProjectBuilding;
+            var projectOpenAndNotBuilding = ProjectOpen && notBuilding;
+
+            info = new MenuInfo();
+
+            info.New = notBuilding;
+            info.Open = notBuilding;
+            info.Import = notBuilding;
+            info.Save = projectOpenAndNotBuilding;
+            info.SaveAs = projectOpenAndNotBuilding;
+            info.Close = projectOpenAndNotBuilding;
+            info.Exit = notBuilding;
+
+            info.Undo = CanUndo;
+            info.Redo = CanRedo;
+
+            info.Build = projectOpenAndNotBuilding;
+            info.Rebuild = projectOpenAndNotBuilding;
+            info.Clean = projectOpenAndNotBuilding;
+            info.Cancel = ProjectBuilding;
+
+            UpdateContextMenu();
+
+            View.UpdateMenus(info);
+        }
+
+        private void UpdateContextMenu()
+        {
+            IProjectItem item;
+            var oneselected = View.GetSelection(out item);
+
+            info.OpenItem = item is ContentItem;
+            info.OpenItemWith = !(item is DirectoryItem);
+            info.OpenItemLocation = oneselected;
+            info.Add = ProjectOpen && !(item is ContentItem);
+            info.Exclude = oneselected && !(item is PipelineProject);
+            info.Rename = oneselected;
+            info.Delete = oneselected && !(item is PipelineProject);
+            info.RebuildItem = oneselected;
         }
     }
 }

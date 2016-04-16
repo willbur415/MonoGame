@@ -11,6 +11,7 @@ namespace MonoGame.Tools.Pipeline
     {
         public static IController Controller;
 
+        private ContextMenu _contextMenu;
         private FileDialogFilter _mgcbFileFilter, _allFileFilter, _xnaFileFilter;
         private string[] monoLocations = {
             "/usr/bin/mono",
@@ -22,17 +23,12 @@ namespace MonoGame.Tools.Pipeline
         {
             InitializeComponent();
 
+            _contextMenu = new ContextMenu();
+            projectControl.Init(_contextMenu, propertyGridControl);
+
             _mgcbFileFilter = new FileDialogFilter("MonoGame Content Build Project (*.mgcb)", new[] { ".mgcb" });
             _allFileFilter = new FileDialogFilter("All Files (*.*)", new[] { ".*" });
             _xnaFileFilter = new FileDialogFilter("XNA Content Projects (*.contentproj)", new[] { ".contentproj" });
-        }
-
-        protected override void OnShown(EventArgs e)
-        {
-            ToolBar.Style = "ToolBar2";
-            ToolBar.Style = "ToolBar";
-
-            base.OnShown(e);
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -47,11 +43,22 @@ namespace MonoGame.Tools.Pipeline
             base.Close();
         }
 
-#region IView implements
+        #region IView implements
 
         public void Attach(IController controller)
         {
             Controller = controller;
+
+            cmdFilterOutput.Checked = PipelineSettings.Default.FilterOutput;
+            CmdFilterOutput_Executed(this, EventArgs.Empty);
+
+            cmdDebugMode.Checked = PipelineSettings.Default.DebugMode;
+            CmdDebugMode_Executed(this, EventArgs.Empty);
+        }
+
+        public void Invoke(Action action)
+        {
+            Application.Instance.Invoke(action);
         }
 
         public AskResult AskSaveOrCancel()
@@ -121,15 +128,15 @@ namespace MonoGame.Tools.Pipeline
 
         public void BeginTreeUpdate()
         {
-            
+
         }
 
         public void SetTreeRoot(IProjectItem item)
         {
             if (item == null)
-                projectControl.SetRoot("");
+                projectControl.SetRoot("", item);
             else
-                projectControl.SetRoot(item.Name);
+                projectControl.SetRoot(item.Name, item);
         }
 
         public void AddTreeItem(IProjectItem item)
@@ -137,37 +144,24 @@ namespace MonoGame.Tools.Pipeline
             projectControl.Add(projectControl.GetRoot(), item);
         }
 
-        public void AddTreeFolder(string folder)
+        public void RemoveTreeItem(IProjectItem contentItem)
         {
-            var item = new DirectoryItem(Path.GetFileName(folder), Path.GetDirectoryName(folder));
-            item.OriginalPath = folder;
 
-            projectControl.Add(projectControl.GetRoot(), item);
-        }
-
-        public void RemoveTreeItem(ContentItem contentItem)
-        {
-            
-        }
-
-        public void RemoveTreeFolder(string folder)
-        {
-            
         }
 
         public void UpdateTreeItem(IProjectItem item)
         {
-            
+
         }
 
         public void EndTreeUpdate()
         {
-            
+            projectControl.UpdateTree();
         }
 
         public void UpdateProperties(IProjectItem item)
         {
-            
+
         }
 
         public void OutputAppend(string text)
@@ -320,11 +314,13 @@ namespace MonoGame.Tools.Pipeline
 
         public bool GetSelection(out IProjectItem[] items)
         {
-            throw new NotImplementedException();
+            return projectControl.GetSelectedItems(out items);
         }
 
         public void UpdateMenus(MenuInfo info)
         {
+            // Menu
+
             cmdNew.Enabled = info.New;
             cmdOpen.Enabled = info.Open;
             cmdImport.Enabled = info.Import;
@@ -335,7 +331,7 @@ namespace MonoGame.Tools.Pipeline
 
             cmdUndo.Enabled = info.Undo;
             cmdRedo.Enabled = info.Redo;
-            menuAdd.Enabled = info.Add;
+            cmdAdd.Enabled = info.Add;
             cmdNewItem.Enabled = info.Add;
             cmdNewFolder.Enabled = info.Add;
             cmdExistingItem.Enabled = info.Add;
@@ -348,6 +344,69 @@ namespace MonoGame.Tools.Pipeline
             cmdRebuild.Enabled = info.Rebuild;
             cmdClean.Enabled = info.Clean;
             cmdCancelBuild.Enabled = info.Cancel;
+
+            cmdOpenItem.Enabled = info.OpenItem;
+            cmdOpenItemWith.Enabled = info.OpenItemWith;
+            cmdOpenItemLocation.Enabled = info.OpenItemLocation;
+            cmdRebuildItem.Enabled = info.RebuildItem;
+
+            // ToolBar
+
+            if (info.Build && ToolBar.Items.Contains(toolCancelBuild))
+            {
+                ToolBar.Items.Remove(toolCancelBuild);
+
+                ToolBar.Items.Insert(12, toolBuild);
+                ToolBar.Items.Insert(13, toolRebuild);
+                ToolBar.Items.Insert(14, toolClean);
+            }
+            else if (info.Cancel && ToolBar.Items.Contains(toolBuild))
+            {
+                ToolBar.Items.Remove(toolBuild);
+                ToolBar.Items.Remove(toolRebuild);
+                ToolBar.Items.Remove(toolClean);
+
+                ToolBar.Items.Insert(12, toolCancelBuild);
+            }
+
+            // Visibility of menu items can't be changed so 
+            // we need to recreate the context menu each time.
+
+            // Context Menu
+
+            var sep = false;
+            _contextMenu.Items.Clear();
+
+            AddContextMenu(cmOpenItem, ref sep);
+            AddContextMenu(cmOpenItemWith, ref sep);
+            AddContextMenu(cmAdd, ref sep);
+            AddSeparator(ref sep);
+            AddContextMenu(cmOpenItemLocation, ref sep);
+            AddContextMenu(cmRebuildItem, ref sep);
+            AddSeparator(ref sep);
+            AddContextMenu(cmExclude, ref sep);
+            AddSeparator(ref sep);
+            AddContextMenu(cmRename, ref sep);
+            AddContextMenu(cmDelete, ref sep);
+        }
+
+        private void AddContextMenu(MenuItem item, ref bool separator)
+        {
+            item.Shortcut = Keys.None;
+
+            if (item.Enabled)
+                _contextMenu.Items.Add(item);
+
+            separator |= item.Enabled;
+        }
+
+        private void AddSeparator(ref bool separator)
+        {
+            if (separator)
+            {
+                _contextMenu.Items.Add(new SeparatorMenuItem());
+                separator = false;
+            }
         }
 
         public void UpdateRecentList(List<string> recentList)
@@ -361,7 +420,7 @@ namespace MonoGame.Tools.Pipeline
                 item.Text = recent;
                 item.Click += (sender, e) => Controller.OpenProject(recent);
 
-                menuRecent.Items.Add(item);
+                menuRecent.Items.Insert(0, item);
             }
 
             if (menuRecent.Items.Count > 0)
@@ -374,9 +433,9 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-#endregion
+        #endregion
 
-#region Commands
+        #region Commands
 
         private void CmdNew_Executed(object sender, EventArgs e)
         {
@@ -475,12 +534,14 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdDebugMode_Executed(object sender, EventArgs e)
         {
+            PipelineSettings.Default.DebugMode = cmdDebugMode.Checked;
             Controller.LaunchDebugger = cmdDebugMode.Checked;
         }
 
         private void CmdFilterOutput_Executed(object sender, EventArgs e)
         {
-
+            PipelineSettings.Default.FilterOutput = cmdFilterOutput.Checked;
+            buildOutput.Filtered = cmdFilterOutput.Checked;
         }
 
         private void CmdHelp_Executed(object sender, EventArgs e)
@@ -494,6 +555,36 @@ namespace MonoGame.Tools.Pipeline
             adialog.Run(this);
         }
 
+        private void CmdOpenItem_Executed(object sender, EventArgs e)
+        {
+            IProjectItem item;
+
+            if (GetSelection(out item))
+                Process.Start(Controller.GetFullPath(item.OriginalPath));
+        }
+
+        private void CmdOpenItemWith_Executed(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void CmdOpenItemLocation_Executed(object sender, EventArgs e)
+        {
+            IProjectItem item;
+
+            if (GetSelection(out item))
+                Process.Start(Controller.GetFullPath(item.Location));
+        }
+
+        private void CmdRebuildItem_Executed(object sender, EventArgs e)
+        {
+            IProjectItem[] items;
+
+            if (GetSelection(out items))
+                Controller.RebuildItems(items);
+        }
+
         #endregion
+
     }
 }

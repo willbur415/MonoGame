@@ -60,7 +60,7 @@ namespace MonoGame.Tools.Pipeline
         {
             try
             {
-                return PlatformGetDirectoryIcon();
+                return PlatformGetDirectoryIcon(exists);
             }
             catch { }
 
@@ -71,7 +71,7 @@ namespace MonoGame.Tools.Pipeline
         {
             try
             {
-                return PlatformGetFileIcon(path);
+                return PlatformGetFileIcon(path, exists);
             }
             catch { }
 

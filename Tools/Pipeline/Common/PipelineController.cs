@@ -46,8 +46,6 @@ namespace MonoGame.Tools.Pipeline
             get { return _templateItems; }
         }
 
-        public Selection Selection { get; private set; }
-
         public bool LaunchDebugger { get; set; }
 
         public string ProjectLocation 
@@ -67,6 +65,10 @@ namespace MonoGame.Tools.Pipeline
         {
             get { return _project.OutputDir; }
         }
+
+        public List<IProjectItem> SelectedItems { get; private set; }
+
+        public IProjectItem SelectedItem { get; private set; }
         
         public bool ProjectOpen { get; private set; }
 
@@ -90,8 +92,8 @@ namespace MonoGame.Tools.Pipeline
         {
             PipelineSettings.Default.Load();
 
+            SelectedItems = new List<IProjectItem>();
             _actionStack = new ActionStack();
-            Selection = new Selection();
 
             View = view;
             View.Attach(this);
@@ -308,7 +310,6 @@ namespace MonoGame.Tools.Pipeline
             PipelineSettings.Default.StartupProject = null;
             PipelineSettings.Default.Save();
 
-            Selection.Clear(this);
             UpdateTree();
             UpdateMenu();
         }
@@ -584,14 +585,13 @@ namespace MonoGame.Tools.Pipeline
 
         public void Include()
         {
-            IProjectItem item;
-            View.GetSelection(out item);
+            var path = GetFullPath(SelectedItem.Location);
 
             List<string> files;
-            if (!View.ChooseContentFile(GetFullPath(item.Location), out files))
+            if (!View.ChooseContentFile(path, out files))
                 return;
 
-            Include(GetFullPath(item.Location), files.ToArray());
+            Include(path, files.ToArray());
         }
 
         private void Include(string initialDirectory, string[] f)
@@ -660,14 +660,13 @@ namespace MonoGame.Tools.Pipeline
 
         public void IncludeFolder()
         {
-            IProjectItem item;
-            View.GetSelection(out item);
+            var path = GetFullPath(SelectedItem.Location);
 
             string folder;
-            if (!View.ChooseContentFolder(GetFullPath(item.Location), out folder))
+            if (!View.ChooseContentFolder(path, out folder))
                 return;
 
-            IncludeFolder(GetFullPath(item.Location), new []{ folder });
+            IncludeFolder(path, new[] { folder });
         }
 
         public void IncludeFolder(string initialDirectory, string[] dirs)
@@ -812,41 +811,41 @@ namespace MonoGame.Tools.Pipeline
             return ret;
         }
 
-        public void Exclude(IEnumerable<ContentItem> items, IEnumerable<string> folders, bool delete)
+        public void Exclude(bool delete)
         {
-            if (delete && !View.ShowDeleteDialog(folders.ToArray(), items.Select(x => x.OriginalPath).ToArray()))
+            if (delete && !View.ShowDeleteDialog(SelectedItems))
                 return;
 
-            var action = new ExcludeAction(this, items, folders, delete);
+            var action = new ExcludeAction(this, SelectedItems, delete);
             if(action.Do())
                 _actionStack.Add(action);
+
+            UpdateMenu();
         }
 
         public void NewItem()
         {
-            IProjectItem item;
+            var path = GetFullPath(SelectedItem.Location);
+
             string name;
             ContentItemTemplate template;
 
-            View.GetSelection(out item);
-            if (!View.ChooseItemTemplate(GetFullPath(item.Location), out template, out name))
+            if (!View.ChooseItemTemplate(path, out template, out name))
                 return;
 
-            var action = new NewAction(this, name, GetFullPath(item.Location), template);
+            var action = new NewAction(this, name, path, template);
             if(action.Do())
                 _actionStack.Add(action);
         }
 
         public void NewFolder()
         {
-            IProjectItem item;
             string name;
 
             if (!View.ShowEditDialog("New Folder", "Folder Name:", "", true, out name))
                 return;
-            View.GetSelection(out item);
 
-            string folder = Path.Combine(GetFullPath(item.Location), name);
+            string folder = Path.Combine(GetFullPath(SelectedItem.Location), name);
 
             if (!Path.IsPathRooted(folder))
                 folder = _project.Location + Path.DirectorySeparatorChar + folder;
@@ -992,16 +991,28 @@ namespace MonoGame.Tools.Pipeline
             return Uri.UnescapeDataString(relativeUri.ToString().Replace('/', Path.DirectorySeparatorChar));
         }
 
-        public void SelectionChanged()
+        public void SelectionChanged(List<IProjectItem> items)
         {
+            SelectedItems = items;
+
+            if (items.Count < 2)
+            {
+                if (items.Count == 1)
+                    SelectedItem = items[0];
+                else
+                    SelectedItem = _project;
+            }
+            else
+                SelectedItem = null;
+
             UpdateContextMenu();
             View.UpdateMenus(info);
         }
 
         MenuInfo info;
 
-        public void UpdateMenu()
-        {;
+        private void UpdateMenu()
+        {
             var notBuilding = !ProjectBuilding;
             var projectOpenAndNotBuilding = ProjectOpen && notBuilding;
 
@@ -1030,17 +1041,17 @@ namespace MonoGame.Tools.Pipeline
 
         private void UpdateContextMenu()
         {
-            IProjectItem item;
-            var oneselected = View.GetSelection(out item);
+            var oneselected = SelectedItems.Count == 1;
+            var somethingselected = SelectedItems.Count > 0;
 
-            info.OpenItem = item is ContentItem;
-            info.OpenItemWith = !(item is DirectoryItem);
+            info.OpenItem = oneselected && SelectedItem is ContentItem;
+            info.OpenItemWith = oneselected && !(SelectedItem is DirectoryItem);
             info.OpenItemLocation = oneselected;
-            info.Add = ProjectOpen && !(item is ContentItem);
-            info.Exclude = oneselected && !(item is PipelineProject);
+            info.Add = (oneselected && !(SelectedItem is ContentItem)) || !somethingselected;
+            info.Exclude = somethingselected && !SelectedItems.Contains(_project);
             info.Rename = oneselected;
-            info.Delete = oneselected && !(item is PipelineProject);
-            info.RebuildItem = oneselected;
+            info.Delete = info.Exclude;
+            info.RebuildItem = somethingselected;
         }
     }
 }

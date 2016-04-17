@@ -19,7 +19,9 @@ namespace MonoGame.Tools.Pipeline
         /// </summary>
         IEnumerable<ContentItemTemplate> Templates { get; }
 
-        Selection Selection { get; }
+        List<IProjectItem> SelectedItems { get; }
+
+        IProjectItem SelectedItem { get; }
 
         string ProjectLocation { get; }
 
@@ -100,7 +102,7 @@ namespace MonoGame.Tools.Pipeline
 
         void IncludeFolder();
 
-        void Exclude(IEnumerable<ContentItem> items, IEnumerable<string> folders, bool delete);
+        void Exclude(bool delete);
 
         void NewItem();
 
@@ -109,6 +111,8 @@ namespace MonoGame.Tools.Pipeline
         void Move (string[] paths, string[] newpaths, FileType[] types);
         
         void AddAction(IProjectAction action);
+
+        void SelectionChanged(List<IProjectItem> items);
 
         IProjectItem GetItem(string originalPath);
 
@@ -131,9 +135,5 @@ namespace MonoGame.Tools.Pipeline
         string GetFullPath(string filePath);
 
         string GetRelativePath(string filePath);
-
-        void UpdateMenu();
-
-        void SelectionChanged();
     }
 }

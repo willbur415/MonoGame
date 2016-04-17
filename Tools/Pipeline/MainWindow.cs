@@ -9,6 +9,7 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class MainWindow : Form, IView
     {
+        public static MainWindow Instance;
         public static IController Controller;
 
         private ContextMenu _contextMenu;
@@ -23,8 +24,10 @@ namespace MonoGame.Tools.Pipeline
         {
             InitializeComponent();
 
+            Instance = this;
+
             _contextMenu = new ContextMenu();
-            projectControl.Init(_contextMenu, propertyGridControl);
+            //projectControl.Init(_contextMenu, propertyGridControl);
 
             _mgcbFileFilter = new FileDialogFilter("MonoGame Content Build Project (*.mgcb)", new[] { ".mgcb" });
             _allFileFilter = new FileDialogFilter("All Files (*.*)", new[] { ".*" });
@@ -41,6 +44,12 @@ namespace MonoGame.Tools.Pipeline
         {
             Application.Instance.Quit();
             base.Close();
+        }
+
+        public void ShowContextMenu()
+        {
+            if (Controller.ProjectOpen)
+                _contextMenu.Show(projectControl);
         }
 
         #region IView implements
@@ -133,20 +142,17 @@ namespace MonoGame.Tools.Pipeline
 
         public void SetTreeRoot(IProjectItem item)
         {
-            if (item == null)
-                projectControl.SetRoot("", item);
-            else
-                projectControl.SetRoot(item.Name, item);
+            projectControl.SetRoot(item);
         }
 
         public void AddTreeItem(IProjectItem item)
         {
-            projectControl.Add(projectControl.GetRoot(), item);
+            projectControl.AddItem(item);
         }
 
-        public void RemoveTreeItem(IProjectItem contentItem)
+        public void RemoveTreeItem(IProjectItem item)
         {
-
+            projectControl.RemoveItem(item);
         }
 
         public void UpdateTreeItem(IProjectItem item)
@@ -156,7 +162,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void EndTreeUpdate()
         {
-            projectControl.UpdateTree();
+            //projectControl.UpdateTree();
         }
 
         public void UpdateProperties(IProjectItem item)
@@ -174,9 +180,9 @@ namespace MonoGame.Tools.Pipeline
             Application.Instance.Invoke(() => buildOutput.ClearOutput());
         }
 
-        public bool ShowDeleteDialog(string[] folders, string[] files)
+        public bool ShowDeleteDialog(List<IProjectItem> items)
         {
-            var dialog = new DeleteDialog(Controller, folders, files);
+            var dialog = new DeleteDialog(Controller, items);
             return dialog.Run(this) == Eto.Forms.DialogResult.Ok;
         }
 
@@ -300,21 +306,6 @@ namespace MonoGame.Tools.Pipeline
             }
 
             return proc;
-        }
-
-        public void ItemExistanceChanged(IProjectItem item)
-        {
-            
-        }
-
-        public bool GetSelection(out IProjectItem item)
-        {
-            return projectControl.GetSelectedItem(out item);
-        }
-
-        public bool GetSelection(out IProjectItem[] items)
-        {
-            return projectControl.GetSelectedItems(out items);
         }
 
         public void UpdateMenus(MenuInfo info)
@@ -482,6 +473,11 @@ namespace MonoGame.Tools.Pipeline
             Controller.Redo();
         }
 
+        private void CmdExclude_Executed(object sender, EventArgs e)
+        {
+            Controller.Exclude(false);
+        }
+
         private void CmdRename_Executed(object sender, EventArgs e)
         {
 
@@ -489,7 +485,7 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdDelete_Executed(object sender, EventArgs e)
         {
-
+            Controller.Exclude(true);
         }
 
         private void CmdNewItem_Executed(object sender, EventArgs e)
@@ -557,10 +553,8 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdOpenItem_Executed(object sender, EventArgs e)
         {
-            IProjectItem item;
-
-            if (GetSelection(out item))
-                Process.Start(Controller.GetFullPath(item.OriginalPath));
+            if (Controller.SelectedItem != null)
+                Process.Start(Controller.GetFullPath(Controller.SelectedItem.OriginalPath));
         }
 
         private void CmdOpenItemWith_Executed(object sender, EventArgs e)
@@ -570,18 +564,13 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdOpenItemLocation_Executed(object sender, EventArgs e)
         {
-            IProjectItem item;
-
-            if (GetSelection(out item))
-                Process.Start(Controller.GetFullPath(item.Location));
+            if (Controller.SelectedItem != null)
+                Process.Start(Controller.GetFullPath(Controller.SelectedItem.Location));
         }
 
         private void CmdRebuildItem_Executed(object sender, EventArgs e)
         {
-            IProjectItem[] items;
-
-            if (GetSelection(out items))
-                Controller.RebuildItems(items);
+            Controller.RebuildItems(Controller.SelectedItems.ToArray());
         }
 
         #endregion

@@ -40,7 +40,7 @@ namespace MonoGame.Tools.Pipeline
 
         void ShowMessage(string message);
 
-        bool ShowDeleteDialog(string[] folders, string[] files);
+        bool ShowDeleteDialog(List<IProjectItem> items);
 
         bool ShowEditDialog(string title, string text, string oldname, bool file, out string newname);
 
@@ -50,7 +50,7 @@ namespace MonoGame.Tools.Pipeline
 
         void AddTreeItem(IProjectItem item);
 
-        void RemoveTreeItem(IProjectItem contentItem);
+        void RemoveTreeItem(IProjectItem item);
 
         void UpdateTreeItem(IProjectItem item);
 
@@ -73,12 +73,6 @@ namespace MonoGame.Tools.Pipeline
         bool CopyOrLinkFolder(string folder, bool exists, out CopyAction action, out bool applyforall);
 
         Process CreateProcess(string exe, string commands);
-
-        void ItemExistanceChanged(IProjectItem item);
-
-        bool GetSelection(out IProjectItem item);
-
-        bool GetSelection(out IProjectItem[] items);
 
         void UpdateMenus(MenuInfo info);
 

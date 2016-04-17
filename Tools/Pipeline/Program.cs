@@ -16,7 +16,11 @@ namespace MonoGame.Tools.Pipeline
         [STAThread]
         static void Main(string [] args)
         {
-            var app = new Application (Platform.Detect);
+            var platform = Platform.Detect;
+            platform.Add<IBuildOutput>(() => new BuildOutputHandler());
+            platform.Add<IProjectControl>(() => new ProjectControlHandler());
+
+            var app = new Application (platform);
             Styles.Load();
 
             var win = new MainWindow ();

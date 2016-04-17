@@ -70,6 +70,7 @@ namespace MonoGame.Tools.Pipeline
 
             cmdUndo.Executed += CmdUndo_Executed;
             cmdRedo.Executed += CmdRedo_Executed;
+            cmdExclude.Executed += CmdExclude_Executed;
             cmdRename.Executed += CmdRename_Executed;
             cmdDelete.Executed += CmdDelete_Executed;
 

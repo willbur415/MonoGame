@@ -57,7 +57,7 @@ namespace MonoGame.Tools.Pipeline
                                 continue;
 
                             item.Exists = !item.Exists;
-                            _view.ItemExistanceChanged (item);
+                            _view.UpdateTreeItem (item);
                         }
                     }
                     catch 

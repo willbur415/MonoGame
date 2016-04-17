@@ -85,7 +85,7 @@ namespace Microsoft.Xna.Framework
             {
                 Sdl.Event ev;
 
-                while (Sdl.PollEvent(out ev) == 1)
+                while (Sdl.PollEvent (out ev) == 1)
                 {
                     if (ev.Type == Sdl.EventType.Quit)
                         _isExiting++;
@@ -123,6 +123,8 @@ namespace Microsoft.Xna.Framework
                     }
                     else if (ev.Type == Sdl.EventType.WindowEvent)
                     {
+                        if (ev.Window.EventID == Sdl.Window.EventId.SizeChanged)
+                            _view.ClientResize(ev.Window.Data1, ev.Window.Data2);
                         if (ev.Window.EventID == Sdl.Window.EventId.Resized)
                             _view.ClientResize(ev.Window.Data1, ev.Window.Data2);
                         else if (ev.Window.EventID == Sdl.Window.EventId.FocusGained)

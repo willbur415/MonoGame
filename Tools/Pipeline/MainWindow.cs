@@ -1,4 +1,8 @@
-﻿using System;
+﻿// MonoGame - Copyright (C) The MonoGame Team
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
+
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,7 +33,7 @@ namespace MonoGame.Tools.Pipeline
             Instance = this;
 
             _contextMenu = new ContextMenu();
-            //projectControl.Init(_contextMenu, propertyGridControl);
+            projectControl.SetContextMenu(_contextMenu);
 
             _mgcbFileFilter = new FileDialogFilter("MonoGame Content Build Project (*.mgcb)", new[] { ".mgcb" });
             _allFileFilter = new FileDialogFilter("All Files (*.*)", new[] { ".*" });

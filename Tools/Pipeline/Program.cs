@@ -17,7 +17,6 @@ namespace MonoGame.Tools.Pipeline
         static void Main(string [] args)
         {
             var platform = Platform.Detect;
-            platform.Add<IBuildOutput>(() => new BuildOutputHandler());
             platform.Add<IProjectControl>(() => new ProjectControlHandler());
 
             var app = new Application (platform);

@@ -64,6 +64,25 @@ namespace MonoGame.Tools.Pipeline
                 h.Control.ToolbarStyle = Gtk.ToolbarStyle.Icons;
                 h.Control.IconSize = Gtk.IconSize.SmallToolbar;
             });
+
+            Style.Add<TreeViewHandler>("Scroll", h =>
+            {
+                var treeView = h.Control.Child as Gtk.TreeView;
+
+                Gtk.TreeIter lastIter, iter;
+
+                if (treeView.Model.GetIterFirst(out iter))
+                {
+                    do
+                    {
+                        lastIter = iter;
+                    }
+                    while (treeView.Model.IterNext(ref iter));
+
+                    var path = treeView.Model.GetPath(lastIter);
+                    treeView.ScrollToCell(path, null, false, 0, 0);
+                }
+            });
         }
     }
 }

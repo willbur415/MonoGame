@@ -9,6 +9,8 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class MainWindow : Form, IView
     {
+        private const string TitleBase = "MonoGame Pipeline Tools";
+
         public static MainWindow Instance;
         public static IController Controller;
 
@@ -157,17 +159,22 @@ namespace MonoGame.Tools.Pipeline
 
         public void UpdateTreeItem(IProjectItem item)
         {
-
+            projectControl.UpdateItem(item);
         }
 
         public void EndTreeUpdate()
         {
-            //projectControl.UpdateTree();
+            
         }
 
         public void UpdateProperties(IProjectItem item)
         {
 
+        }
+
+        public void EditProperties(List<IProjectItem> items)
+        {
+            propertyGridControl.SetSelectedItems(items);
         }
 
         public void OutputAppend(string text)
@@ -308,8 +315,22 @@ namespace MonoGame.Tools.Pipeline
             return proc;
         }
 
-        public void UpdateMenus(MenuInfo info)
+        public void UpdateCommands(MenuInfo info)
         {
+            // Title
+
+            var title = TitleBase;
+
+            if (Controller.ProjectOpen)
+            {
+                title += " - " + Path.GetFileName(Controller.ProjectItem.OriginalPath);
+
+                if (Controller.ProjectDirty)
+                    title += "*";
+            }
+
+            Title = title;
+
             // Menu
 
             cmdNew.Enabled = info.New;
@@ -402,8 +423,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void UpdateRecentList(List<string> recentList)
         {
-            while (menuRecent.Items.Count > 0)
-                menuRecent.Items.Remove(menuRecent.Items[0]);
+            menuRecent.Items.Clear();
 
             foreach (var recent in recentList)
             {
@@ -480,7 +500,7 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdRename_Executed(object sender, EventArgs e)
         {
-
+            Controller.Rename();
         }
 
         private void CmdDelete_Executed(object sender, EventArgs e)
@@ -559,7 +579,8 @@ namespace MonoGame.Tools.Pipeline
 
         private void CmdOpenItemWith_Executed(object sender, EventArgs e)
         {
-            
+            if (Controller.SelectedItem != null)
+                Global.ShowOpenWithDialog(Controller.GetFullPath(Controller.SelectedItem.OriginalPath));
         }
 
         private void CmdOpenItemLocation_Executed(object sender, EventArgs e)

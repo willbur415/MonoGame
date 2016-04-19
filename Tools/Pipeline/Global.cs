@@ -56,6 +56,18 @@ namespace MonoGame.Tools.Pipeline
             return true;
         }
 
+        public static void ShowOpenWithDialog(string filePath)
+        {
+            try
+            {
+                PlatformShowOpenWithDialog(filePath);
+            }
+            catch
+            {
+                MainWindow.Instance.ShowError("Error", "The current platform does not have this dialog implemented.");
+            }
+        }
+
         public static Bitmap GetDirectoryIcon(bool exists)
         {
             try
@@ -64,7 +76,7 @@ namespace MonoGame.Tools.Pipeline
             }
             catch { }
 
-            return Bitmap.FromResource("TreeView.Folder.png");
+            return exists ? Bitmap.FromResource("TreeView.Folder.png") : Bitmap.FromResource("TreeView.FolderMissing.png");
         }
 
         public static Bitmap GetFileIcon(string path, bool exists)
@@ -75,7 +87,7 @@ namespace MonoGame.Tools.Pipeline
             }
             catch { }
 
-            return Bitmap.FromResource("TreeView.File.png");
+            return exists ? Bitmap.FromResource("TreeView.File.png") : Bitmap.FromResource("TreeView.FileMissing.png");
         }
     }
 }

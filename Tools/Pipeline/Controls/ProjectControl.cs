@@ -14,6 +14,8 @@ namespace MonoGame.Tools.Pipeline
         void AddItem(IProjectItem item);
 
         void RemoveItem(IProjectItem item);
+
+        void UpdateItem(IProjectItem item);
     }
 
     [Handler(typeof(IProjectControl))]
@@ -34,6 +36,11 @@ namespace MonoGame.Tools.Pipeline
         public void RemoveItem(IProjectItem item)
         {
             Handler.RemoveItem(item);
+        }
+
+        public void UpdateItem(IProjectItem item)
+        {
+            Handler.UpdateItem(item);
         }
     }
 }

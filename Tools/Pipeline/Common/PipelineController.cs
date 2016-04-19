@@ -48,7 +48,15 @@ namespace MonoGame.Tools.Pipeline
 
         public bool LaunchDebugger { get; set; }
 
-        public string ProjectLocation 
+        public PipelineProject ProjectItem
+        {
+            get
+            {
+                return _project;
+            }
+        }
+
+        public string ProjectLocation
         {
             get
             {
@@ -93,7 +101,7 @@ namespace MonoGame.Tools.Pipeline
             PipelineSettings.Default.Load();
 
             SelectedItems = new List<IProjectItem>();
-            _actionStack = new ActionStack();
+            _actionStack = new ActionStack(this);
 
             View = view;
             View.Attach(this);
@@ -215,6 +223,7 @@ namespace MonoGame.Tools.Pipeline
 #endif
 
             UpdateTree();
+            View.UpdateTreeItem(_project);
 
             if (OnProjectLoaded != null)
                 OnProjectLoaded();
@@ -243,9 +252,7 @@ namespace MonoGame.Tools.Pipeline
             if (OnProjectLoading != null)
                 OnProjectLoading();
 
-#if !DEBUG
             try
-#endif
             {
                 _actionStack.Clear();
                 _project = new PipelineProject();
@@ -264,15 +271,14 @@ namespace MonoGame.Tools.Pipeline
                 PipelineSettings.Default.Save();
                 View.UpdateRecentList(PipelineSettings.Default.ProjectHistory);
             }
-#if !DEBUG
             catch (Exception e)
             {
                 View.ShowError("Open Project", "Failed to open project!");
                 return;
             }
-#endif
 
             UpdateTree();
+            View.UpdateTreeItem(_project);
 
             if (OnProjectLoaded != null)
                 OnProjectLoaded();
@@ -318,6 +324,8 @@ namespace MonoGame.Tools.Pipeline
         {
             string opath = _project.OriginalPath;
             string ext = Path.GetExtension(opath);
+
+            PipelineSettings.Default.ProjectHistory.Remove(opath);
 
             try
             {
@@ -841,7 +849,6 @@ namespace MonoGame.Tools.Pipeline
         public void NewFolder()
         {
             string name;
-
             if (!View.ShowEditDialog("New Folder", "Folder Name:", "", true, out name))
                 return;
 
@@ -864,6 +871,29 @@ namespace MonoGame.Tools.Pipeline
             var action = new IncludeAction(this, null, new List<string> { folder });
             if(action.Do())
                 _actionStack.Add(action);
+        }
+
+        public void Rename()
+        {
+            string name;
+            if (SelectedItem == null || !View.ShowEditDialog("Rename Item", "New Name:", SelectedItem.Name, true, out name))
+                return;
+
+            FileType type = FileType.Base;
+            var path = SelectedItem.OriginalPath;
+            var newpath = System.IO.Path.GetDirectoryName(SelectedItem.OriginalPath) + System.IO.Path.DirectorySeparatorChar + name;
+
+            if (SelectedItem is ContentItem)
+                type = FileType.File;
+            else if (SelectedItem is DirectoryItem)
+                type = FileType.Folder;
+            else
+            {
+                path = SelectedItem.Name;
+                newpath = name;
+            }
+
+            Move(new[] { path }, new[] { newpath }, new[] { type });
         }
 
         public void AddAction(IProjectAction action)
@@ -891,12 +921,6 @@ namespace MonoGame.Tools.Pipeline
 
         private readonly ActionStack _actionStack;
 
-        public event CanUndoRedoChanged OnCanUndoRedoChanged
-        {
-            add { _actionStack.OnCanUndoRedoChanged += value; }
-            remove { _actionStack.OnCanUndoRedoChanged -= value; } 
-        }
-
         public bool CanUndo { get { return _actionStack.CanUndo; } }
 
         public bool CanRedo { get { return _actionStack.CanRedo; } }
@@ -904,13 +928,11 @@ namespace MonoGame.Tools.Pipeline
         public void Undo()
         {
             _actionStack.Undo();
-            UpdateMenu();
         }
 
         public void Redo()
         {
             _actionStack.Redo();
-            UpdateMenu();
         }
 
         #endregion
@@ -1006,12 +1028,13 @@ namespace MonoGame.Tools.Pipeline
                 SelectedItem = null;
 
             UpdateContextMenu();
-            View.UpdateMenus(info);
+            View.UpdateCommands(info);
+            View.EditProperties(items);
         }
 
         MenuInfo info;
 
-        private void UpdateMenu()
+        public void UpdateMenu()
         {
             var notBuilding = !ProjectBuilding;
             var projectOpenAndNotBuilding = ProjectOpen && notBuilding;
@@ -1026,8 +1049,8 @@ namespace MonoGame.Tools.Pipeline
             info.Close = projectOpenAndNotBuilding;
             info.Exit = notBuilding;
 
-            info.Undo = CanUndo;
-            info.Redo = CanRedo;
+            info.Undo = _actionStack.CanUndo;
+            info.Redo = _actionStack.CanRedo;
 
             info.Build = projectOpenAndNotBuilding;
             info.Rebuild = projectOpenAndNotBuilding;
@@ -1036,7 +1059,7 @@ namespace MonoGame.Tools.Pipeline
 
             UpdateContextMenu();
 
-            View.UpdateMenus(info);
+            View.UpdateCommands(info);
         }
 
         private void UpdateContextMenu()
@@ -1047,7 +1070,7 @@ namespace MonoGame.Tools.Pipeline
             info.OpenItem = oneselected && SelectedItem is ContentItem;
             info.OpenItemWith = oneselected && !(SelectedItem is DirectoryItem);
             info.OpenItemLocation = oneselected;
-            info.Add = (oneselected && !(SelectedItem is ContentItem)) || !somethingselected;
+            info.Add = (oneselected && !(SelectedItem is ContentItem)) || !somethingselected && ProjectOpen;
             info.Exclude = somethingselected && !SelectedItems.Contains(_project);
             info.Rename = oneselected;
             info.Delete = info.Exclude;

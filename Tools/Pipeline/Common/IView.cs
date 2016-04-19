@@ -58,6 +58,8 @@ namespace MonoGame.Tools.Pipeline
 
         void UpdateProperties(IProjectItem item);
 
+        void EditProperties(List<IProjectItem> items);
+
         void OutputAppend(string text);
 
         void OutputClear();
@@ -74,7 +76,7 @@ namespace MonoGame.Tools.Pipeline
 
         Process CreateProcess(string exe, string commands);
 
-        void UpdateMenus(MenuInfo info);
+        void UpdateCommands(MenuInfo info);
 
         void UpdateRecentList(List<string> recentList);
     }

@@ -7,6 +7,7 @@ using Gdk;
 using Eto.GtkSharp.Forms;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -26,6 +27,7 @@ namespace MonoGame.Tools.Pipeline
         private Pixbuf _iconRoot;
         private TreeStore _treeStore;
         private TreeIter _iterRoot;
+        private bool _rootExists;
 
         public ProjectControlHandler()
         {
@@ -41,6 +43,7 @@ namespace MonoGame.Tools.Pipeline
 
             // Init
 
+            _rootExists = false;
             _iconRoot = new Pixbuf(null, "TreeView.Root.png");
 
             var column = new TreeViewColumn();
@@ -94,9 +97,7 @@ namespace MonoGame.Tools.Pipeline
                 TreePath path;
                 TreeIter iter;
 
-                _treeView.GetDestRowAtPos((int)args.Event.X, (int)args.Event.Y, out path, out pos);
-
-                if (_treeStore.GetIter(out iter, path))
+                if (_treeView.GetDestRowAtPos((int)args.Event.X, (int)args.Event.Y, out path, out pos) && _treeStore.GetIter(out iter, path))
                 {
                     if (MainWindow.Controller.SelectedItems.Contains(_treeStore.GetValue(iter, 2) as IProjectItem))
                        args.RetVal = true;
@@ -106,8 +107,15 @@ namespace MonoGame.Tools.Pipeline
 
         private void TreeView_ButtonReleaseEvent(object o, ButtonReleaseEventArgs args)
         {
-            if (args.Event.Button == 3)
+            TreeViewDropPosition pos;
+            TreePath path;
+
+            if (args.Event.Button == 3 &&
+                _treeView.GetDestRowAtPos((int)args.Event.X, (int)args.Event.Y, out path, out pos) &&
+                _treeView.Selection.GetSelectedRows().ToList().Contains(path))
+            {
                 MainWindow.Instance.ShowContextMenu();
+            }
         }
 
         public void SetRoot(IProjectItem item)
@@ -115,10 +123,19 @@ namespace MonoGame.Tools.Pipeline
             if (item == null)
             {
                 _treeStore.Clear();
+                _rootExists = false;
                 return;
             }
 
-            _iterRoot = _treeStore.AppendValues(_iconRoot, item.Name, item);
+            if (!_rootExists)
+            {
+                _iterRoot = _treeStore.AppendNode();
+                _rootExists = true;
+            }
+
+            _treeStore.SetValue(_iterRoot, 0, _iconRoot);
+            _treeStore.SetValue(_iterRoot, 1, item.Name);
+            _treeStore.SetValue(_iterRoot, 2, item);
         }
 
         public void AddItem(IProjectItem item)
@@ -137,31 +154,97 @@ namespace MonoGame.Tools.Pipeline
 
         public void RemoveItem(IProjectItem item)
         {
-            RemoveItem(_iterRoot, item.OriginalPath);
+            TreeIter iter;
+            if (FindItem(_iterRoot, item.OriginalPath, out iter))
+                _treeStore.Remove(ref iter);
         }
 
-        public void RemoveItem(TreeIter root, string path)
+        public void UpdateItem(IProjectItem item)
         {
+            if (item is PipelineProject)
+            {
+                _treeView.ExpandRow(_treeStore.GetPath(_iterRoot), false);
+                _treeView.Selection.UnselectAll();
+                _treeView.Selection.SelectIter(_iterRoot);
+                return;
+            }
+
             TreeIter iter;
+            if (FindItem(_iterRoot, item.OriginalPath, out iter))
+            {
+                if (item.SelectThis)
+                {
+                    _treeView.Selection.UnselectAll();
+                    _treeView.Selection.SelectIter(iter);
+                    item.SelectThis = false;
+                }
+
+                if (item.ExpandToThis)
+                {
+                    _treeView.ExpandToPath(_treeStore.GetPath(iter));
+                    item.ExpandToThis = false;
+                }
+
+                SetExists(iter, item.Exists);
+            }
+        }
+
+        public void SetExists(TreeIter iter, bool exists)
+        {
+            var item = _treeStore.GetValue(iter, 2) as IProjectItem;
+
+            if (item is PipelineProject)
+                return;
+
+            if (item is DirectoryItem)
+            {
+                TreeIter iterChild;
+                bool fex = exists;
+
+                if (_treeStore.IterChildren(out iterChild, iter))
+                {
+                    do
+                    {
+                        var iex = (_treeStore.GetValue(iter, 2) as IProjectItem).Exists;
+
+                        if (!exists)
+                            fex = false;
+                    }
+                    while (_treeStore.IterNext(ref iterChild));
+                }
+
+                _treeStore.SetValue(iter, 0, Global.GetDirectoryIcon(fex).ControlObject);
+            }
+            else
+                _treeStore.SetValue(iter, 0, Global.GetFileIcon(MainWindow.Controller.GetFullPath(item.OriginalPath), exists).ControlObject);
+            
+            _treeStore.IterParent(out iter, iter);
+            SetExists(iter, exists);
+        }
+
+        public bool FindItem(TreeIter root, string path, out TreeIter iter)
+        {
             var split = path.Split('/');
 
             if (GetItem(root, split[0], out iter))
             {
-                if (split.Length == 1)
-                    _treeStore.Remove(ref iter);
-                else
-                    RemoveItem(iter, string.Join("/", split, 1, split.Length - 1));
+                if (split.Length != 1)
+                    return FindItem(iter, string.Join("/", split, 1, split.Length - 1), out iter);
+                
+                return true;
             }
+
+            return false;
         }
 
-        public bool GetItem(TreeIter root, string name, out TreeIter iter)
+        public bool GetItem(TreeIter root, string text, out TreeIter iter)
         {
             TreeIter childIter;
             if (_treeStore.IterChildren(out childIter, root))
             {
                 do
                 {
-                    if (_treeStore.GetValue(childIter, 1).ToString() == name)
+                    if (_treeStore.GetValue(childIter, 1).ToString() == text)
                     {
                         iter = childIter;
                         return true;
@@ -215,9 +298,9 @@ namespace MonoGame.Tools.Pipeline
 
             Pixbuf icon;
             if (item is DirectoryItem)
-                icon = Global.GetGtkDirectoryIcon(item.Exists);
+                icon = Global.GetDirectoryIcon(item.Exists).ControlObject as Pixbuf;
             else
-                icon = Global.GetGtkFileIcon(MainWindow.Controller.GetFullPath(item.OriginalPath), item.Exists);
+                icon = Global.GetFileIcon(MainWindow.Controller.GetFullPath(item.OriginalPath), item.Exists).ControlObject as Pixbuf;
 
             var ret = _treeStore.InsertNode(root, pos);
             _treeStore.SetValue(ret, 0, icon);

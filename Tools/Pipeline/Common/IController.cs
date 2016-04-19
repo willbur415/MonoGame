@@ -23,7 +23,7 @@ namespace MonoGame.Tools.Pipeline
 
         IProjectItem SelectedItem { get; }
 
-        string ProjectLocation { get; }
+        PipelineProject ProjectItem { get; }
 
         /// <summary>
         /// True if there is a project.
@@ -108,7 +108,9 @@ namespace MonoGame.Tools.Pipeline
 
         void NewFolder();
 
-        void Move (string[] paths, string[] newpaths, FileType[] types);
+        void Rename();
+
+        void Move(string[] paths, string[] newpaths, FileType[] types);
         
         void AddAction(IProjectAction action);
 
@@ -119,8 +121,6 @@ namespace MonoGame.Tools.Pipeline
         #endregion
 
         #region Undo, Redo
-
-        event CanUndoRedoChanged OnCanUndoRedoChanged;
 
         bool CanRedo { get; }
 

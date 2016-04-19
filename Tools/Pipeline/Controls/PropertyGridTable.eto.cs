@@ -8,13 +8,13 @@ namespace MonoGame.Tools.Pipeline
 {
     public partial class PropertyGridTable : Scrollable
     {
-        TreeGridView propertyGrid;
+        Drawable drawable;
 
         private void InitializeComponent()
         {
-            propertyGrid = new TreeGridView();
+            drawable = new Drawable();
 
-            Content = propertyGrid;
+            Content = drawable;
         }
     }
 }

@@ -76,7 +76,7 @@ namespace MonoGame.Tools.Pipeline
         private void ButtonAdd_Click(object sender, EventArgs e)
         {
             var dialog = new OpenFileDialog();
-            dialog.Directory = new Uri(_controller.ProjectLocation);
+            dialog.Directory = new Uri(_controller.ProjectItem.Location);
             dialog.MultiSelect = true;
             dialog.Filters.Add(_dllFileFilter);
             dialog.Filters.Add(_allFileFilter);

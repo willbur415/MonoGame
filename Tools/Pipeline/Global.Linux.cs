@@ -21,24 +21,25 @@ namespace MonoGame.Tools.Pipeline
     {
         static IconTheme theme = IconTheme.Default;
 
-        static Bitmap PlatformGetDirectoryIcon(bool exists)
+        static void PlatformShowOpenWithDialog(string filePath)
         {
-            return new Bitmap(new BitmapHandler(GetGtkDirectoryIcon(exists)));
+            
         }
 
-        public static Gdk.Pixbuf GetGtkDirectoryIcon(bool exists)
+        static Bitmap PlatformGetDirectoryIcon(bool exists)
         {
-            return theme.LoadIcon("folder", 16, 0);
+            if (!exists)
+                throw new NotImplementedException();
+            
+            return new Bitmap(new BitmapHandler(theme.LoadIcon("folder", 16, 0)));
         }
 
         static Bitmap PlatformGetFileIcon(string path, bool exists)
         {
-            return new Bitmap(new BitmapHandler(GetGtkFileIcon(path, exists)));
-        }
-
-        public static Gdk.Pixbuf GetGtkFileIcon(string path, bool exists)
-        {
             Gdk.Pixbuf icon = null;
+
+            if (!exists)
+                throw new NotImplementedException();
 
             try
             {
@@ -61,7 +62,7 @@ namespace MonoGame.Tools.Pipeline
             if (icon == null)
                 icon = theme.LoadIcon("text-x-generic", 16, 0);
 
-            return icon;
+            return new Bitmap(new BitmapHandler(icon));
         }
     }
 }

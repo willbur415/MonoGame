@@ -12,19 +12,47 @@ namespace MonoGame.Tools.Pipeline
 {
     public partial class PropertyGridTable
     {
+        List<string> values;
+        private int spacing = 16;
+
         public PropertyGridTable()
         {
             InitializeComponent();
+
+            values = new List<string>();
+
+            drawable.BackgroundColor = SystemColors.ControlBackground;
+            drawable.Paint += Drawable_Paint;
+        }
+
+        private void Drawable_Paint(object sender, PaintEventArgs e)
+        {
+            var graphics = e.Graphics;
+            graphics.Clear(SystemColors.ControlBackground);
+            var y = 3;
+
+            foreach (var v in values)
+            {
+                graphics.DrawText(SystemFonts.Default(), SystemColors.ControlText, 3, y, v);
+                y += (int)SystemFonts.Default().Size + spacing;
+            }
+
         }
 
         public void Clear()
         {
-            
+            values.Clear();
         }
 
-        public void AddEntry(PropertyInfo property, object value)
+        public void AddEntry(string category, PropertyInfo property, object value)
         {
-            Console.WriteLine(property.Name);
+            Console.WriteLine(category + " " + property.Name);
+            values.Add(property.Name);
+        }
+
+        public void Update()
+        {
+            drawable.Update(new Rectangle(0, 0, drawable.Width, drawable.Height));
         }
     }
 }

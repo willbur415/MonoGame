@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Eto.Forms;
 using Eto.Drawing;
 using System.Reflection;
+using System.Linq;
+using System.ComponentModel;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -49,12 +51,29 @@ namespace MonoGame.Tools.Pipeline
 
             foreach (var p in props)
             {
+                var attrs = p.GetCustomAttributes(true);
+                var browsable = true;
+                var category = "Mics";
+
+                foreach (var a in attrs)
+                {
+                    if (a is BrowsableAttribute)
+                        browsable = (a as BrowsableAttribute).Browsable;
+                    else if (a is CategoryAttribute)
+                        category = (a as CategoryAttribute).Category;
+                }
+
+                if (!browsable)
+                    continue;
+
                 object value = "???";
                 foreach (object o in selectedObjects) 
                     value = CompareVariables (value, p.GetValue (o, null));
 
-                propertyTable.AddEntry(p, value);
+                propertyTable.AddEntry(category, p, value);
             }
+
+            propertyTable.Update();
         }
     }
 }

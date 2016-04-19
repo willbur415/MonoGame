@@ -15,6 +15,11 @@ namespace MonoGame.Tools.Pipeline
             drawable = new Drawable();
 
             Content = drawable;
+
+            drawable.MouseMove += Drawable_MouseMove;
+            drawable.MouseLeave += Drawable_MouseLeave;
+            drawable.MouseDoubleClick += Drawable_MouseDoubleClick;
+            drawable.Paint += Drawable_Paint;
         }
     }
 }

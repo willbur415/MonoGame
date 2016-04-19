@@ -12,9 +12,11 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonoGame.Tools.Pipeline
 {
     public class PipelineProject : IProjectItem
-    {        
+    {
+        [Browsable(false)]
         public string OriginalPath { get; set; }
 
+        [Browsable(false)]
         public List<ContentItem> ContentItems { get; private set; }                
 
         public string OutputDir { get; set; }
@@ -33,6 +35,7 @@ namespace MonoGame.Tools.Pipeline
 
         #region IPipelineItem
 
+        [Category("Common")]
         public string Name
         {
             get
@@ -44,6 +47,7 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
+        [Category("Common")]
         public string Location
         {
             get

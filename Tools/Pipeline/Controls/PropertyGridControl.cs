@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using Eto.Forms;
-using Eto.Drawing;
 using System.Reflection;
 using System.Linq;
 using System.ComponentModel;
@@ -14,29 +12,44 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class PropertyGridControl
     {
-        List<IProjectItem> selectedObjects;
+        List<object> selectedObjects;
 
         public PropertyGridControl()
         {
             InitializeComponent();
+
+            selectedObjects = new List<object>();
+        }
+
+        private void BtnAbc_Click(object sender, EventArgs e)
+        {
+            propertyTable.Group = false;
+            propertyTable.Update();
+        }
+
+        private void BtnGroup_Click(object sender, EventArgs e)
+        {
+            propertyTable.Group = true;
+            propertyTable.Update();
         }
 
         public void SetSelectedItems(List<IProjectItem> objects)
         {
-            selectedObjects = objects;
+            selectedObjects = objects.Cast<object>().ToList();
 
             Reload();
         }
 
-        private object CompareVariables(object a, object b)
+        private bool CompareVariables(ref object a, object b, PropertyInfo p)
         {
-            if (a == null)
-                return a;
+            var prop = b.GetType().GetProperty(p.Name);
+            if (prop == null)
+                return false;
 
-            if (a.ToString () == "???" || a.Equals(b))
-                return b;
+            if (!a.Equals(prop.GetValue(b)))
+                a = null;
 
-            return null;
+            return true;
         }
 
         public void Reload()
@@ -45,9 +58,13 @@ namespace MonoGame.Tools.Pipeline
 
             if (selectedObjects.Count == 0)
                 return;
+            
+            LoadProps(selectedObjects);
+        }
 
-            var objectType = selectedObjects[0].GetType ();
-            var props = objectType.GetProperties (BindingFlags.Instance | BindingFlags.Public);
+        public void LoadProps(List<object> objects)
+        {
+            var props = objects[0].GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             foreach (var p in props)
             {
@@ -63,18 +80,46 @@ namespace MonoGame.Tools.Pipeline
                         category = (a as CategoryAttribute).Category;
                 }
 
+                object value = p.GetValue(objects[0], null);
+                foreach (object o in objects)
+                {
+                    if (!CompareVariables(ref value, o, p))
+                    {
+                        browsable = false;
+                        break;
+                    }
+                }
+
                 if (!browsable)
                     continue;
 
-                object value = "???";
-                foreach (object o in selectedObjects) 
-                    value = CompareVariables (value, p.GetValue (o, null));
+                propertyTable.AddEntry(category, p.Name, value, p.CanWrite);
 
-                propertyTable.AddEntry(category, p, value);
+                if (value is ProcessorTypeDescription)
+                    LoadProcessorParams(selectedObjects.Cast<ContentItem>().ToList());
+            }
+
+            propertyTable.Update();
+        }
+
+        public void LoadProcessorParams(List<ContentItem> objects)
+        {
+            foreach (var p in objects[0].Processor.Properties)
+            {
+                object value = objects[0].ProcessorParams[p.Name];
+                foreach (ContentItem o in objects)
+                {
+                    if (!o.ProcessorParams[p.Name].Equals(value))
+                    {
+                        value = null;
+                        break;
+                    }
+                }
+
+                propertyTable.AddEntry("Processor Parameters", p.Name, value, true);
             }
 
             propertyTable.Update();
         }
     }
 }
-

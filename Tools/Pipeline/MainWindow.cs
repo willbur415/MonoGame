@@ -7,7 +7,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Eto.Forms;
-using Eto;
 
 namespace MonoGame.Tools.Pipeline
 {
@@ -399,6 +398,8 @@ namespace MonoGame.Tools.Pipeline
             AddSeparator(ref sep);
             AddContextMenu(cmOpenItemLocation, ref sep);
             AddContextMenu(cmRebuildItem, ref sep);
+            if (sep && !info.Exclude)
+                sep = false;
             AddSeparator(ref sep);
             AddContextMenu(cmExclude, ref sep);
             AddSeparator(ref sep);

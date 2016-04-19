@@ -22,5 +22,11 @@ namespace MonoGame.Tools.Pipeline
             this.ShowModal(window);
             return _result;
         }
+
+        public DialogResult Run(Control control)
+        {
+            this.ShowModal(control);
+            return _result;
+        }
     }
 }

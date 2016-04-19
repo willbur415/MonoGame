@@ -19,16 +19,18 @@ namespace MonoGame.Tools.Pipeline
             subLayout.Orientation = Orientation.Horizontal;
 
             btnGroup = new Button { Text = "Group" };
-            subLayout.Items.Add(new StackLayoutItem(btnGroup));
+            subLayout.Items.Add(new StackLayoutItem(btnGroup, true));
 
             btnAbc = new Button { Text = "Abc" };
-            subLayout.Items.Add(new StackLayoutItem(btnAbc));
+            subLayout.Items.Add(new StackLayoutItem(btnAbc, true));
 
             Add(subLayout);
 
             propertyTable = new PropertyGridTable();
             Add(propertyTable);
-        }
-    }
-}
 
+            btnAbc.Click += BtnAbc_Click;
+            btnGroup.Click += BtnGroup_Click;
+        }
+   }
+}

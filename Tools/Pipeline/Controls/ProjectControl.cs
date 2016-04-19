@@ -24,8 +24,9 @@ namespace MonoGame.Tools.Pipeline
             _iconRoot = Icon.FromResource("TreeView.Root.png");
 
             treeView1.DataStore = _treeBase = new TreeItem();
-            treeView1.SelectionChanged += TreeView1_SelectionChanged;
             treeView1.Expanded += TreeView1_Expanded;
+
+            Init();
         }
 
         private void TreeView1_Expanded(object sender, TreeViewItemEventArgs e)
@@ -37,17 +38,6 @@ namespace MonoGame.Tools.Pipeline
         public void SetContextMenu(ContextMenu menu)
         {
             treeView1.ContextMenu = menu;
-        }
-
-        public void TreeView1_SelectionChanged(object sender, EventArgs e)
-        {
-            var item = treeView1.SelectedItem as TreeItem;
-            var list = new List<IProjectItem>();
-
-            if (item != null)
-                list.Add(item.Tag as IProjectItem);
-            
-            MainWindow.Controller.SelectionChanged(list);
         }
 
         public void SetRoot(IProjectItem item)
@@ -86,7 +76,7 @@ namespace MonoGame.Tools.Pipeline
             var item = GetorAddItem(root, split.Length > 1 ? new DirectoryItem(split[0], currentPath) { Exists = citem.Exists } : citem);
 
             if (path.Contains("/"))
-                AddItem(item, citem, string.Join("/", split, 1, split.Length - 1), (currentPath + Path.DirectorySeparatorChar + split[0]).TrimStart(Path.DirectorySeparatorChar));
+                AddItem(item, citem, string.Join("/", split, 1, split.Length - 1), (currentPath + Path.DirectorySeparatorChar + split[0]));
         }
 
         public void RemoveItem(IProjectItem item)
@@ -120,7 +110,6 @@ namespace MonoGame.Tools.Pipeline
                 if (item.SelectThis)
                 {
                     treeView1.SelectedItem = titem;
-                    //treeView1.RefreshItem(titem);
                     item.SelectThis = false;
                 }
                 else

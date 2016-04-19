@@ -9,19 +9,14 @@ namespace MonoGame.Tools.Pipeline
 {
     public class DirectoryItem : IProjectItem
     {
-        public DirectoryItem(string path)
+        public DirectoryItem(string name, string location) : this(location + Path.DirectorySeparatorChar + name)
         {
-            Name = Path.GetFileName(path);
-            Location = Path.GetDirectoryName(path);
-            OriginalPath = path;
-            Exists = true;
+            
         }
 
-        public DirectoryItem(string name, string location)
+        public DirectoryItem(string path)
         {
-            Name = name;
-            Location = location;
-            OriginalPath = Path.Combine(location, name);
+            OriginalPath = path.TrimStart(Path.DirectorySeparatorChar);
             Exists = true;
         }
 
@@ -31,12 +26,24 @@ namespace MonoGame.Tools.Pipeline
         public string OriginalPath { get; set; }
 
         [Category("Common")]
-        [Description("The name of this folder.")]
-        public string Name { set; get; }
+        [Description("The file name of this item.")]
+        public string Name
+        {
+            get
+            {
+                return System.IO.Path.GetFileName(OriginalPath);
+            }
+        }
 
         [Category("Common")]
-        [Description("The file path to this folder.")]
-        public string Location { set; get; }
+        [Description("The folder where this item is located.")]
+        public string Location
+        {
+            get
+            {
+                return System.IO.Path.GetDirectoryName(OriginalPath);
+            }
+        }
 
         [Browsable(false)]
         public bool Exists { get; set; }

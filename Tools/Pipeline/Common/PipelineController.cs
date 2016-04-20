@@ -125,7 +125,6 @@ namespace MonoGame.Tools.Pipeline
         {            
             Debug.Assert(ProjectOpen, "OnProjectModified called with no project open?");
             ProjectDirty = true;
-            View.UpdateProperties(_project);
         }
 
         public void OnReferencesModified()
@@ -133,14 +132,12 @@ namespace MonoGame.Tools.Pipeline
             Debug.Assert(ProjectOpen, "OnReferencesModified called with no project open?");
             ProjectDirty = true;
             ResolveTypes();
-            View.UpdateProperties(_project);
         }
 
         public void OnItemModified(ContentItem contentItem)
         {
             Debug.Assert(ProjectOpen, "OnItemModified called with no project open?");
             ProjectDirty = true;
-            View.UpdateProperties(contentItem);
 
             View.BeginTreeUpdate();
             View.UpdateTreeItem(contentItem);
@@ -833,7 +830,7 @@ namespace MonoGame.Tools.Pipeline
 
         public void NewItem()
         {
-            var path = GetFullPath(SelectedItem.Location);
+            var path = GetFullPath(SelectedItem.OriginalPath);
 
             string name;
             ContentItemTemplate template;
@@ -852,7 +849,7 @@ namespace MonoGame.Tools.Pipeline
             if (!View.ShowEditDialog("New Folder", "Folder Name:", "", true, out name))
                 return;
 
-            string folder = Path.Combine(GetFullPath(SelectedItem.Location), name);
+            string folder = Path.Combine(GetFullPath(SelectedItem.OriginalPath), name);
 
             if (!Path.IsPathRooted(folder))
                 folder = _project.Location + Path.DirectorySeparatorChar + folder;
@@ -899,6 +896,11 @@ namespace MonoGame.Tools.Pipeline
         public void AddAction(IProjectAction action)
         {
             _actionStack.Add(action);
+            if (!ProjectDirty)
+            {
+                ProjectDirty = true;
+                UpdateMenu();
+            }
         }
 
         public IProjectItem GetItem(string originalPath)
@@ -944,9 +946,9 @@ namespace MonoGame.Tools.Pipeline
             {
                 i.Observer = this;
                 i.ResolveTypes();
-                View.UpdateProperties(i);
             }
 
+            View.UpdateProperties();
             LoadTemplates(Path.Combine(_project.Location, "MGTemplates"));
         }
 
@@ -1029,7 +1031,7 @@ namespace MonoGame.Tools.Pipeline
 
             UpdateContextMenu();
             View.UpdateCommands(info);
-            View.EditProperties(items);
+            View.UpdateProperties();
         }
 
         MenuInfo info;

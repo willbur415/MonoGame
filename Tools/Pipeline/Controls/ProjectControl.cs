@@ -13,9 +13,10 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class ProjectControl : Scrollable
     {
-        Icon _iconRoot;
-        TreeItem _treeBase, _treeRoot;
+        private Icon _iconRoot;
+        private TreeItem _treeBase, _treeRoot;
         private bool _rootExists;
+        private ContextMenu _contextMenu;
 
         public ProjectControl()
         {
@@ -35,9 +36,9 @@ namespace MonoGame.Tools.Pipeline
             e.Item.Expanded = e.Item.Expanded;
         }
 
-        public void SetContextMenu(ContextMenu menu)
+        public void SetContextMenu(ContextMenu contextMenu)
         {
-            treeView1.ContextMenu = menu;
+            _contextMenu = contextMenu;
         }
 
         public void SetRoot(IProjectItem item)
@@ -46,6 +47,7 @@ namespace MonoGame.Tools.Pipeline
             {
                 treeView1.DataStore = _treeBase = new TreeItem();
                 _rootExists = false;
+                treeView1.ContextMenu = null;
                 return;
             }
 
@@ -63,6 +65,7 @@ namespace MonoGame.Tools.Pipeline
             _treeRoot.Expanded = true;
 
             treeView1.RefreshItem(_treeRoot);
+            treeView1.ContextMenu = _contextMenu;
         }
 
         public void AddItem(IProjectItem citem)
@@ -96,7 +99,7 @@ namespace MonoGame.Tools.Pipeline
             if (FindItem(_treeRoot, item.OriginalPath, out titem))
             {
                 var parrent = titem.Parent as TreeItem;
-                var selected = treeView1.SelectedItem;
+                var selected = GetSelected();
 
                 if (item.ExpandToThis)
                 {
@@ -113,7 +116,7 @@ namespace MonoGame.Tools.Pipeline
                     item.SelectThis = false;
                 }
                 else
-                    treeView1.SelectedItem = selected;
+                    SetSelected(selected);
             }
         }
 

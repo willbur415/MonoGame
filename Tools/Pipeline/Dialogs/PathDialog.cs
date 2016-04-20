@@ -42,6 +42,7 @@ namespace MonoGame.Tools.Pipeline
 
         private void TextBox1_TextChanged(object sender, EventArgs e)
         {
+            Path = textBox1.Text;
             DefaultButton.Enabled = !string.IsNullOrWhiteSpace(textBox1.Text);
         }
 

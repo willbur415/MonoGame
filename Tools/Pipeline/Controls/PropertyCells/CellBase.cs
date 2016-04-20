@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using Eto.Drawing;
 using Eto.Forms;
 
@@ -10,22 +11,22 @@ namespace MonoGame.Tools.Pipeline
     class CellBase
     {
         public string Category { get; set; }
-
         public object Value { get; set; }
-
         public string DisplayValue { get; set; }
-        
         public string Text { get; set; }
-
         public bool Editable { get; set; }
 
-        public CellBase(string category, string name, object value)
+        internal EventHandler _eventHandler;
+
+        public CellBase(string category, string name, object value, EventHandler eventHandler = null)
         {
             Category = category;
             Value = value;
             DisplayValue = (value == null) ? "" : value.ToString();
             Text = name;
             Editable = true;
+
+            _eventHandler = eventHandler;
         }
 
         public virtual void Edit(Control control)

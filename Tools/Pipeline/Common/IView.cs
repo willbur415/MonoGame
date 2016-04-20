@@ -56,9 +56,7 @@ namespace MonoGame.Tools.Pipeline
 
         void EndTreeUpdate();
 
-        void UpdateProperties(IProjectItem item);
-
-        void EditProperties(List<IProjectItem> items);
+        void UpdateProperties();
 
         void OutputAppend(string text);
 

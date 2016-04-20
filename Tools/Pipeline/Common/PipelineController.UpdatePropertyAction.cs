@@ -3,18 +3,19 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace MonoGame.Tools.Pipeline
 {
-    class UpdateProcessorAction : IProjectAction
+    class UpdatePropertyAction : IProjectAction
     {
         private readonly IView _view;
-        private readonly List<ContentItem> _objects;
-        private readonly string _property;
+        private readonly List<object> _objects;
+        private readonly PropertyInfo _property;
 
         private List<object> _values;
 
-        public UpdateProcessorAction(IView view, List<ContentItem> objects, string property, object value)
+        public UpdatePropertyAction(IView view, List<object> objects, PropertyInfo property, object value)
         {
             _view = view;
             _objects = objects;
@@ -45,8 +46,8 @@ namespace MonoGame.Tools.Pipeline
             {
                 var obj = _objects[i];
 
-                oldValues.Add(obj.ProcessorParams[_property]);
-                obj.ProcessorParams[_property] = _values[i];
+                oldValues.Add(_property.GetValue(obj));
+                _property.SetValue(obj, _values[i]);
             }
 
             _view.UpdateProperties();

@@ -170,14 +170,9 @@ namespace MonoGame.Tools.Pipeline
             
         }
 
-        public void UpdateProperties(IProjectItem item)
+        public void UpdateProperties()
         {
-
-        }
-
-        public void EditProperties(List<IProjectItem> items)
-        {
-            propertyGridControl.SetSelectedItems(items);
+            propertyGridControl.SetObjects(Controller.SelectedItems);
         }
 
         public void OutputAppend(string text)

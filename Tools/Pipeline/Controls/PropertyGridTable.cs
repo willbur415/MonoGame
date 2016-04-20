@@ -118,14 +118,13 @@ namespace MonoGame.Tools.Pipeline
         private void Drawable_MouseMove(object sender, MouseEventArgs e)
         {
             location = e.Location;
-            ((Control)sender).Invalidate();
-            e.Handled = true;
+            drawable.Invalidate();
         }
 
         private void Drawable_MouseLeave(object sender, MouseEventArgs e)
         {
             location = new PointF(-1, -1);
-            ((Control)sender).Invalidate();
+            drawable.Invalidate();
         }
 
         public void Clear()
@@ -133,18 +132,18 @@ namespace MonoGame.Tools.Pipeline
             cells.Clear();
         }
 
-        public void AddEntry(string category, string name, object value, bool editable)
+        public void AddEntry(string category, string name, object value, EventHandler eventHandler = null, bool editable = true)
         {
             if (value is Enum || value is Boolean || value is ImporterTypeDescription || value is ProcessorTypeDescription)
-                cells.Add(new CellCombo(category, name, value));
+                cells.Add(new CellCombo(category, name, value, eventHandler));
             else if (name.Contains("Dir"))
-                cells.Add(new CellPath(category, name, value));
+                cells.Add(new CellPath(category, name, value, eventHandler));
             else if (value is IList)
-                cells.Add(new CellRefs(category, name, value));
+                cells.Add(new CellRefs(category, name, value, eventHandler));
             else if (value is Microsoft.Xna.Framework.Color)
-                cells.Add(new CellColor(category, name, value));
+                cells.Add(new CellColor(category, name, value, eventHandler));
             else
-                cells.Add(new CellText(category, name, value, editable));
+                cells.Add(new CellText(category, name, value, eventHandler, editable));
         }
 
         public void Update()
@@ -154,7 +153,7 @@ namespace MonoGame.Tools.Pipeline
             else
                 cells.Sort((x, y) => string.Compare(x.Text, y.Text) + (x.Category.Contains("Proc") ? 100 : 0) + (y.Category.Contains("Proc") ? -100 : 0));
 
-            drawable.Update(new Rectangle(0, 0, drawable.Width, drawable.Height));
+            drawable.Invalidate();
         }
     }
 }

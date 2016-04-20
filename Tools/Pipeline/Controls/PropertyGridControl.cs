@@ -12,13 +12,13 @@ namespace MonoGame.Tools.Pipeline
 {
     partial class PropertyGridControl
     {
-        List<object> selectedObjects;
+        List<object> _objects;
 
         public PropertyGridControl()
         {
             InitializeComponent();
 
-            selectedObjects = new List<object>();
+            _objects = new List<object>();
         }
 
         private void BtnAbc_Click(object sender, EventArgs e)
@@ -33,11 +33,20 @@ namespace MonoGame.Tools.Pipeline
             propertyTable.Update();
         }
 
-        public void SetSelectedItems(List<IProjectItem> objects)
+        public void SetObjects(List<IProjectItem> objects)
         {
-            selectedObjects = objects.Cast<object>().ToList();
-
+            _objects = objects.Cast<object>().ToList();
             Reload();
+        }
+
+        public void Reload()
+        {
+            propertyTable.Clear();
+
+            if (_objects.Count != 0)
+                LoadProps(_objects);
+            
+            propertyTable.Update();
         }
 
         private bool CompareVariables(ref object a, object b, PropertyInfo p)
@@ -46,23 +55,13 @@ namespace MonoGame.Tools.Pipeline
             if (prop == null)
                 return false;
 
-            if (!a.Equals(prop.GetValue(b)))
+            if (a == null || !a.Equals(prop.GetValue(b)))
                 a = null;
 
             return true;
         }
 
-        public void Reload()
-        {
-            propertyTable.Clear();
-
-            if (selectedObjects.Count == 0)
-                return;
-            
-            LoadProps(selectedObjects);
-        }
-
-        public void LoadProps(List<object> objects)
+        private void LoadProps(List<object> objects)
         {
             var props = objects[0].GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
@@ -93,33 +92,39 @@ namespace MonoGame.Tools.Pipeline
                 if (!browsable)
                     continue;
 
-                propertyTable.AddEntry(category, p.Name, value, p.CanWrite);
+                propertyTable.AddEntry(category, p.Name, value, (sender, e) =>
+                {
+                    var action = new UpdatePropertyAction(MainWindow.Instance, objects, p, sender);
+                    MainWindow.Controller.AddAction(action);
+                    action.Do();
+                }, p.CanWrite);
 
                 if (value is ProcessorTypeDescription)
-                    LoadProcessorParams(selectedObjects.Cast<ContentItem>().ToList());
+                    LoadProcessorParams(_objects.Cast<ContentItem>().ToList());
             }
-
-            propertyTable.Update();
         }
 
-        public void LoadProcessorParams(List<ContentItem> objects)
+        private void LoadProcessorParams(List<ContentItem> objects)
         {
             foreach (var p in objects[0].Processor.Properties)
             {
                 object value = objects[0].ProcessorParams[p.Name];
                 foreach (ContentItem o in objects)
                 {
-                    if (!o.ProcessorParams[p.Name].Equals(value))
+                    if (value == null || !value.Equals(o.ProcessorParams[p.Name]))
                     {
                         value = null;
                         break;
                     }
                 }
 
-                propertyTable.AddEntry("Processor Parameters", p.Name, value, true);
+                propertyTable.AddEntry("Processor Parameters", p.Name, value, (sender, e) =>
+                {
+                    var action = new UpdateProcessorAction(MainWindow.Instance, objects.Cast<ContentItem>().ToList(), p.Name, sender);
+                    MainWindow.Controller.AddAction(action);
+                    action.Do();
+                }, true);
             }
-
-            propertyTable.Update();
         }
     }
 }

@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using Eto.Drawing;
 using Eto.Forms;
 
@@ -9,9 +10,9 @@ namespace MonoGame.Tools.Pipeline
 {
     class CellColor : CellBase
     {
-        Color color;
+        private readonly Color color;
 
-        public CellColor(string category, string name, object value) : base(category, name, value)
+        public CellColor(string category, string name, object value, EventHandler eventHandler) : base(category, name, value, eventHandler)
         {
             var tmp = (Microsoft.Xna.Framework.Color)value;
             color = new Color(tmp.R / 255f, tmp.G / 255f, tmp.B / 255f, tmp.A / 255f);
@@ -21,7 +22,12 @@ namespace MonoGame.Tools.Pipeline
         {
             var dialog = new ColorDialog();
             dialog.Color = color;
-            dialog.ShowDialog(control);
+
+            if (dialog.ShowDialog(control) == DialogResult.Ok && _eventHandler != null)
+            {
+                var col = new Microsoft.Xna.Framework.Color(dialog.Color.Rb, dialog.Color.Gb, dialog.Color.Bb, dialog.Color.Ab);
+                _eventHandler(col, EventArgs.Empty);
+            }
         }
 
         public override void DrawCell(Graphics g, Rectangle rec, int separatorPos, bool selected)

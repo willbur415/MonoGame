@@ -9,7 +9,7 @@ namespace MonoGame.Tools.Pipeline
 {
     class CellCombo : CellBase
     {
-        public CellCombo(string category, string name, object value) : base(category, name, value)
+        public CellCombo(string category, string name, object value, EventHandler eventHandler) : base(category, name, value, eventHandler)
         {
             if (value is ImporterTypeDescription)
                 DisplayValue = (value as ImporterTypeDescription).DisplayName;
@@ -42,8 +42,7 @@ namespace MonoGame.Tools.Pipeline
             }
             else if (Value is ImporterTypeDescription)
             {
-                var values = PipelineTypes.Importers;
-                foreach (var v in values)
+                foreach (var v in PipelineTypes.Importers)
                 {
                     combo.Items.Add(v.DisplayName);
 
@@ -53,8 +52,7 @@ namespace MonoGame.Tools.Pipeline
             }
             else
             {
-                var values = PipelineTypes.Processors;
-                foreach (var v in values)
+                foreach (var v in PipelineTypes.Processors)
                 {
                     combo.Items.Add(v.DisplayName);
 
@@ -64,7 +62,17 @@ namespace MonoGame.Tools.Pipeline
             }
 
             dialog.CreateContent(combo);
-            dialog.Run(control);
+            if (dialog.Run(control) != DialogResult.Ok || _eventHandler == null)
+                return;
+
+            if (Value is Enum)
+                _eventHandler(Enum.Parse(Value.GetType(), combo.SelectedValue.ToString()), EventArgs.Empty);
+            else if (Value is Boolean)
+                _eventHandler(combo.SelectedIndex == 0, EventArgs.Empty);
+            else if (Value is ImporterTypeDescription)
+                _eventHandler(PipelineTypes.Importers[combo.SelectedIndex], EventArgs.Empty);
+            else
+                _eventHandler(PipelineTypes.Processors[combo.SelectedIndex], EventArgs.Empty);
         }
     }
 }

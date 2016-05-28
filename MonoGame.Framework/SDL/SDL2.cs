@@ -54,7 +54,7 @@ internal static class Sdl
         GetEvent = 0x2,
     }
 
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Explicit, Size = 56)]
     public struct Event
     {
         [FieldOffset(0)] public EventType Type;

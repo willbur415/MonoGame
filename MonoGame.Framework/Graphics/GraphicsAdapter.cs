@@ -48,7 +48,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private DisplayModeCollection _supportedDisplayModes;
 
-        
 #if MONOMAC
 		private NSScreen _screen;
         internal GraphicsAdapter(NSScreen screen)
@@ -308,6 +307,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         if (!modes.Contains(displayMode))
                             modes.Add(displayMode);
                     }
+
 #elif DIRECTX && !WINDOWS_PHONE
                     var dxgiFactory = new SharpDX.DXGI.Factory1();
                     var adapter = dxgiFactory.GetAdapter(0);

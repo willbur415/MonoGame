@@ -197,6 +197,8 @@ namespace Microsoft.Xna.Framework.Graphics
             
             GL.GetInteger(GetPName.MaxTextureSize, out _maxTextureSize);
             GraphicsExtensions.CheckGLError();
+
+            SpriteBatch.NeedsHalfPixelOffset = true;
 #if !GLES
 			// Initialize draw buffer attachment array
 			int maxDrawBuffers;

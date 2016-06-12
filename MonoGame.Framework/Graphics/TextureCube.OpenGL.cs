@@ -16,16 +16,10 @@ using GLPixelFormat = OpenTK.Graphics.OpenGL.All;
 using PixelInternalFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 using Bool = OpenTK.Graphics.OpenGL.Boolean;
 #endif
-#if DESKTOPGL
+#if DESKTOPGL || GLES
 using OpenGL;
 using GLPixelFormat = OpenGL.PixelFormat;
 using PixelFormat = OpenGL.PixelFormat;
-#endif
-#if GLES
-using OpenTK.Graphics.ES20;
-using GLPixelFormat = OpenTK.Graphics.ES20.All;
-using PixelFormat = OpenTK.Graphics.ES20.PixelFormat;
-using PixelInternalFormat = OpenTK.Graphics.ES20.PixelFormat;
 #endif
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -103,7 +97,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (mipMap)
                 {
 #if IOS || ANDROID
-				    GL.GenerateMipmap(TextureTarget.TextureCubeMap);
+                    GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
 #else
                     GraphicsDevice.FramebufferHelper.Get().GenerateMipmap((int) glTarget);
                     // This updates the mipmaps after a change in the base texture

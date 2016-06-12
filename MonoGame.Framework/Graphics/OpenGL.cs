@@ -127,6 +127,10 @@ namespace OpenGL
         DepthComponent16 = 0x81a5,
         DepthComponent24 = 0x81a6,
         Depth24Stencil8 = 0x88F0,
+        // GLES Values
+        DepthComponent24Oes = 0x0,
+        Depth24Stencil8Oes = 0x0,
+        StencilIndex8 = 0x0,
     }
 
     public enum EnableCap : int
@@ -686,6 +690,12 @@ namespace OpenGL
         public delegate void ScissorDelegate(int x, int y, int width, int height);
         public static ScissorDelegate Scissor;
 
+        [System.Security.SuppressUnmanagedCodeSecurity ()]
+        [MonoNativeFunctionWrapper]
+        [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
+        public delegate void ReadPixelsDelegate (int x, int y, int width, int height, PixelFormat format, PixelType type, IntPtr data);
+        public static ReadPixelsDelegate glReadPixels;
+
         [System.Security.SuppressUnmanagedCodeSecurity()]
         [MonoNativeFunctionWrapper]       
         public delegate void BindBufferDelegate(BufferTarget target, uint buffer);
@@ -748,6 +758,12 @@ namespace OpenGL
         public delegate void FramebufferRenderbufferDelegate (FramebufferTarget target, FramebufferAttachment attachement,
             RenderbufferTarget renderBufferTarget, int buffer);
         public static FramebufferRenderbufferDelegate FramebufferRenderbuffer;
+
+        [System.Security.SuppressUnmanagedCodeSecurity ()]
+        [MonoNativeFunctionWrapper]
+        [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
+        public delegate void RenderbufferStorageDelegate (RenderbufferTarget target, RenderbufferStorage storage, int width, int hegiht);
+        public static RenderbufferStorageDelegate RenderbufferStorage;
 
         [System.Security.SuppressUnmanagedCodeSecurity()]
         [MonoNativeFunctionWrapper]       
@@ -1078,6 +1094,9 @@ namespace OpenGL
                 Viewport = (ViewportDelegate)LoadEntryPoint<ViewportDelegate>("glViewport");
             if (Scissor == null)
                 Scissor = (ScissorDelegate)LoadEntryPoint<ScissorDelegate>("glScissor");
+            if (MakeCurrent == null)
+                MakeCurrent = (MakeCurrentDelegate)LoadEntryPoint<MakeCurrentDelegate>("glMakeCurrent");
+
             GetError = (GetErrorDelegate)LoadEntryPoint<GetErrorDelegate>("glGetError");
 
             TexParameterf = (TexParameterFloatDelegate)LoadEntryPoint<TexParameterFloatDelegate>("glTexParameterf");
@@ -1086,7 +1105,6 @@ namespace OpenGL
 
             EnableVertexAttribArray = (EnableVertexAttribArrayDelegate)LoadEntryPoint<EnableVertexAttribArrayDelegate>("glEnableVertexAttribArray");
             DisableVertexAttribArray = (DisableVertexAttribArrayDelegte)LoadEntryPoint<DisableVertexAttribArrayDelegte>("glDisableVertexAttribArray");
-            //MakeCurrent = (MakeCurrentDelegate)LoadEntryPoint<MakeCurrentDelegate>("glMakeCurrent");
             GetIntegerv = (GetIntegerDelegate)LoadEntryPoint<GetIntegerDelegate>("glGetIntegerv");
             GetStringInternal = (GetStringDelegate)LoadEntryPoint<GetStringDelegate>("glGetString");
             ClearDepth = (ClearDepthDelegate)LoadEntryPoint<ClearDepthDelegate>("glClearDepth");
@@ -1111,9 +1129,12 @@ namespace OpenGL
             DrawArrays = (DrawArraysDelegate)LoadEntryPoint<DrawArraysDelegate>("glDrawArrays");
             Uniform1i = (Uniform1iDelegate)LoadEntryPoint<Uniform1iDelegate>("glUniform1i");
             Uniform4fv = (Uniform4fvDelegate)LoadEntryPoint<Uniform4fvDelegate>("glUniform4fv");
+            glReadPixels = (ReadPixelsDelegate)LoadEntryPoint<ReadPixelsDelegate> ("glReadPixels");
 
             ReadBuffer = (ReadBufferDelegate)LoadEntryPoint<ReadBufferDelegate>("glReadBuffer");
             DrawBuffer = (DrawBufferDelegate)LoadEntryPoint<DrawBufferDelegate>("glDrawBuffer");
+
+            RenderbufferStorage = (RenderbufferStorageDelegate)LoadEntryPoint<RenderbufferStorageDelegate> ("glRenderbufferStorage");
 
             // these are only in GL 3.0 or ARB_framebuffer_object, if they fail to load (and only if they do), we need to check if EXT_framebuffer_object is present as a fallback
             try
@@ -1384,6 +1405,16 @@ namespace OpenGL
             finally
             {
                 pixelsPtr.Free();
+            }
+        }
+
+        public static unsafe void ReadPixels<T> (int x, int y, int width, int height, PixelFormat format, PixelType type, [In][Out] T[] data)
+        {
+            GCHandle pixels_ptr = GCHandle.Alloc (data, GCHandleType.Pinned);
+            try {
+                glReadPixels (x, y, width,height, format, type, (IntPtr)pixels_ptr.AddrOfPinnedObject ());
+            } finally {
+                pixels_ptr.Free ();
             }
         }
     }

@@ -10,7 +10,7 @@ using MonoMac.AudioToolbox;
 using MonoMac.AudioUnit;
 using MonoMac.OpenAL;
 #elif OPENAL
-#if GLES || MONOMAC
+#if MONOMAC
 using OpenTK.Audio.OpenAL;
 #else 
 using OpenAL;

@@ -5,20 +5,12 @@
 using System;
 using System.IO;
 
-#if MONOMAC && PLATFORM_MACOS_LEGACY
-using MonoMac.AudioToolbox;
-using MonoMac.AudioUnit;
-using MonoMac.OpenAL;
-#elif OPENAL
-#if MONOMAC
-using OpenTK.Audio.OpenAL;
-#else 
+#if OPENAL
 using OpenAL;
 #endif
 #if IOS || MONOMAC
 using AudioToolbox;
 using AudioUnit;
-#endif
 #endif
 
 namespace Microsoft.Xna.Framework.Audio

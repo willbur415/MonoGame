@@ -28,15 +28,15 @@ namespace MonoGame.Tools.Pipeline
             
             _output = new OutputParser();
 
-            _iconInformation = Global.GetEtoIcon("Build.Information.png");
-            _iconFail = Global.GetEtoIcon("Build.Fail.png");
-            _iconProcessing = Global.GetEtoIcon("Build.Processing.png");
-            _iconSkip = Global.GetEtoIcon("Build.Skip.png");
-            _iconStart = Global.GetEtoIcon("Build.Start.png");
-            _iconEndSucceed = Global.GetEtoIcon("Build.EndSucceed.png");
-            _iconEndFailed = Global.GetEtoIcon("Build.EndFailed.png");
-            _iconSucceed = Global.GetEtoIcon("Build.Succeed.png");
-            _iconSucceedWithWarnings = Global.GetEtoIcon("Build.SucceedWithWarnings.png");
+            _iconInformation = Global.GetIcon("Build.Information.png");
+            _iconFail = Global.GetIcon("Build.Fail.png");
+            _iconProcessing = Global.GetIcon("Build.Processing.png");
+            _iconSkip = Global.GetIcon("Build.Skip.png");
+            _iconStart = Global.GetIcon("Build.Start.png");
+            _iconEndSucceed = Global.GetIcon("Build.EndSucceed.png");
+            _iconEndFailed = Global.GetIcon("Build.EndFailed.png");
+            _iconSucceed = Global.GetIcon("Build.Succeed.png");
+            _iconSucceedWithWarnings = Global.GetIcon("Build.SucceedWithWarnings.png");
 
             _items = new List<BuildItem>();
 

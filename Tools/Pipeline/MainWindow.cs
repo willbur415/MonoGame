@@ -3,9 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using Eto.Forms;
 
 namespace MonoGame.Tools.Pipeline
@@ -59,22 +60,32 @@ namespace MonoGame.Tools.Pipeline
             _mgcbFileFilter = new FileDialogFilter("MonoGame Content Build Project (*.mgcb)", new[] { ".mgcb" });
             _allFileFilter = new FileDialogFilter("All Files (*.*)", new[] { ".*" });
             _xnaFileFilter = new FileDialogFilter("XNA Content Projects (*.contentproj)", new[] { ".contentproj" });
+
+
+#if WINDOWS || LINUX
+            projectControl.TreeView.RowActivated += CmdOpenItem_Executed;
+#endif
+
         }
 
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            e.Cancel = !PipelineController.Instance.Exit();
-
-            if (!e.Cancel)
-                Xwt.Application.Exit();
-
-            base.OnClosing(e);
-        }
-
+#if WINDOWS || LINUX
         public void ShowContextMenu()
         {
             if (PipelineController.Instance.ProjectOpen)
                 _contextMenu.Show(projectControl.TreeView.ToEto());
+        }
+#endif
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = !PipelineController.Instance.Exit();
+
+#if WINDOWS || LINUX
+            if (!e.Cancel)
+                Xwt.Application.Exit();
+#endif
+
+            base.OnClosing(e);
         }
 
         #region IView implements

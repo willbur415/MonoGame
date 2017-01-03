@@ -29,9 +29,6 @@ namespace MonoGame.Tools.Pipeline
         private static Dictionary<string, Image> _files;
         private static Image _fileMissing, _folder, _folderMissing;
 
-        private static Dictionary<string, Xwt.Drawing.Image> _xwtFiles;
-        private static Xwt.Drawing.Image _xwtFileMissing, _xwtFolder, _xwtFolderMissing;
-
         static Global()
         {
             Unix = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
@@ -42,11 +39,9 @@ namespace MonoGame.Tools.Pipeline
             _folder = Bitmap.FromResource("TreeView.Folder.png");
             _folderMissing = Bitmap.FromResource("TreeView.FolderMissing.png");
 
-            _xwtFiles = new Dictionary<string, Xwt.Drawing.Image>();
-            _xwtFiles.Add(".", Xwt.Drawing.Image.FromResource("TreeView.File.png"));
-            _xwtFileMissing = Xwt.Drawing.Image.FromResource("TreeView.FileMissing.png");
-            _xwtFolder = Xwt.Drawing.Image.FromResource("TreeView.Folder.png");
-            _xwtFolderMissing = Xwt.Drawing.Image.FromResource("TreeView.FolderMissing.png");
+#if WINDOWS || LINUX
+            InitXwt();
+#endif
 
             PlatformInit();
         }
@@ -74,12 +69,12 @@ namespace MonoGame.Tools.Pipeline
             }
         }
 
-        public static Image GetEtoDirectoryIcon(bool exists)
+        public static Image GetDirectoryIcon(bool exists)
         {
             return exists ? _folder : _folderMissing;
         }
 
-        public static Image GetEtoFileIcon(string path, bool exists)
+        public static Image GetFileIcon(string path, bool exists)
         {
             if (!exists)
                 return _fileMissing;
@@ -103,36 +98,7 @@ namespace MonoGame.Tools.Pipeline
             return icon;
         }
 
-        public static Xwt.Drawing.Image GetXwtDirectoryIcon(bool exists)
-        {
-            return exists ? _xwtFolder : _xwtFolderMissing;
-        }
-
-        public static Xwt.Drawing.Image GetXwtFileIcon(string path, bool exists)
-        {
-            if (!exists)
-                return _xwtFileMissing;
-
-            var ext = Path.GetExtension(path);
-            if (_xwtFiles.ContainsKey(ext))
-                return _xwtFiles[ext];
-
-            Xwt.Drawing.Image icon;
-
-            try
-            {
-                icon = ToXwtImage(PlatformGetFileIcon(path));
-            }
-            catch
-            {
-                icon = _xwtFiles["."];
-            }
-
-            _xwtFiles.Add(ext, icon);
-            return icon;
-        }
-
-        public static Image GetEtoIcon(string resource)
+        public static Image GetIcon(string resource)
         {
 #if LINUX
             var nativeicon = PlatformGetIcon(resource);
@@ -143,18 +109,5 @@ namespace MonoGame.Tools.Pipeline
 
             return Icon.FromResource(resource);
         }
-
-        public static Xwt.Drawing.Image GetXwtIcon(string resource)
-        {
-#if LINUX
-            var nativeicon = PlatformGetIcon(resource);
-
-            if (nativeicon != null)
-                return ToXwtImage(nativeicon);
-#endif
-            
-            return Xwt.Drawing.Image.FromResource(resource);
-        }
     }
 }
-

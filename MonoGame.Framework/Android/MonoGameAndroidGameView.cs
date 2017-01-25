@@ -61,6 +61,10 @@ namespace Microsoft.Xna.Framework
 
         public bool IsResuming { get; private set; }
 
+        internal AndroidGameActivity Activity { 
+            get { return Context as AndroidGameActivity; }
+        }
+
         public MonoGameAndroidGameView (Context context, AndroidGameWindow gameWindow, Game game)
             : base (context)
         {
@@ -286,7 +290,8 @@ namespace Microsoft.Xna.Framework
                 }
                 Log.Verbose ("AndroidGameView", "RenderLoop exited");
             } catch (Exception ex) {
-                Log.Error ("AndroidGameView", ex.ToString ());
+                Log.Error("AndroidGameView", ex.ToString());
+                Activity.RunOnUiThread (() => { throw ex; });
             } finally {
                 lock (lockObject) {
                     isExited = true;
@@ -330,10 +335,13 @@ namespace Microsoft.Xna.Framework
                 var t = (curUpdateTime - prevUpdateTime).TotalMilliseconds;
                 updateEventArgs.Time = t < 0 ? 0 : t;
             }
-            try {
-                UpdateFrameInternal (updateEventArgs);
-            } catch (Content.ContentLoadException) {
-                // ignore it..
+            try
+            {
+                UpdateFrameInternal(updateEventArgs);
+            }
+            catch (Content.ContentLoadException ex)
+            {
+                Activity.RunOnUiThread(() => { throw ex; });
             }
 
             prevUpdateTime = curUpdateTime;

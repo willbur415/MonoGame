@@ -199,7 +199,10 @@ namespace Microsoft.Xna.Framework
                     }, null);
                 } else
                     RenderLoop (cts.Token);
-            }, cts.Token);
+            }, cts.Token).ContinueWith((t) =>
+            {
+                OnStopped(EventArgs.Empty);
+            });;
         }
 
         public virtual void Pause ()

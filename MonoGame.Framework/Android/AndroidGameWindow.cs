@@ -287,8 +287,6 @@ namespace Microsoft.Xna.Framework
                         TouchPanelState.ReleaseAllTouches();
                     }
 
-                    Game.Activity.RequestedOrientation = requestedOrientation;
-
                     OnOrientationChanged();
                 }
             }

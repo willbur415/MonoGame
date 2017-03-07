@@ -97,6 +97,7 @@ namespace Microsoft.Xna.Framework
             var rect = NSScreen.MainScreen.Frame;
 			
 			clientBounds = new Rectangle (0,0,(int)rect.Width,(int)rect.Height);
+            OpenGLContext = GL.CreateContext(null);
 
 			// Enable multi-touch
 			//MultipleTouchEnabled = true;
@@ -429,6 +430,8 @@ namespace Microsoft.Xna.Framework
 				}
 			}
 		}
+
+        public IGraphicsContext OpenGLContext { get; set; }
 
 		public event EventHandler<EventArgs> ClientSizeChanged;
 		public event EventHandler<EventArgs> OrientationChanged;

@@ -11,8 +11,6 @@ using OpenAL;
 #if IOS || MONOMAC
 using AudioToolbox;
 using AudioUnit;
-using AVFoundation;
-using Foundation;
 #endif
 
 namespace Microsoft.Xna.Framework.Audio
@@ -51,7 +49,13 @@ namespace Microsoft.Xna.Framework.Audio
             Size = size;
             Rate = freq;
 
-            duration = TimeSpan.FromSeconds((float)size / freq);
+            var bytesPerSecond = freq;
+            if (format == ALFormat.Mono16 || format == ALFormat.Stereo8)
+                bytesPerSecond *= 2;
+            else if (format == ALFormat.Stereo16)
+                bytesPerSecond *= 4;
+
+            duration = TimeSpan.FromSeconds((float) size / bytesPerSecond);
 #endif
 
 #if MONOMAC || IOS
@@ -71,27 +75,9 @@ namespace Microsoft.Xna.Framework.Audio
                 int channelsPerFrame = asbd.ChannelsPerFrame;
                 int bitsPerChannel = asbd.BitsPerChannel;
 
-                // There is a random chance that properties asbd.ChannelsPerFrame and asbd.BitsPerChannel are invalid because of a bug in Xamarin.iOS
-                // See: https://bugzilla.xamarin.com/show_bug.cgi?id=11074 (Failed to get buffer attributes error when playing sounds)
-                if (channelsPerFrame <= 0 || bitsPerChannel <= 0)
-                {
-                    NSError err;
-                    using (NSData nsData = NSData.FromArray(audiodata))
-                    using (AVAudioPlayer player = AVAudioPlayer.FromData(nsData, out err))
-                    {
-                        channelsPerFrame = (int)player.NumberOfChannels;
-                        bitsPerChannel = player.SoundSetting.LinearPcmBitDepth.GetValueOrDefault(16);
-
-						Rate = (float)player.SoundSetting.SampleRate;
-                        duration = TimeSpan.FromSeconds(player.Duration);
-                    }
-                }
-                else
-                {
-                    Rate = (float)asbd.SampleRate;
-                    double durationSec = (Size / ((bitsPerChannel / 8) * channelsPerFrame)) / asbd.SampleRate;
-                    duration = TimeSpan.FromSeconds(durationSec);
-                }
+                Rate = (float)asbd.SampleRate;
+                double durationSec = (Size / ((bitsPerChannel / 8) * channelsPerFrame)) / asbd.SampleRate;
+                duration = TimeSpan.FromSeconds(durationSec);
 
                 if (channelsPerFrame == 1)
                     Format = (bitsPerChannel == 8) ? ALFormat.Mono8 : ALFormat.Mono16;

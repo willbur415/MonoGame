@@ -15,14 +15,8 @@ namespace OpenGL
         
         static partial void LoadPlatformEntryPoints()
 		{
-			BoundApi = RenderApi.ES;
-
-            Viewport = iOSViewport;
+            BoundApi = RenderApi.GL;
 		}
-
-        private static void iOSViewport (int x, int y, int w, int h)
-        {
-        }
 
         private static IGraphicsContext PlatformCreateContext (IWindowInfo info)
         {
@@ -54,9 +48,24 @@ namespace OpenGL
 
     public class GraphicsContext : IGraphicsContext
     {
+        NSOpenGLPixelFormat pixelFormat;
+
         public GraphicsContext ()
         {
-            Context = new NSOpenGLContext (null, null);
+            var attribs = new object[] {
+                NSOpenGLPixelFormatAttribute.Accelerated,
+                NSOpenGLPixelFormatAttribute.NoRecovery,
+                NSOpenGLPixelFormatAttribute.DoubleBuffer,
+                NSOpenGLPixelFormatAttribute.ColorSize, 24,
+                NSOpenGLPixelFormatAttribute.DepthSize, 16 };
+
+            pixelFormat = new NSOpenGLPixelFormat(attribs);
+
+            if (pixelFormat == null)
+                Console.WriteLine("No OpenGL pixel format");
+            
+            Context = new NSOpenGLContext (pixelFormat, null);
+            Context.MakeCurrentContext();
         }
 
         public bool IsCurrent {

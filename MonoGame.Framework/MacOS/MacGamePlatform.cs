@@ -154,8 +154,6 @@ namespace Microsoft.Xna.Framework
 				_gameWindow = GameWindow.CreateWindowDelegate(Game, frame);
             Window = _gameWindow;
             _mainWindow.ContentView.AddSubview(_gameWindow);
-
-            OpenGL.GL.LoadEntryPoints();
         }
 
         protected override void Dispose(bool disposing)
@@ -268,7 +266,7 @@ namespace Microsoft.Xna.Framework
             // Using DisplayLink does not play nicely with background thread
             // loading.
             var graphicsDeviceManager = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
-            _gameWindow.OpenGLContext.SwapInterval = graphicsDeviceManager.SynchronizeWithVerticalRetrace ? 0 : 1;
+            _gameWindow.OpenGLContext.SwapInterval = graphicsDeviceManager.SynchronizeWithVerticalRetrace;
         }
 
         public override bool BeforeUpdate(GameTime gameTime)
@@ -384,7 +382,7 @@ namespace Microsoft.Xna.Framework
             // Using DisplayLink does not play nicely with background thread
             // loading.
            var graphicsDeviceManager = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
-            _gameWindow.OpenGLContext.SwapInterval = graphicsDeviceManager.SynchronizeWithVerticalRetrace ? 0 : 1;
+            _gameWindow.OpenGLContext.SwapInterval = graphicsDeviceManager.SynchronizeWithVerticalRetrace;
         }
 
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)

@@ -4,7 +4,6 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Content;
 #if !WINDOWS || DIRECTX || XNA
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
@@ -16,22 +15,12 @@ namespace MonoGame.Tests.ContentPipeline
 {
     internal static class AssetTestUtility
     {
-
-        public static Effect LoadEffect(ContentManager content, string name)
-        {
-#if DIRECTX
-            var gd = ((IGraphicsDeviceService) content.ServiceProvider.GetService(typeof(IGraphicsDeviceService))).GraphicsDevice;
-            return CompileEffect(gd, Paths.RawEffect(name));
-#else
-            return content.Load<Effect>(Paths.CompiledEffect(name));
-#endif
-        }
-
-        public static Effect CompileEffect(GraphicsDevice graphicsDevice, string effectPath)
+        public static Effect CompileEffect(GraphicsDevice graphicsDevice, params string[] pathParts)
         {
 #if !WINDOWS || DIRECTX || XNA
             var effectProcessor = new EffectProcessor();
             var context = new TestProcessorContext(TargetPlatform.Windows, "notused.xnb");
+            var effectPath = Paths.Effect(pathParts);
             var compiledEffect = effectProcessor.Process(new EffectContent
             {
                 EffectCode = File.ReadAllText(effectPath),

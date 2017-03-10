@@ -16,7 +16,13 @@ namespace OpenGL
         static partial void LoadPlatformEntryPoints()
 		{
 			BoundApi = RenderApi.ES;
+
+            Viewport = iOSViewport;
 		}
+
+        private static void iOSViewport (int x, int y, int w, int h)
+        {
+        }
 
         private static IGraphicsContext PlatformCreateContext (IWindowInfo info)
         {

@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Audio
             string signature = new string(reader.ReadChars(4));
             if (signature != "RIFF")
             {
-                throw new ArgumentException("Specified stream is not a wave file.");
+                throw new NotSupportedException("Specified stream is not a wave file.");
             }
 
 			reader.ReadInt32(); // riff_chunck_size
@@ -57,7 +57,7 @@ namespace Microsoft.Xna.Framework.Audio
             string wformat = new string(reader.ReadChars(4));
             if (wformat != "WAVE")
             {
-                throw new ArgumentException("Specified stream is not a wave file.");
+                throw new NotSupportedException("Specified stream is not a wave file.");
             }
 
             // WAVE header
@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (audio_format != 1)
             {
-                throw new ArgumentException("Wave compression is not supported.");
+                throw new NotSupportedException("Wave compression is not supported.");
             }
 
             // reads residual bytes
@@ -96,7 +96,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             if (data_signature != "data")
             {
-                throw new ArgumentException("Specified wave file is not supported.");
+                throw new NotSupportedException("Specified wave file is not supported.");
             }
 
             int data_chunk_size = reader.ReadInt32();

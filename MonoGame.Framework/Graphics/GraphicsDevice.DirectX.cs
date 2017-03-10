@@ -563,23 +563,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 #endif
 
-        partial void PlatformValidatePresentationParameters(PresentationParameters presentationParameters)
-        {
-#if WINDOWS_UAP
-            if (presentationParameters.SwapChainPanel == null)
-                throw new ArgumentException("PresentationParameters.SwapChainPanel must not be null.");
-#elif WINDOWS_STOREAPP
-            if (presentationParameters.DeviceWindowHandle == IntPtr.Zero && presentationParameters.SwapChainBackgroundPanel == null)
-                throw new ArgumentException("PresentationParameters.DeviceWindowHandle or PresentationParameters.SwapChainBackgroundPanel must be not null.");
-#else
-            if (presentationParameters.DeviceWindowHandle == IntPtr.Zero)
-                throw new ArgumentException("PresentationParameters.DeviceWindowHandle must not be null.");
-#endif
-        }
-
 #if WINDOWS_STOREAPP || WINDOWS_UAP || WINDOWS_PHONE
 
-        private void SetMultiSamplingToMaximum(PresentationParameters presentationParameters, out int quality)
+        internal void PlatformSetMultiSamplingToMaximum(PresentationParameters presentationParameters, out int quality)
         {
             quality = (int)SharpDX.Direct3D11.StandardMultisampleQualityLevels.StandardMultisamplePattern;
         }
@@ -666,10 +652,39 @@ namespace Microsoft.Xna.Framework.Graphics
             // Get Direct3D 11.1 context
             _d3dContext = _d3dDevice.ImmediateContext.QueryInterface<SharpDX.Direct3D11.DeviceContext>();
         }
-
-        private int GetMultiSamplingQuality(Format format, int multiSampleCount)
+        
+        internal void PlatformSetMultiSamplingToMaximum(PresentationParameters presentationParameters, out int quality)
         {
-            return _d3dDevice.CheckMultisampleQualityLevels(format, multiSampleCount) - 1;
+            var format = presentationParameters.BackBufferFormat == SurfaceFormat.Color ?
+                               SharpDX.DXGI.Format.B8G8R8A8_UNorm :
+                               SharpDXHelper.ToFormat(presentationParameters.BackBufferFormat);
+
+            // Check that the multisample count specified by the game is valid.
+            var msc = PresentationParameters.MultiSampleCount;
+            if (!((msc != 0) && ((msc & (msc - 1)) == 0)))
+            {
+                throw new ApplicationException(
+                    "The specified multisample count is not a power of 2 (it must be " +
+                    "a value such as 0, 1, 2, 4, 8, 16, 32, etc.).");
+            }
+
+            // Find the maximum supported level starting with the game's requested multisampling level
+            // and halving each time until reaching 0 (meaning no multisample support).
+            var qualityLevels = 0;
+            var maxLevel = msc;
+            while (maxLevel > 0)
+            {
+                qualityLevels = _d3dDevice.CheckMultisampleQualityLevels(format, maxLevel);
+                if (qualityLevels > 0)
+                    break;
+                maxLevel /= 2;
+            }
+
+            // Correct the MSAA level if it is too high.
+            if (presentationParameters.MultiSampleCount > maxLevel)
+                presentationParameters.MultiSampleCount = maxLevel;
+
+            quality = qualityLevels - 1;
         }
 
         internal void SetHardwareFullscreen()
@@ -723,7 +738,8 @@ namespace Microsoft.Xna.Framework.Graphics
             var multisampleDesc = new SharpDX.DXGI.SampleDescription(1, 0);
             if (PresentationParameters.MultiSampleCount > 1)
             {
-                var quality = GetMultiSamplingQuality(format, PresentationParameters.MultiSampleCount);
+                int quality;
+                PlatformSetMultiSamplingToMaximum(PresentationParameters, out quality);
                 
                 multisampleDesc.Count = PresentationParameters.MultiSampleCount;
                 multisampleDesc.Quality = quality;
@@ -736,7 +752,7 @@ namespace Microsoft.Xna.Framework.Graphics
                                         PresentationParameters.BackBufferWidth,
                                         PresentationParameters.BackBufferHeight,
                                         format,
-                                        SwapChainFlags.AllowModeSwitch);
+                                        SwapChainFlags.None);
             }
 
             // Otherwise, create a new swap chain.
@@ -835,7 +851,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 #endif // WINDOWS
 
-        private void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
+        public void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
         {
             // Clear options for depth/stencil buffer if not attached.
             if (_currentDepthStencilView != null)
@@ -934,7 +950,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif // WINDOWS_STOREAPP
         }
         
-        private void PlatformPresent()
+        public void PlatformPresent()
         {
 #if WINDOWS_STOREAPP || WINDOWS_UAP
             // The application may optionally specify "dirty" or "scroll" rects to improve efficiency

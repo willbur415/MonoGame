@@ -77,9 +77,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
         }
 
-        string _description = string.Empty;
-        public string Description { get { return _description; } private set { _description = value; } }
-
         public DisplayMode CurrentDisplayMode
         {
             get

@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework
         public SwapChainPanel SwapChainPanel { get; set; }
 #endif
 
-        partial void PlatformPreparePresentationParameters(PresentationParameters presentationParameters)
+        partial void PlatformInitialize(PresentationParameters presentationParameters)
         {
 #if WINDOWS_UAP
 

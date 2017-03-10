@@ -70,6 +70,8 @@ namespace MonoGame.Tools.Pipeline
 
             Content = splitterHorizontal;
 
+            projectControl.TreeView.RowActivated += CmdOpenItem_Executed;
+
             cmdNew.Executed += CmdNew_Executed;
             cmdOpen.Executed += CmdOpen_Executed;
             cmdClose.Executed += CmdClose_Executed;
@@ -139,7 +141,7 @@ namespace MonoGame.Tools.Pipeline
             cmdSaveAs.Image = Global.GetEtoIcon("Commands.SaveAs.png");
 
             cmdExit = new Command();
-            cmdExit.MenuText = Global.Unix ? "Quit" : "Exit";
+            cmdExit.MenuText = "Exit";
             cmdExit.Shortcut = Application.Instance.CommonModifier | Keys.Q;
 
             // Edit Commands
@@ -252,10 +254,6 @@ namespace MonoGame.Tools.Pipeline
         private void InitalizeMenu()
         {
             menubar = new MenuBar();
-#if MONOMAC
-            Menu = menubar;
-            Menu.Items.Clear(); // HACK: Eto.Forms adds some pointless items on Mac
-#endif
 
             menuFile = new ButtonMenuItem();
             menuFile.Text = "File";
@@ -355,15 +353,15 @@ namespace MonoGame.Tools.Pipeline
             ToolBar.Items.Add(cmdNew);
             ToolBar.Items.Add(cmdOpen);
             ToolBar.Items.Add(cmdSave);
-            ToolBar.Items.Add(new SeparatorToolItem { Type = SeparatorToolItemType.Divider });
+            ToolBar.Items.Add(new SeparatorToolItem());
             ToolBar.Items.Add(cmdUndo);
             ToolBar.Items.Add(cmdRedo);
-            ToolBar.Items.Add(new SeparatorToolItem { Type = SeparatorToolItemType.Divider });
+            ToolBar.Items.Add(new SeparatorToolItem());
             ToolBar.Items.Add(cmdNewItem);
             ToolBar.Items.Add(cmdExistingItem);
             ToolBar.Items.Add(cmdNewFolder);
             ToolBar.Items.Add(cmdExistingFolder);
-            ToolBar.Items.Add(new SeparatorToolItem { Type = SeparatorToolItemType.Divider });
+            ToolBar.Items.Add(new SeparatorToolItem());
             ToolBar.Items.Add(toolBuild);
             ToolBar.Items.Add(toolRebuild);
             ToolBar.Items.Add(toolClean);

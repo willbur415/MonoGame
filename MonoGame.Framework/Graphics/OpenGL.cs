@@ -281,7 +281,6 @@ namespace OpenGL
         MaxDrawBuffers = 0x8824,
         TextureBinding2D = 0x8069,
         MaxTextureMaxAnisotropyExt = 0x84FF,
-        MaxSamples = 0x8D57,
     }
 
     public enum StringName { 
@@ -1010,7 +1009,7 @@ namespace OpenGL
         [System.Security.SuppressUnmanagedCodeSecurity()]
         [MonoNativeFunctionWrapper]       
         public delegate void CompressedTexSubImage2DDelegate (TextureTarget target, int level,
-            int x, int y, int width, int height, PixelInternalFormat format, int size, IntPtr data);
+            int x, int y, int width, int height, PixelFormat format, int size, IntPtr data);
         public static CompressedTexSubImage2DDelegate CompressedTexSubImage2D;
 
         [System.Security.SuppressUnmanagedCodeSecurity()]
@@ -1033,11 +1032,6 @@ namespace OpenGL
         [MonoNativeFunctionWrapper]       
         internal delegate void GetTexImageDelegate(TextureTarget target, int level, PixelFormat format, PixelType type, [Out] IntPtr pixels);
         internal static GetTexImageDelegate GetTexImageInternal;
-
-        [System.Security.SuppressUnmanagedCodeSecurity()]
-        [MonoNativeFunctionWrapper]       
-        internal delegate void GetCompressedTexImageDelegate(TextureTarget target, int level, [Out] IntPtr pixels);
-        internal static GetCompressedTexImageDelegate GetCompressedTexImageInternal;
 
         [System.Security.SuppressUnmanagedCodeSecurity()]
         [MonoNativeFunctionWrapper]       
@@ -1228,7 +1222,6 @@ namespace OpenGL
             PixelStore = (PixelStoreDelegate)LoadEntryPoint<PixelStoreDelegate>("glPixelStorei");
             Finish = (FinishDelegate)LoadEntryPoint<FinishDelegate>("glFinish");
             GetTexImageInternal = (GetTexImageDelegate)LoadEntryPoint<GetTexImageDelegate>("glGetTexImage");
-            GetCompressedTexImageInternal = (GetCompressedTexImageDelegate)LoadEntryPoint<GetCompressedTexImageDelegate>("glGetCompressedTexImage");
             TexImage3D = (TexImage3DDelegate)LoadEntryPoint<TexImage3DDelegate>("glTexImage3D");
             TexSubImage3D = (TexSubImage3DDelegate)LoadEntryPoint<TexSubImage3DDelegate>("glTexSubImage3D");
             DeleteTextures = (DeleteTexturesDelegate)LoadEntryPoint<DeleteTexturesDelegate>("glDeleteTextures");
@@ -1420,39 +1413,16 @@ namespace OpenGL
             TexParameteri(target, name, value);
         }
 
-        public static void GetTexImage<T>(TextureTarget target, int level, PixelFormat format, PixelType type, T[] pixels) where T : struct
+        public static unsafe void GetTexImage<T>(TextureTarget target, int level, PixelFormat format, PixelType type, [In] [Out] T[] pixels) where T : struct
         {
-            var pixelsPtr = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+            GCHandle pixels_ptr = GCHandle.Alloc(pixels, GCHandleType.Pinned);
             try
             {
-                GetTexImageInternal(target, level, format, type, pixelsPtr.AddrOfPinnedObject());
+                GetTexImageInternal(target, (Int32)level, format, type, (IntPtr)pixels_ptr.AddrOfPinnedObject());
             }
             finally
             {
-                pixelsPtr.Free();
-            }
-        }
-
-        public static void GetCompressedTexImage<T>(TextureTarget target, int level, T[] pixels) where T : struct
-        {
-            var pixelsPtr = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-            try
-            {
-                GetCompressedTexImageInternal(target, level, pixelsPtr.AddrOfPinnedObject());
-            }
-            finally
-            {
-                pixelsPtr.Free();
-            }
-        }
-
-        public static unsafe void ReadPixels<T> (int x, int y, int width, int height, PixelFormat format, PixelType type, [In][Out] T[] data)
-        {
-            GCHandle pixels_ptr = GCHandle.Alloc (data, GCHandleType.Pinned);
-            try {
-                glReadPixels (x, y, width,height, format, type, (IntPtr)pixels_ptr.AddrOfPinnedObject ());
-            } finally {
-                pixels_ptr.Free ();
+                pixels_ptr.Free();
             }
         }
 

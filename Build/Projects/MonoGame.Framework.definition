@@ -527,16 +527,13 @@
     <Compile Include="Graphics\DeviceNotResetException.cs" />
     <Compile Include="GraphicsDeviceInformation.cs" />
     <Compile Include="GraphicsDeviceManager.cs">
-		<Platforms>Windows,WindowsGL,Linux,Windows8,WindowsPhone81,WindowsUniversal,Web</Platforms>
-    </Compile>
-    <Compile Include="GraphicsDeviceManager.SDL.cs">
-      <Platforms>WindowsGL,Linux</Platforms>
+		<Platforms>Windows,Windows8,WindowsPhone81,WindowsUniversal,Web</Platforms>
     </Compile>
     <Compile Include="GraphicsDeviceManager.WinRT.cs">
 		<Platforms>Windows8,WindowsPhone81,WindowsUniversal</Platforms>
     </Compile>
     <Compile Include="GraphicsDeviceManager.Legacy.cs">
-		<Platforms>Android,Angle,iOS,MacOS,tvOS</Platforms>
+		<Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS</Platforms>
     </Compile>
     <Compile Include="Graphics\GraphicsMetrics.cs" />
     <Compile Include="Graphics\DirectionalLight.cs" />
@@ -588,14 +585,8 @@
       <Platforms>Android,Angle,iOS,Linux,MacOS,WindowsGL,tvOS,Web</Platforms>
     </Compile>
     <Compile Include="Graphics\GraphicsCapabilities.cs" />
-    <Compile Include="Graphics\GraphicsCapabilities.DirectX.cs">
-      <Services>DirectXGraphics</Services>
-    </Compile>
-    <Compile Include="Graphics\GraphicsCapabilities.OpenGL.cs">
-      <Services>OpenGLGraphics,ANGLEGraphics</Services>
-    </Compile>
-    <Compile Include="Graphics\GraphicsCapabilities.Web.cs">
-      <Services>WebGraphics</Services>
+    <Compile Include="Graphics\GraphicsCapabilities.Default.cs">
+      <Services>ANGLEGraphics,OpenGLGraphics,DirectXGraphics,WebGraphics</Services>
     </Compile>
     <Compile Include="Graphics\GraphicsContext.SDL.cs">
       <Platforms>WindowsGL,Linux</Platforms>

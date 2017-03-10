@@ -1,8 +1,4 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
-// This file is subject to the terms and conditions defined in
-// file 'LICENSE.txt', which is part of this source code package.
-
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Tests.ContentPipeline;
@@ -34,7 +30,13 @@ namespace MonoGame.Tests.Graphics {
                 View = Matrix.Identity,
                 World = Matrix.Identity
             };
-            _effect2 = content.Load<Effect>(Paths.CompiledEffect("Grayscale"));            
+            var effect2Name = "Grayscale";
+#if XNA
+            effect2Name = System.IO.Path.Combine("XNA", effect2Name);
+#elif WINDOWS
+            effect2Name = System.IO.Path.Combine("DirectX", effect2Name);
+#endif
+            _effect2 = content.Load<Effect>(Paths.Effect(effect2Name));            
 		}
 
 	    [TearDown]
@@ -294,7 +296,7 @@ namespace MonoGame.Tests.Graphics {
         [Test]
         public void DrawWithCustomEffectAndTwoTextures()
         {
-            var customSpriteEffect = AssetTestUtility.LoadEffect(content, "CustomSpriteBatchEffect");
+            var customSpriteEffect = AssetTestUtility.CompileEffect(gd, "CustomSpriteBatchEffect.fx");
             var texture2 = new Texture2D(gd, 1, 1, false, SurfaceFormat.Color);
 
             customSpriteEffect.Parameters["SourceTexture"].SetValue(texture2);
@@ -384,13 +386,6 @@ namespace MonoGame.Tests.Graphics {
         }
 
         [Test]
-#if DESKTOPGL
-        // OpenGL produces a slightly different result.
-        // I think this is due to differences in how downsampling is done by default
-        // (it makes a big difference here because the textures are so small).
-        // There are possibly also some differences because of how rasterization is handled.
-        [Ignore]
-#endif
         public void Draw_many()
         {
             PrepareFrameCapture();

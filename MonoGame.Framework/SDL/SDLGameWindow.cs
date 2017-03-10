@@ -47,16 +47,12 @@ namespace Microsoft.Xna.Framework
 
                 return new Point(x, y);
             }
-            set
-            {
-                Sdl.Window.SetPosition(Handle, value.X, value.Y);
-                _wasMoved = true;
-            }
+            set { Sdl.Window.SetPosition(Handle, value.X, value.Y); }
         }
 
         public override DisplayOrientation CurrentOrientation
         {
-            get { return DisplayOrientation.Default; }
+            get { return DisplayOrientation.LandscapeLeft; }
         }
 
         public override IntPtr Handle
@@ -83,12 +79,11 @@ namespace Microsoft.Xna.Framework
         public bool IsFullScreen;
 
         internal readonly Game _game;
-        private IntPtr _handle, _icon;
+        private IntPtr _handle;
         private bool _disposed;
         private bool _resizable, _borderless, _willBeFullScreen, _mouseVisible, _hardwareSwitch;
         private string _screenDeviceName;
         private int _winx, _winy, _width, _height;
-        private bool _wasMoved, _supressMoved;
 
         public SdlGameWindow(Game game)
         {
@@ -108,7 +103,17 @@ namespace Microsoft.Xna.Framework
                 _winx = display.X + display.Width / 2;
                 _winy = display.Y + display.Height / 2;
             }
-            
+
+            var initflags =
+                Sdl.Window.State.OpenGL |
+                Sdl.Window.State.Hidden |
+                Sdl.Window.State.InputFocus |
+                Sdl.Window.State.MouseFocus;
+
+            _handle = Sdl.Window.Create(MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle(),
+                _winx - _width / 2, _winy - _height / 2,
+                _width, _height, initflags);
+
             Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
             Sdl.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
 
@@ -124,39 +129,52 @@ namespace Microsoft.Xna.Framework
                         try
                         {
                             var src = Sdl.RwFromMem(br.ReadBytes((int)stream.Length), (int)stream.Length);
-                            _icon = Sdl.LoadBMP_RW(src, 1);
+                            var icon = Sdl.LoadBMP_RW(src, 1);
+                            Sdl.Window.SetIcon(_handle, icon);
+                            Sdl.FreeSurface(icon);
                         }
                         catch { }
                     }
             }
 
-            _handle = Sdl.Window.Create("", _winx, _winy,
-                GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight,
-                Sdl.Window.State.Hidden);
+            SetCursorVisible(_mouseVisible);
         }
 
-        internal void CreateWindow()
+        // TODO Move this to GraphicsDeviceManager
+        internal void InitGraphics()
         {
-            var initflags =
-                Sdl.Window.State.OpenGL |
-                Sdl.Window.State.Hidden |
-                Sdl.Window.State.InputFocus |
-                Sdl.Window.State.MouseFocus;
+            var surfaceFormat = _game.graphicsDeviceManager.PreferredBackBufferFormat.GetColorFormat();
+            var depthStencilFormat = _game.graphicsDeviceManager.PreferredDepthStencilFormat;
 
-            if (_handle != IntPtr.Zero)
-                Sdl.Window.Destroy(_handle);
+            // TODO Need to get this data from the Presentation Parameters
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.RedSize, surfaceFormat.R);
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.GreenSize, surfaceFormat.G);
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.BlueSize, surfaceFormat.B);
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.AlphaSize, surfaceFormat.A);
 
-            _handle = Sdl.Window.Create(MonoGame.Utilities.AssemblyHelper.GetDefaultWindowTitle(),
-                _winx - _width / 2, _winy - _height / 2,
-                _width, _height, initflags);
+            switch (depthStencilFormat)
+            {
+                case DepthFormat.None:
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 0);
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 0);
+                    break;
+                case DepthFormat.Depth16:
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 16);
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 0);
+                    break;
+                case DepthFormat.Depth24:
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 24);
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 0);
+                    break;
+                case DepthFormat.Depth24Stencil8:
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.DepthSize, 24);
+                    Sdl.GL.SetAttribute(Sdl.GL.Attribute.StencilSize, 8);
+                    break;
+            }
 
-            if (_icon != IntPtr.Zero)
-                Sdl.Window.SetIcon(_handle, _icon);
-
-            Sdl.Window.SetBordered(_handle, _borderless ? 0 : 1);
-            Sdl.Window.SetResizable(_handle, _resizable);
-
-            SetCursorVisible(_mouseVisible);
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.DoubleBuffer, 1);
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.ContextMajorVersion, 2);
+            Sdl.GL.SetAttribute(Sdl.GL.Attribute.ContextMinorVersion, 1);
         }
 
         ~SdlGameWindow()
@@ -245,24 +263,11 @@ namespace Microsoft.Xna.Framework
             // after the window gets resized, window position information
             // becomes wrong (for me it always returned 10 8). Solution is
             // to not try and set the window position because it will be wrong.
-            if ((Sdl.Patch > 4 || !AllowUserResizing) && !_wasMoved)
+            if (Sdl.Patch > 4 || !AllowUserResizing)
                 Sdl.Window.SetPosition(Handle, centerX, centerY);
 
             IsFullScreen = _willBeFullScreen;
             OnClientSizeChanged();
-
-            _supressMoved = true;
-        }
-
-        internal void Moved()
-        {
-            if (_supressMoved)
-            {
-                _supressMoved = false;
-                return;
-            }
-
-            _wasMoved = true;
         }
 
         public void ClientResize(int width, int height)
@@ -310,9 +315,6 @@ namespace Microsoft.Xna.Framework
 
             Sdl.Window.Destroy(_handle);
             _handle = IntPtr.Zero;
-
-            if (_icon != IntPtr.Zero)
-                Sdl.FreeSurface(_icon);
 
             _disposed = true;
         }

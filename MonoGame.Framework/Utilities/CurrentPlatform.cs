@@ -100,12 +100,10 @@ namespace MonoGame.Utilities
     {
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetDllDirectory(string lpPathName);
-        
-        private static bool _dllDirectorySet = false;
-        
+
         public static void InitDllDirectory()
         {
-            if (CurrentPlatform.OS == OS.Windows && !_dllDirectorySet)
+            if (CurrentPlatform.OS == OS.Windows)
             {
                 string executingDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 if (Environment.Is64BitProcess)
@@ -116,8 +114,6 @@ namespace MonoGame.Utilities
                 {
                     NativeHelper.SetDllDirectory(System.IO.Path.Combine(executingDirectory, "x86"));
                 }
-                
-                _dllDirectorySet = true;
             }
         }
     }

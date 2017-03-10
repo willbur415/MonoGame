@@ -242,12 +242,10 @@ namespace MonoGame.Tools.Pipeline
 
         private void PropertyGridTable_SizeChanged(object sender, EventArgs e)
         {
-#if WINDOWS
             SetWidth();
-#endif
 
 #if LINUX
-            // force size reallocation
+            // force size realocation
             drawable.Width = pixel1.Width - 2;
 
             foreach (var child in pixel1.Children)
@@ -258,7 +256,7 @@ namespace MonoGame.Tools.Pipeline
             drawable.Invalidate();
         }
 
-        public void SetWidth()
+        private void SetWidth()
         {
 #if WINDOWS
             var action = new Action(() =>
@@ -273,9 +271,6 @@ namespace MonoGame.Tools.Pipeline
 
             (drawable.ControlObject as System.Windows.Controls.Canvas).Dispatcher.BeginInvoke(action,
                 System.Windows.Threading.DispatcherPriority.ContextIdle, null);
-
-#elif MONOMAC
-            drawable.Width = Width; // TODO: Subtract sctollbar size
 #endif
         }
     }

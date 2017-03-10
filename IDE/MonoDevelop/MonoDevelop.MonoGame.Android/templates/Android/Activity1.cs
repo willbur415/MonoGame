@@ -18,7 +18,6 @@ namespace ${Namespace}
 	           Theme = "@style/Theme.Splash",
                AlwaysRetainTaskState=true,
 	           LaunchMode=LaunchMode.SingleInstance,
-			   ScreenOrientation = ScreenOrientation.FullUser,
 	           ConfigurationChanges = ConfigChanges.Orientation | 
 	                                  ConfigChanges.KeyboardHidden | 
 	                                  ConfigChanges.Keyboard |

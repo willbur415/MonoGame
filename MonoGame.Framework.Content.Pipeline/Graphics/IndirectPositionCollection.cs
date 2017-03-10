@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
     /// </remarks>
     public sealed class IndirectPositionCollection : IList<Vector3>
     {
-        private readonly VertexChannel<int> _positionIndices;
+        private readonly VertexChannel<int> _positionIndicies;
         private readonly GeometryContent _geometry;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <value>Number of positions.</value>
         public int Count
         {
-            get { return _positionIndices.Count; }
+            get { return _positionIndicies.Count; }
         }
 
         /// <summary>
@@ -38,9 +38,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         {
             get
             {
-                var remap = _positionIndices[index];
+                var remap = _positionIndicies[index];
                 return _geometry.Parent.Positions[remap];
             } 
+
             set
             {
                 throw Readonly();
@@ -59,10 +60,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Initializes a new instance of IndirectPositionCollection.
         /// </summary>
-        internal IndirectPositionCollection(GeometryContent geom, VertexChannel<int> positionIndices)
+        internal IndirectPositionCollection(GeometryContent geom, VertexChannel<int> positionIndicies)
         {
             _geometry = geom;
-            _positionIndices = positionIndices;
+            _positionIndicies = positionIndicies;
         }
 
         /// <summary>

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
-using System.Reflection;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -52,14 +51,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         {
             get
             {
-                var index = IndexOf(name);
+                int index = IndexOf(name);
                 if (index < 0)
                     throw new ArgumentException("name");
                 return channels[index];
             }
             set
             {
-                var index = IndexOf(name);
+                int index = IndexOf(name);
                 if (index < 0)
                     throw new ArgumentException("name");
                 channels[index] = value;
@@ -85,7 +84,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         {
             this.vertexContent = vertexContent;
             channels = new List<VertexChannel>();
-             _insertOverload = GetType().GetMethods().First(m => m.Name == "Insert" && m.IsGenericMethodDefinition);
         }
 
         /// <summary>
@@ -152,7 +150,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 throw new ArgumentOutOfRangeException("index");
 
             // Get the channel at that index
-            var channel = this[index];
+            VertexChannel channel = this[index];
             // Remove it because we cannot add a new channel with the same name
             RemoveAt(index);
             VertexChannel<TargetType> result = null;
@@ -180,7 +178,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>New channel in the specified format.</returns>
         public VertexChannel<TargetType> ConvertChannelContent<TargetType>(string name)
         {
-            var index = IndexOf(name);
+            int index = IndexOf(name);
             if (index < 0)
                 throw new ArgumentException("name");
             return ConvertChannelContent<TargetType>(index);
@@ -196,7 +194,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         {
             if (index < 0 || index >= channels.Count)
                 throw new ArgumentOutOfRangeException("index");
-            var channel = this[index];
+            VertexChannel channel = this[index];
             // Make sure the channel type is as expected
             if (channel.ElementType != typeof(T))
                 throw new InvalidOperationException("Mismatched channel type");
@@ -211,7 +209,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>The vertex channel.</returns>
         public VertexChannel<T> Get<T>(string name)
         {
-            var index = IndexOf(name);
+            int index = IndexOf(name);
             if (index < 0)
                 throw new ArgumentException("name");
             return Get<T>(index);
@@ -267,7 +265,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // Don't insert a channel with the same name
             if (IndexOf(name) >= 0)
                 throw new ArgumentException("Vertex channel with name " + name + " already exists");
-            var channel = new VertexChannel<ElementType>(name);
+            VertexChannel<ElementType> channel = new VertexChannel<ElementType>(name);
             if (channelData != null)
             {
                 // Insert the values from the enumerable into the channel
@@ -285,9 +283,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             return channel;
         }
 
-        // this reference the above Insert method and is initialized in the constructor
-        private readonly MethodInfo _insertOverload;
-
         /// <summary>
         /// Inserts a new vertex channel at the specified position.
         /// </summary>
@@ -299,7 +294,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         public VertexChannel Insert(int index, string name, Type elementType, IEnumerable channelData)
         {
             // Call the generic version of this method
-            return (VertexChannel) _insertOverload.MakeGenericMethod(elementType).Invoke(this, new object[] { index, name, channelData });
+            return (VertexChannel)GetType().GetMethod("Insert").MakeGenericMethod(elementType).Invoke(this, new object[] { index, name, channelData });
         }
 
         /// <summary>
@@ -309,7 +304,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         /// <returns>true if the channel was removed; false otherwise.</returns>
         public bool Remove(string name)
         {
-            var index = IndexOf(name);
+            int index = IndexOf(name);
             if (index >= 0)
             {
                 channels.RemoveAt(index);

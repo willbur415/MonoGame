@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+#include "include.fxh"
+
 Texture2D SourceTexture;
 
 SamplerComparisonState SourceSampler;
@@ -19,18 +21,10 @@ float4 PS_Main(VSOutput input) : COLOR0
     return float4(comparisonResult, 0, 0, 1);
 }
 
-#if SM4
-#define PS_PROFILE ps_4_0
-#define VS_PROFILE vs_4_0
-#else
-#define PS_PROFILE ps_3_0
-#define VS_PROFILE vs_3_0
-#endif
-
 technique
 {
     pass
     {
-        PixelShader = compile PS_PROFILE PS_Main();
+        PixelShader = compile ps_4_0 PS_Main();
     }
 }

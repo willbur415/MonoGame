@@ -22,7 +22,7 @@ namespace MonoGame.Framework
 {
     class WinFormsGameWindow : GameWindow, IDisposable
     {
-        internal WinFormsGameForm Form;
+        internal WinFormsGameForm _form;
 
         static private ReaderWriterLockSlim _allWindowsReaderWriterLockSlim = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         static private List<WinFormsGameWindow> _allWindows = new List<WinFormsGameWindow>();
@@ -37,16 +37,17 @@ namespace MonoGame.Framework
 
         private bool _isMouseInBounds;
 
+        private bool _areClientSizeChangedEventsIgnored;
+
         #region Internal Properties
 
         internal Game Game { get; private set; }
-        internal bool UserResized { get; private set; }
 
         #endregion
 
         #region Public Properties
 
-        public override IntPtr Handle { get { return Form.Handle; } }
+        public override IntPtr Handle { get { return _form.Handle; } }
 
         public override string ScreenDeviceName { get { return String.Empty; } }
 
@@ -54,8 +55,8 @@ namespace MonoGame.Framework
         {
             get
             {
-                var position = Form.PointToScreen(Point.Empty);
-                var size = Form.ClientSize;
+                var position = _form.PointToScreen(Point.Empty);
+                var size = _form.ClientSize;
                 return new Rectangle(position.X, position.Y, size.Width, size.Height);
             }
         }
@@ -68,13 +69,13 @@ namespace MonoGame.Framework
                 if (_isResizable != value)
                 {
                     _isResizable = value;
-                    Form.MaximizeBox = _isResizable;
+                    _form.MaximizeBox = _isResizable;
                 }
                 else
                     return;
                 if (_isBorderless)
                     return;
-                Form.FormBorderStyle = _isResizable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+                _form.FormBorderStyle = _isResizable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
             }
         }
 
@@ -83,7 +84,7 @@ namespace MonoGame.Framework
              get { return base.AllowAltF4; }
              set
              {
-                 Form.AllowAltF4 = value;
+                 _form.AllowAltF4 = value;
                  base.AllowAltF4 = value;
              }
         }
@@ -95,8 +96,8 @@ namespace MonoGame.Framework
 
         public override XnaPoint Position
         {
-            get { return new XnaPoint(Form.Location.X, Form.Location.Y); }
-            set { Form.Location = new Point(value.X, value.Y); }
+            get { return new XnaPoint(_form.DesktopLocation.X, _form.DesktopLocation.Y); }
+            set { _form.DesktopLocation = new Point(value.X, value.Y); }
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
@@ -113,9 +114,9 @@ namespace MonoGame.Framework
                 else
                     return;
                 if (_isBorderless)
-                    Form.FormBorderStyle = FormBorderStyle.None;
+                    _form.FormBorderStyle = FormBorderStyle.None;
                 else
-                    Form.FormBorderStyle = _isResizable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+                    _form.FormBorderStyle = _isResizable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
             }
         }
 
@@ -126,26 +127,26 @@ namespace MonoGame.Framework
             _platform = platform;
             Game = platform.Game;
 
-            Form = new WinFormsGameForm(this);
-            Form.ClientSize = new Size(GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight);
+            _form = new WinFormsGameForm(this);
+            _form.ClientSize = new Size(GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight);
 
             SetIcon();
             Title = Utilities.AssemblyHelper.GetDefaultWindowTitle();
 
-            Form.MaximizeBox = false;
-            Form.FormBorderStyle = FormBorderStyle.FixedSingle;
-            Form.StartPosition = FormStartPosition.Manual;
+            _form.MaximizeBox = false;
+            _form.FormBorderStyle = FormBorderStyle.FixedSingle;
+            _form.StartPosition = FormStartPosition.CenterScreen;           
 
             // Capture mouse events.
-            Form.MouseWheel += OnMouseScroll;
-            Form.MouseEnter += OnMouseEnter;
-            Form.MouseLeave += OnMouseLeave;            
+            _form.MouseWheel += OnMouseScroll;
+            _form.MouseEnter += OnMouseEnter;
+            _form.MouseLeave += OnMouseLeave;            
 
-            Form.Activated += OnActivated;
-            Form.Deactivate += OnDeactivate;
-            Form.ResizeEnd += OnResizeEnd;
+            _form.Activated += OnActivated;
+            _form.Deactivate += OnDeactivate;
+            _form.ClientSizeChanged += OnClientSizeChanged;
 
-            Form.KeyPress += OnKeyPress;
+            _form.KeyPress += OnKeyPress;
 
             RegisterToAllWindows();
         }
@@ -161,7 +162,7 @@ namespace MonoGame.Framework
                 return;
             var handle = ExtractIcon(IntPtr.Zero, assembly.Location, 0);
             if (handle != IntPtr.Zero)
-                Form.Icon = Icon.FromHandle(handle);
+                _form.Icon = Icon.FromHandle(handle);
         }
 
         ~WinFormsGameWindow()
@@ -199,6 +200,20 @@ namespace MonoGame.Framework
 
         private void OnActivated(object sender, EventArgs eventArgs)
         {
+#if (WINDOWS && DIRECTX)
+            if (Game.GraphicsDevice != null)
+            {
+                if (Game.graphicsDeviceManager.HardwareModeSwitch)
+                {
+                    if (!_platform.IsActive && Game.GraphicsDevice.PresentationParameters.IsFullScreen)
+                   {
+                       Game.GraphicsDevice.PresentationParameters.IsFullScreen = true;
+                       Game.GraphicsDevice.CreateSizeDependentResources();
+                        Game.GraphicsDevice.ApplyRenderTargets(null);
+                   }
+                }
+          }
+#endif
             _platform.IsActive = true;
             Keyboard.SetActive(true);
         }
@@ -219,11 +234,11 @@ namespace MonoGame.Framework
             // If we call the form client functions before the form has
             // been made visible it will cause the wrong window size to
             // be applied at startup.
-            if (!Form.Visible)
+            if (!_form.Visible)
                 return;
 
-            var clientPos = Form.PointToClient(Control.MousePosition);
-            var withinClient = Form.ClientRectangle.Contains(clientPos);
+            var clientPos = _form.PointToClient(Control.MousePosition);
+            var withinClient = _form.ClientRectangle.Contains(clientPos);
             var buttons = Control.MouseButtons;
 
             var previousState = MouseState.LeftButton;
@@ -278,30 +293,40 @@ namespace MonoGame.Framework
         }
 
         internal void Initialize(int width, int height)
-        {
-            Form.ClientSize = new Size(width, height);
-            CenterForm();
+        {            
+            _form.ClientSize = new Size(width, height);
+            _form.Show();
         }
 
-        private void OnResizeEnd(object sender, EventArgs eventArgs)
+        internal void EnableClientSizeChangedEvent(bool isEnabled)
         {
-            UserResized = true;
+            _areClientSizeChangedEventsIgnored = !isEnabled;
+            if (isEnabled)
+                OnClientSizeChanged(this, EventArgs.Empty);
+        }
+
+        private void OnClientSizeChanged(object sender, EventArgs eventArgs)
+        {
+            if (_areClientSizeChangedEventsIgnored)
+                return;
+
             if (Game.Window == this)
             {
                 var manager = Game.graphicsDeviceManager;
                 if (manager.GraphicsDevice == null)
                     return;
 
-                var newSize = Form.ClientSize;
-                if (newSize.Width == manager.PreferredBackBufferWidth
-                    && newSize.Height == manager.PreferredBackBufferHeight)
-                    return;
-
-                // Set the default new back buffer size and viewport, but this
-                // can be overloaded by the two events below.
-                manager.PreferredBackBufferWidth = newSize.Width;
-                manager.PreferredBackBufferHeight = newSize.Height;
-                manager.ApplyChanges();
+                // Only resize the backbuffer in windowed mode. In fullscreen mode, it gets stretched to fit the window.
+                // Also skip resizing the backbuffer when the window is minimized.
+                if (!manager.IsFullScreen && (_form.WindowState != FormWindowState.Minimized))
+                {
+                    // Set the default new back buffer size and viewport, but this
+                    // can be overloaded by the two events below.
+                    var newSize = _form.ClientSize;
+                    manager.GraphicsDevice.PresentationParameters.BackBufferWidth = newSize.Width;
+                    manager.GraphicsDevice.PresentationParameters.BackBufferHeight = newSize.Height;
+                    manager.GraphicsDevice.OnPresentationChanged();
+                }
             }
 
             // Set the new view state which will trigger the 
@@ -312,23 +337,19 @@ namespace MonoGame.Framework
 
         protected override void SetTitle(string title)
         {
-            Form.Text = title;
+            _form.Text = title;
         }
 
         internal void RunLoop()
         {
-            // center now in case the user changed the window size
-            // in the first update call
-            Form.CenterOnPrimaryMonitor();
-
             // https://bugzilla.novell.com/show_bug.cgi?id=487896
             // Since there's existing bug from implementation with mono WinForms since 09'
             // Application.Idle is not working as intended
             // So we're just going to emulate Application.Run just like Microsoft implementation
-            Form.Show();
+            _form.Show();
 
             var nativeMsg = new NativeMessage();
-            while (Form != null && Form.IsDisposed == false)
+            while (_form != null && _form.IsDisposed == false)
             {
                 if (PeekMessage(out nativeMsg, IntPtr.Zero, 0, 0, 0))
                 {
@@ -351,6 +372,7 @@ namespace MonoGame.Framework
             // This is critical for some NUnit runners which
             // typically will run all the tests on the same
             // process/thread.
+
             var msg = new NativeMessage();
             do
             {
@@ -359,12 +381,7 @@ namespace MonoGame.Framework
 
                 Thread.Sleep(100);
             } 
-            while (PeekMessage(out msg, IntPtr.Zero, 0, 1 << 5, 1));
-        }
-
-        public void CenterForm()
-        {
-            Form.CenterOnPrimaryMonitor();
+            while (PeekMessage(out msg, IntPtr.Zero, 0, 0, 1));
         }
 
         internal void UpdateWindows()
@@ -399,8 +416,8 @@ namespace MonoGame.Framework
 
         internal void ChangeClientSize(Size clientBounds)
         {
-            if(this.Form.ClientSize != clientBounds)
-                this.Form.ClientSize = clientBounds;
+            if(this._form.ClientSize != clientBounds)
+                this._form.ClientSize = clientBounds;
         }
 
         [System.Security.SuppressUnmanagedCodeSecurity] // We won't use this maliciously
@@ -419,11 +436,11 @@ namespace MonoGame.Framework
         {
             if (disposing)
             {
-                if (Form != null)
+                if (_form != null)
                 {
                     UnregisterFromAllWindows(); 
-                    Form.Dispose();
-                    Form = null;
+                    _form.Dispose();
+                    _form = null;
                 }
             }
             _platform = null;

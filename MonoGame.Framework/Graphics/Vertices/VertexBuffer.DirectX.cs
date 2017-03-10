@@ -84,7 +84,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                     try
                     {
-                        var startBytes = startIndex * TsizeInBytes;
+                        var startBytes = startIndex * vertexStride;
                         var dataPtr = (IntPtr)(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
 
                         lock (GraphicsDevice._d3dContext)

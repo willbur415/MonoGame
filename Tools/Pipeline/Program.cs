@@ -23,6 +23,8 @@ namespace MonoGame.Tools.Pipeline
             Xwt.Application.InitializeAsGuest(Xwt.ToolkitType.Wpf);
 #elif LINUX
             Xwt.Application.InitializeAsGuest(Xwt.ToolkitType.Gtk3);
+#else
+            Xwt.Application.InitializeAsGuest(Xwt.ToolkitType.Gtk);
 #endif
 
             var win = new MainWindow();

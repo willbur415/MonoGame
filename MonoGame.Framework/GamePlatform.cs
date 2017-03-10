@@ -16,7 +16,8 @@ namespace Microsoft.Xna.Framework
         protected TimeSpan _inactiveSleepTime = TimeSpan.FromMilliseconds(20.0);
         protected bool _needsToResetElapsedTime = false;
         bool disposed;
-        protected bool InFullScreenMode = false;
+        protected bool _alreadyInFullScreenMode = false;
+        protected bool _alreadyInWindowedMode = false;
         protected bool IsDisposed { get { return disposed; } }
 
         #endregion
@@ -137,6 +138,11 @@ namespace Microsoft.Xna.Framework
         public virtual void BeforeInitialize()
         {
             IsActive = true;
+            if (this.Game.GraphicsDevice == null) 
+            {
+                var graphicsDeviceManager = Game.Services.GetService(typeof(IGraphicsDeviceManager)) as IGraphicsDeviceManager;			   
+                graphicsDeviceManager.CreateDevice();
+            }
         }
 
         /// <summary>

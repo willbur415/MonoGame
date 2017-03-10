@@ -60,8 +60,8 @@ namespace Microsoft.Xna.Framework.Audio
         private void PlatformApply3D(AudioListener listener, AudioEmitter emitter)
         {
             // get AL's listener position
-            float x, y, z;
-            AL.GetListener(ALListener3f.Position, out x, out y, out z);
+            float[] pos = { 0, 0, 0 };
+            AL.GetListener(ALListenerfv.Position, ref pos);
             ALHelper.CheckError("Failed to get source position.");
 
             // get the emitter offset from origin
@@ -69,15 +69,15 @@ namespace Microsoft.Xna.Framework.Audio
             // set up orientation matrix
             Matrix orientation = Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
             // set up our final position and velocity according to orientation of listener
-            Vector3 finalPos = new Vector3(x + posOffset.X, y + posOffset.Y, z + posOffset.Z);
+            Vector3 finalPos = new Vector3(pos[0] + posOffset.X, pos[1] + posOffset.Y, pos[2] + posOffset.Z);
             finalPos = Vector3.Transform(finalPos, orientation);
             Vector3 finalVel = emitter.Velocity;
             finalVel = Vector3.Transform(finalVel, orientation);
 
             // set the position based on relative positon
-            AL.Source(SourceId, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);
+            AL.Source(SourceId, ALSourcefv.Position, finalPos.X, finalPos.Y, finalPos.Z);
             ALHelper.CheckError("Failed to set source position.");
-            AL.Source(SourceId, ALSource3f.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
+            AL.Source(SourceId, ALSourcefv.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
             ALHelper.CheckError("Failed to Set source velocity.");
         }
 
@@ -120,7 +120,7 @@ namespace Microsoft.Xna.Framework.Audio
 			AL.DistanceModel (ALDistanceModel.InverseDistanceClamped);
             ALHelper.CheckError("Failed set source distance.");
 			// Pan
-			AL.Source (SourceId, ALSource3f.Position, _pan, 0, 0.1f);
+			AL.Source (SourceId, ALSourcefv.Position, _pan, 0, 0.1f);
             ALHelper.CheckError("Failed to set source pan.");
 			// Volume
 			AL.Source (SourceId, ALSourcef.Gain, _alVolume);
@@ -213,7 +213,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             if (HasSourceId)
             {
-                AL.Source(SourceId, ALSource3f.Position, value, 0.0f, 0.1f);
+                AL.Source(SourceId, ALSourcefv.Position, value, 0.0f, 0.1f);
                 ALHelper.CheckError("Failed to set source pan.");
             }
         }

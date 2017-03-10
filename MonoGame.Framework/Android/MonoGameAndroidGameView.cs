@@ -33,6 +33,7 @@ namespace Microsoft.Xna.Framework
         int surfaceWidth;
         int surfaceHeight;
 
+        bool forceGLSurfaceRecreationOnSurfaceChange = false;
         bool glSurfaceAvailable;
         bool glContextAvailable;
         bool lostglContext;
@@ -87,6 +88,12 @@ namespace Microsoft.Xna.Framework
                 surfaceWidth = Width;
                 surfaceHeight = Height;
 
+                // required when screen is rotated
+                if (forceGLSurfaceRecreationOnSurfaceChange)
+                {
+                    forceGLSurfaceRecreationOnSurfaceChange = false;
+                    RecreateGLSurface ();
+                }
                 if (_game.GraphicsDevice != null)
                     _game.graphicsDeviceManager.ResetClientBounds ();
             }
@@ -119,6 +126,11 @@ namespace Microsoft.Xna.Framework
         {
             _touchManager.OnTouchEvent (e);
             return true;
+        }
+
+        public void ForceGLSurfaceRecreationOnSurfaceChange()
+        {
+            forceGLSurfaceRecreationOnSurfaceChange = true;
         }
 
         public virtual void SwapBuffers ()
@@ -438,6 +450,21 @@ namespace Microsoft.Xna.Framework
             Monitor.PulseAll (lockObject);
         }
 
+        private void RecreateGLSurface ()
+        {
+            // This call is kinda equivalent to calling 'SurfaceDestroyed(); SurfaceCreated();'
+            // We must use delayed surface recreation because it is called from non-openGL thread.              
+            surfaceAvailable = false;
+            Monitor.PulseAll (lockObject);
+            while (glSurfaceAvailable)
+            {
+                Monitor.Wait (lockObject);
+            }
+
+            surfaceAvailable = true;
+            Monitor.PulseAll (lockObject);
+        }
+
         internal struct SurfaceConfig
         {
             public int Red;
@@ -581,7 +608,6 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-
         protected void CreateGLSurface ()
         {
 
@@ -599,6 +625,13 @@ namespace Microsoft.Xna.Framework
                         throw new Exception ("Could not make EGL current" + GetErrorAsString ());
 
                     glSurfaceAvailable = true;
+
+                    // Must set viewport after creation, the viewport has correct values in it already as we call it, but
+                    // the surface is created after the correct viewport is already applied so we must do it again.
+                    if (_game.GraphicsDevice != null)
+                    {
+                        _game.GraphicsDevice.ApplyCurrentViewport ();
+                    }
 
                 } catch (Exception ex) {
                     Log.Error ("AndroidGameView", ex.ToString ());

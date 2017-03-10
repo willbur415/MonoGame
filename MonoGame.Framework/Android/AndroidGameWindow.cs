@@ -287,6 +287,8 @@ namespace Microsoft.Xna.Framework
                         TouchPanelState.ReleaseAllTouches();
                     }
 
+                    GameView.ForceGLSurfaceRecreationOnSurfaceChange(); // needed or rendering gets distorted
+
                     Game.Activity.RequestedOrientation = requestedOrientation;
 
                     OnOrientationChanged();

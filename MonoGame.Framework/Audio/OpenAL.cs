@@ -80,15 +80,18 @@ namespace OpenAL
         Stopped = 0x1014,
     }
 
-    public enum ALListener3f
-    {
-        Position = 0x1004,
-    }
-
-    public enum ALSource3f
+    public enum ALSourcefv
     {
         Position = 0x1004,
         Velocity = 0x1006,
+        Direction = 0x1005,
+    }
+
+    public enum ALListenerfv
+    {
+        Position = 0x1004,
+        Velocity = 0x1006,
+        Direction = 0x1005,
     }
 
     public enum ALDistanceModel
@@ -351,9 +354,32 @@ namespace OpenAL
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcef")]
         public static extern void Source (int sourceId, ALSourcef i, float a);
 
+        /* MUST NOT USE THIS VERSION BECAUSE OF WHAT SEEMS AS A XAMARIN BUG WHERE MULTIPLIE FLOAT PARAMS PASSED BY VALUE CORRUPT FUNCTION PARAMETERS,
+         SO WE MUST USE THE VERSION WHICH PASSES AN ARRAY (POINTER) OF FLOATS. 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSource3f")]
         public static extern void Source (int sourceId, ALSource3f i, float x, float y, float z);
+        */
+
+        public static void Source (int sourceId, ALSourcefv i, float x, float y, float z)
+        {
+            float[] v = { x, y, z };
+            Source (sourceId, i, ref v);
+        }
+
+        public static void Source (int sourceId, ALSourcefv i, ref float[] values)
+        {
+            unsafe
+            {
+                fixed (float* ptr = &values[0])
+                {
+                    SourcePrivate (sourceId, i, ptr);
+                }
+            }
+        }
+
+        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcefv", ExactSpelling = true)]
+        unsafe private static extern void SourcePrivate (int sid, ALSourcefv param, float* values);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetSourcei")]
@@ -365,9 +391,26 @@ namespace OpenAL
             return (ALSourceState)state;
         }
 
-        [CLSCompliant (false)]
-        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetListener3f")]
-        public static extern void GetListener (ALListener3f param, out float value1, out float value2, out float value3);
+        /* MUST NOT USE THIS VERSION BECAUSE OF WHAT SEEMS AS A XAMARIN BUG WHERE MULTIPLIE FLOAT PARAMS PASSED BY VALUE CORRUPT FUNCTION PARAMETERS,
+         SO WE MUST USE THE VERSION WHICH PASSES AN ARRAY (POINTER) OF FLOATS. 
+       [CLSCompliant (false)]
+       [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetListener3f")]
+       public static extern void GetListener (ALListener3f param, out float value1, out float value2, out float value3);
+       */
+
+        public static void GetListener (ALListenerfv i, ref float[] outValues)
+        {
+            unsafe
+            {
+                fixed (float* ptr = &outValues[0])
+                {
+                    GetListener (i, ptr);
+                }
+            }
+        }
+
+        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetListenerfv", ExactSpelling = true)]
+        unsafe private static extern void GetListener (ALListenerfv i, float* values);
 
         public static void DistanceModel(ALDistanceModel model) { }
 

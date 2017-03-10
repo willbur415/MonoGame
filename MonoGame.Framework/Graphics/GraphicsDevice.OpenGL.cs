@@ -417,6 +417,11 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
+        public void ApplyCurrentViewport()
+        {
+            PlatformSetViewport(ref _viewport);
+        }
+
         private void PlatformSetViewport(ref Viewport value)
         {
             if (IsRenderTargetBound)

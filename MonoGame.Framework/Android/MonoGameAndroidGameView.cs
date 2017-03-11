@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework
         int surfaceWidth;
         int surfaceHeight;
 
-        bool forceGLSurfaceRecreationOnSurfaceChange = false;
+        bool forceGLSurfaceRecreation = false;
         bool glSurfaceAvailable;
         bool glContextAvailable;
         bool lostglContext;
@@ -41,6 +41,9 @@ namespace Microsoft.Xna.Framework
         private bool isExited = false;
         System.Diagnostics.Stopwatch stopWatch;
         double tick = 0;
+
+        bool executeOpenALOnPause = false;
+        bool executeOpenALOnResume = false;
 
         bool loaded = false;
 
@@ -51,6 +54,10 @@ namespace Microsoft.Xna.Framework
         private readonly Game _game;
 
         const int EglContextClientVersion = 0x3098;
+
+        // Events that are triggered on the game thread
+        public static event EventHandler OnPauseGameThread;
+        public static event EventHandler OnResumeGameThread;
 
         public bool TouchEnabled {
             get { return _touchManager.Enabled; }
@@ -88,12 +95,10 @@ namespace Microsoft.Xna.Framework
                 surfaceWidth = Width;
                 surfaceHeight = Height;
 
-                // required when screen is rotated
-                if (forceGLSurfaceRecreationOnSurfaceChange)
-                {
-                    forceGLSurfaceRecreationOnSurfaceChange = false;
-                    RecreateGLSurface ();
-                }
+                // Set flag to recreate gl surface or rendering can be bad on orienation change or if app 
+                // is closed in one orientation and re-opened in another.
+                forceGLSurfaceRecreation = true;
+
                 if (_game.GraphicsDevice != null)
                     _game.graphicsDeviceManager.ResetClientBounds ();
             }
@@ -128,9 +133,9 @@ namespace Microsoft.Xna.Framework
             return true;
         }
 
-        public void ForceGLSurfaceRecreationOnSurfaceChange()
+        public void ForceRecreateGLSurface()
         {
-            forceGLSurfaceRecreationOnSurfaceChange = true;
+            forceGLSurfaceRecreation = true;
         }
 
         public virtual void SwapBuffers ()
@@ -179,17 +184,22 @@ namespace Microsoft.Xna.Framework
             }
             updates = 0;
             var syncContext = new SynchronizationContext ();
-            renderTask = Task.Factory.StartNew (() => {
-                if (RenderOnUIThread) {
-                    syncContext.Send ((s) => {
+            renderTask = Task.Factory.StartNew (() => 
+            {
+                if (RenderOnUIThread)
+                {
+                    syncContext.Send ((s) =>
+                    {
                         RenderLoop (cts.Token);
                     }, null);
                 } else
                     RenderLoop (cts.Token);
             }, cts.Token)
-                .ContinueWith ((t) => {
+                .ContinueWith ((t) => 
+                {
                     OnStopped (EventArgs.Empty);
                 });
+
         }
 
         public virtual void Run (double updatesPerSecond)
@@ -213,15 +223,22 @@ namespace Microsoft.Xna.Framework
         public virtual void Pause ()
         {
             EnsureUndisposed ();
+
             lock (lockObject) {
                 isPaused = true;
                 Monitor.PulseAll (lockObject);
             }
+
+            // MUST BE CALLED AFTER 'isPaused = true;'
+            pauseOpenALDeviceBlocking ();
         }
 
         public virtual void Resume ()
         {
             EnsureUndisposed ();
+
+            resumeOpenALDeviceNonBlocking ();
+
             lock (lockObject) {
                 if (isPaused) {
                     isPaused = false;
@@ -233,6 +250,21 @@ namespace Microsoft.Xna.Framework
                 } catch {
                 }
             }
+
+            
+        }
+
+        private void resumeOpenALDeviceNonBlocking()
+        {
+            // we cannot wait here because the renderTask has not started yet ( status == WaitingForActivation, which is an internal wait state)
+            executeOpenALOnResume = true;
+        }
+
+        private void pauseOpenALDeviceBlocking()
+        {
+            // set flag and wait for game thread to finish executing it it, must wait so that game thread isn't stopped before that.
+            executeOpenALOnPause = true;
+            while (executeOpenALOnPause == true) ;
         }
 
         protected override void Dispose (bool disposing)
@@ -269,26 +301,41 @@ namespace Microsoft.Xna.Framework
         protected void RenderLoop (CancellationToken token)
         {
             Threading.ResetThread (Thread.CurrentThread.ManagedThreadId);
-            try {
+            try
+            {
                 stopWatch = System.Diagnostics.Stopwatch.StartNew ();
                 tick = 0;
                 prevUpdateTime = DateTime.Now;
-                while (!cts.IsCancellationRequested) {
-                    if (!IsGLSurfaceAvailable ()) {
+                while (!cts.IsCancellationRequested)
+                {
+                    // MUST BE CALLED BEFORE IsGLSurfaceAvailable! because the latter blocks.
+                    triggerOpenALPauseAndResumeEvents ();
+
+                    // this waits when android onPause callback is triggered, resumes when onResume is called (by pinging Monitor)
+                    if (!IsGLSurfaceAvailableWaitIfNot ())
+                    {
                         break;
                     }
 
                     Threading.ResetThread (Thread.CurrentThread.ManagedThreadId);
-                    try {
+
+                    try
+                    {
                         RunIteration (token);
-                    } catch (MonoGameGLException ex) {
+                    }
+                    catch (MonoGameGLException ex)
+                    {
                         Log.Error ("AndroidGameView", "GL Exception occured during RunIteration {0}", ex.Message);
                     }
+                  
 
-                    if (updates > 0) {
+                    if (updates > 0)
+                    {
                         var t = updates - (stopWatch.Elapsed.TotalMilliseconds - tick);
-                        if (t > 0) {
-                            if (LogFPS) {
+                        if (t > 0)
+                        {
+                            if (LogFPS)
+                            {
                                 Log.Verbose ("AndroidGameView", "took {0:F2}ms, should take {1:F2}ms, sleeping for {2:F2}", stopWatch.Elapsed.TotalMilliseconds - tick, updates, t);
                             }
                             if (token.IsCancellationRequested)
@@ -297,15 +344,23 @@ namespace Microsoft.Xna.Framework
                     }
                 }
                 Log.Verbose ("AndroidGameView", "RenderLoop exited");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Log.Error ("AndroidGameView", ex.ToString ());
-            } finally {
-                lock (lockObject) {
+            }
+            finally
+            {
+                lock (lockObject)
+                {
                     isExited = true;
                     cts = null;
+
                     if (glSurfaceAvailable)
                         DestroyGLSurface ();
-                    if (glContextAvailable) {
+
+                    if (glContextAvailable)
+                    {
                         DestroyGLContext ();
                         ContextLostInternal ();
                     }
@@ -329,6 +384,22 @@ namespace Microsoft.Xna.Framework
         protected virtual void OnUpdateFrame (FrameEventArgs e)
         {
 
+        }
+
+        void triggerOpenALPauseAndResumeEvents()
+        {
+            // we must execute this event on the game thread so that the openAL device pause/resume get called on the same thread as other openAL API calls.
+            if (executeOpenALOnPause)
+            {
+                executeOpenALOnPause = false;
+                OnPauseGameThread (this, EventArgs.Empty);
+            }
+
+            if (executeOpenALOnResume)
+            {
+                executeOpenALOnResume = false;
+                OnResumeGameThread (this, EventArgs.Empty);
+            }
         }
 
         // this method is called on the main thread
@@ -447,21 +518,6 @@ namespace Microsoft.Xna.Framework
             Log.Verbose ("AndroidGameView", "DestroyGLSurface");
             DestroyGLSurfaceInternal ();
             glSurfaceAvailable = false;
-            Monitor.PulseAll (lockObject);
-        }
-
-        private void RecreateGLSurface ()
-        {
-            // This call is kinda equivalent to calling 'SurfaceDestroyed(); SurfaceCreated();'
-            // We must use delayed surface recreation because it is called from non-openGL thread.              
-            surfaceAvailable = false;
-            Monitor.PulseAll (lockObject);
-            while (glSurfaceAvailable)
-            {
-                Monitor.Wait (lockObject);
-            }
-
-            surfaceAvailable = true;
             Monitor.PulseAll (lockObject);
         }
 
@@ -610,7 +666,6 @@ namespace Microsoft.Xna.Framework
 
         protected void CreateGLSurface ()
         {
-
             if (!glSurfaceAvailable)
                 try {
                     Log.Verbose ("AndroidGameView", "CreateGLSurface");
@@ -692,27 +747,38 @@ namespace Microsoft.Xna.Framework
 
         }
 
-        protected bool IsGLSurfaceAvailable ()
+        protected bool IsGLSurfaceAvailableWaitIfNot ()
         {
             lock (lockObject) {
                 // we want to wait until we have a valid surface
                 // this is not called from the UI thread but on
                 // the background rendering thread
-                while (!cts.IsCancellationRequested) {
+                while (!cts.IsCancellationRequested)
+                {
                     //Log.Verbose ("AndroidGameView", "IsGLSurfaceAvailable {0} IsPaused {1} lostcontext {2} surfaceAvailable {3} contextAvailable {4} ThreadID {5}",
                     //  glSurfaceAvailable, isPaused, lostglContext, surfaceAvailable, glContextAvailable,Thread.CurrentThread.ManagedThreadId);
-                    if (glSurfaceAvailable && (isPaused || !surfaceAvailable)) {
+                    if (glSurfaceAvailable && (isPaused || !surfaceAvailable) )
+                    {
+                        forceGLSurfaceRecreation = false;
+
                         // Surface we are using needs to go away
                         DestroyGLSurface ();
+
                         if (loaded)
                             OnUnload (EventArgs.Empty);
+                    }
+                    else if ((!glSurfaceAvailable && !isPaused && surfaceAvailable ) || lostglContext )
+                    {
+                        forceGLSurfaceRecreation = false;
 
-                    } else if ((!glSurfaceAvailable && !isPaused && surfaceAvailable) || lostglContext) {
                         // We can (re)create the EGL surface (not paused, surface available)
-                        if (glContextAvailable && !lostglContext) {
-                            try {
+                        if (glContextAvailable && !lostglContext)
+                        {
+                            try
+                            {
                                 CreateGLSurface ();
-                            } catch (Exception ex) {
+                            } catch (Exception ex)
+                            {
                                 // We failed to create the surface for some reason
                                 Log.Verbose ("AndroidGameView", ex.ToString ());
                             }
@@ -743,6 +809,14 @@ namespace Microsoft.Xna.Framework
                                 ContextSetInternal ();
                             }
                         }
+                    }
+                    else if( glSurfaceAvailable && surfaceAvailable && forceGLSurfaceRecreation)
+                    {                     
+                        // when rotation happens we must recreate surface
+                        forceGLSurfaceRecreation = false;
+
+                        DestroyGLSurface ();
+                        CreateGLSurface ();
                     }
 
                     // If we have a GL surface we can continue 

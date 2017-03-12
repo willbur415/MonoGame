@@ -304,7 +304,9 @@ namespace Microsoft.Xna.Framework.Graphics
             // So overwrite these states with what is needed to perform
             // the clear correctly and restore it afterwards.
             //
-		    var prevScissorRect = ScissorRectangle;
+            MonoGameAndroidGameView.s = 90080201;
+
+            var prevScissorRect = ScissorRectangle;
 		    var prevDepthStencilState = DepthStencilState;
             var prevBlendState = BlendState;
             ScissorRectangle = _viewport.Bounds;
@@ -314,6 +316,7 @@ namespace Microsoft.Xna.Framework.Graphics
             DepthStencilState = this.clearDepthStencilState;
 		    BlendState = BlendState.Opaque;
             ApplyState(false);
+            MonoGameAndroidGameView.s = 90080202;
 
             ClearBufferMask bufferMask = 0;
             if ((options & ClearOptions.Target) == ClearOptions.Target)
@@ -326,7 +329,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
                 bufferMask = bufferMask | ClearBufferMask.ColorBufferBit;
             }
-			if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
+            MonoGameAndroidGameView.s = 90080203;
+
+            if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
             {
                 if (stencil != _lastClearStencil)
                 {
@@ -336,8 +341,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
                 bufferMask = bufferMask | ClearBufferMask.StencilBufferBit;
 			}
+            MonoGameAndroidGameView.s = 90080204;
 
-			if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer) 
+            if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer) 
             {
                 if (depth != _lastClearDepth)
                 {
@@ -352,14 +358,20 @@ namespace Microsoft.Xna.Framework.Graphics
 				bufferMask = bufferMask | ClearBufferMask.DepthBufferBit;
 			}
 
+            MonoGameAndroidGameView.s = 90080205;
 
-			GL.Clear(bufferMask);
+            GL.Clear(bufferMask);
+            MonoGameAndroidGameView.s = 90080206;
+
             GraphicsExtensions.CheckGLError();
-           		
+            MonoGameAndroidGameView.s = 90080207;
+
             // Restore the previous render state.
-		    ScissorRectangle = prevScissorRect;
+            ScissorRectangle = prevScissorRect;
 		    DepthStencilState = prevDepthStencilState;
 		    BlendState = prevBlendState;
+            MonoGameAndroidGameView.s = 90080206;
+
         }
 
         private void PlatformDispose()

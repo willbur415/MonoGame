@@ -188,11 +188,23 @@ namespace OpenAL
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alEnable")]
-        public static extern void Enable (int cap);
+        public static extern void pEnable (int cap);
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alBufferData")]
-        public static extern void BufferData(uint bid, int format, IntPtr data, int size, int freq);
+        public static extern void pBufferData(uint bid, int format, IntPtr data, int size, int freq);
+
+        public static  void Enable (int cap)
+        {
+            Android.Util.Log.Debug ("ropo", "Enable tid: " + Environment.CurrentManagedThreadId);
+            pEnable (cap);
+        }
+
+         public static  void BufferData (uint bid, int format, IntPtr data, int size, int freq)
+        {
+            Android.Util.Log.Debug ("ropo", "BufferData tid: " + Environment.CurrentManagedThreadId);
+            pBufferData (bid, format, data, size, freq);
+        }
 
         public static void BufferData(int bid, ALFormat format, byte[] data, int size, int freq)
         {
@@ -210,7 +222,15 @@ namespace OpenAL
 
         [CLSCompliant (false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alDeleteBuffers")]
-        public static unsafe extern void DeleteBuffers(int n, int* buffers);
+        public static unsafe extern void pDeleteBuffers(int n, int* buffers);
+
+
+        public static unsafe  void DeleteBuffers (int n, int* buffers)
+        {
+            Android.Util.Log.Debug ("ropo", "DeleteBuffers tid: " + Environment.CurrentManagedThreadId);
+
+            pDeleteBuffers (n, buffers);
+        }
 
         public static void DeleteBuffers(int[] buffers)
         {
@@ -227,22 +247,55 @@ namespace OpenAL
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alBufferi")]
-        public static extern void Bufferi (int buffer, ALBufferi param, int value);
+        public static extern void pBufferi (int buffer, ALBufferi param, int value);
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetBufferi")]
-        public static extern void GetBufferi(int bid, ALGetBufferi param, out int value);
+        public static extern void pGetBufferi(int bid, ALGetBufferi param, out int value);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alBufferiv")]
-        public static extern void Bufferiv (int bid, ALBufferi param, int[] values);
+        public static extern void pBufferiv (int bid, ALBufferi param, int[] values);
+
+      public static  void Bufferi (int buffer, ALBufferi param, int value)
+        {
+            Android.Util.Log.Debug ("ropo", "Bufferi tid: " + Environment.CurrentManagedThreadId);
+
+            pBufferi (buffer, param, value);
+        }
+
+        public static  void GetBufferi (int bid, ALGetBufferi param, out int value)
+        {
+            Android.Util.Log.Debug ("ropo", "GetBufferi tid: " + Environment.CurrentManagedThreadId);
+
+            pGetBufferi (bid, param,out value);
+        }
+
+        public static  void Bufferiv (int bid, ALBufferi param, int[] values)
+        {
+            Android.Util.Log.Debug ("ropo", "Bufferiv tid: " + Environment.CurrentManagedThreadId);
+
+            pBufferiv (bid, param, values);
+        }
+
 
         public static void GetBuffer(int bid, ALGetBufferi param, out int value)
         {
-            GetBufferi(bid, param, out value);
+            Android.Util.Log.Debug ("ropo", "GetBuffer tid: " + Environment.CurrentManagedThreadId);
+
+            GetBufferi (bid, param, out value);
         }
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGenBuffers")]
-        public static unsafe extern void GenBuffers(int count, int* buffers);
+        public static unsafe extern void pGenBuffers(int count, int* buffers);
+
+
+        public static unsafe  void GenBuffers (int count, int* buffers)
+        {
+            Android.Util.Log.Debug ("ropo", "GenBuffers tid: " + Environment.CurrentManagedThreadId);
+
+            pGenBuffers (count, buffers);
+        }
+
 
         internal unsafe static void GenBuffers (int count,out int[] buffers)
         {
@@ -269,7 +322,7 @@ namespace OpenAL
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGenSources")]
-        public static extern void GenSources(int n, uint[] sources);
+        public static extern void pGenSources(int n, uint[] sources);
 
 
         public static void GenSources(int[] sources)
@@ -283,20 +336,52 @@ namespace OpenAL
         }
 
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetError")]
-        public static extern ALError GetError();
+        public static extern ALError pGetError();
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alIsBuffer")]
-        public static extern bool IsBuffer(uint buffer);
+        public static extern bool pIsBuffer(uint buffer);
+
+        public static void GenSources (int n, uint[] sources)
+        {
+            Android.Util.Log.Debug ("ropo", "GenSources tid: " + Environment.CurrentManagedThreadId);
+
+            pGenSources (n, sources);
+        }
+
+
+        public static ALError GetError ()
+        {
+            Android.Util.Log.Debug ("ropo", "GetError tid: " + Environment.CurrentManagedThreadId);
+
+            return pGetError ();
+        }
+
+        public static bool IsBuffer (uint buffer)
+        {
+            Android.Util.Log.Debug ("ropo", "IsBuffer tid: " + Environment.CurrentManagedThreadId);
+
+            return pIsBuffer (buffer);
+        }
+
 
         public static bool IsBuffer(int buffer)
         {
-            return IsBuffer((uint)buffer);
+            Android.Util.Log.Debug ("ropo", "IsBuffer tid: " + Environment.CurrentManagedThreadId);
+
+            return IsBuffer ((uint)buffer);
         }
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcePause")]
-        public static extern void SourcePause(uint source);
+        public static extern void pSourcePause(uint source);
+
+        public static  void SourcePause (uint source)
+        {
+            Android.Util.Log.Debug ("ropo", "SourcePause tid: " + Environment.CurrentManagedThreadId);
+
+            pSourcePause (source);
+        }
 
         public static void SourcePause(int source)
         {
@@ -305,7 +390,14 @@ namespace OpenAL
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcePlay")]
-        public static extern void SourcePlay(uint source);
+        public static extern void pSourcePlay(uint source);
+
+      public static  void SourcePlay (uint source)
+        {
+            Android.Util.Log.Debug ("ropo", "SourcePlay tid: " + Environment.CurrentManagedThreadId);
+
+            pSourcePlay (source);
+        }
 
         public static void SourcePlay(int source)
         {
@@ -319,11 +411,25 @@ namespace OpenAL
 
         [CLSCompliant(false)]
         [DllImport(NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alIsSource")]
-        public static extern bool IsSource(int source);
+        public static extern bool pIsSource(int source);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alDeleteSources")]
-        public static extern void DeleteSources(int n, ref int sources);
+        public static extern void pDeleteSources(int n, ref int sources);
+
+        public static bool IsSource (int source)
+        {
+            Android.Util.Log.Debug ("ropo", "IsSource tid: " + Environment.CurrentManagedThreadId);
+
+            return pIsSource (source);
+        }
+
+        public static void DeleteSources (int n, ref int sources)
+        {
+            Android.Util.Log.Debug ("ropo", "DeleteSources tid: " + Environment.CurrentManagedThreadId);
+
+            pDeleteSources (n, ref sources);
+        }
 
         public static void DeleteSource(int source)
         {
@@ -332,14 +438,34 @@ namespace OpenAL
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceStop")]
-        public static extern void SourceStop (int sourceId);
+        public static extern void pSourceStop (int sourceId);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcei")]
-        internal static extern void Source (int sourceId, int i, int a);
+        internal static extern void pSource (int sourceId, int i, int a);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSource3i")]
-        public static extern void Source (int sourceId, ALSourcei i, int a, int b, int c);
+        public static extern void pSource (int sourceId, ALSourcei i, int a, int b, int c);
+
+        public static void SourceStop (int sourceId)
+        {
+            Android.Util.Log.Debug ("ropo", "SourceStop tid: " + Environment.CurrentManagedThreadId);
+
+            pSourceStop (sourceId);
+        }
+       internal static void Source (int sourceId, int i, int a)
+        {
+            Android.Util.Log.Debug ("ropo", "Source A tid: " + Environment.CurrentManagedThreadId);
+
+            pSource (sourceId, i, a);
+        }
+
+        public static void Source (int sourceId, ALSourcei i, int a, int b, int c)
+        {
+            Android.Util.Log.Debug ("ropo", "Source B tid: " + Environment.CurrentManagedThreadId);
+
+            pSource (sourceId, i, a, b, c);
+        }
 
         public static void Source (int sourceId, ALSourcei i, int a)
         {
@@ -352,7 +478,15 @@ namespace OpenAL
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcef")]
-        public static extern void Source (int sourceId, ALSourcef i, float a);
+        public static extern void pSource (int sourceId, ALSourcef i, float a);
+
+        public static  void Source (int sourceId, ALSourcef i, float a)
+        {
+            Android.Util.Log.Debug ("ropo", "Source C tid: " + Environment.CurrentManagedThreadId);
+
+            pSource (sourceId, i, a);
+        }
+
 
         /* MUST NOT USE THIS VERSION BECAUSE OF WHAT SEEMS AS A XAMARIN BUG WHERE MULTIPLIE FLOAT PARAMS PASSED BY VALUE CORRUPT FUNCTION PARAMETERS,
          SO WE MUST USE THE VERSION WHICH PASSES AN ARRAY (POINTER) OF FLOATS. 
@@ -379,11 +513,25 @@ namespace OpenAL
         }
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourcefv", ExactSpelling = true)]
-        unsafe private static extern void SourcePrivate (int sid, ALSourcefv param, float* values);
+        unsafe private static extern void pSourcePrivate (int sid, ALSourcefv param, float* values);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetSourcei")]
-        public static extern void GetSource (int sourceId, ALGetSourcei i, out int state);
+        public static extern void pGetSource (int sourceId, ALGetSourcei i, out int state);
+
+       unsafe private static  void SourcePrivate (int sid, ALSourcefv param, float* values)
+        {
+            Android.Util.Log.Debug ("ropo", "SourcePrivate tid: " + Environment.CurrentManagedThreadId);
+
+            pSourcePrivate (sid, param, values);
+        }
+
+        public static  void GetSource (int sourceId, ALGetSourcei i, out int state)
+        {
+            Android.Util.Log.Debug ("ropo", "GetSource tid: " + Environment.CurrentManagedThreadId);
+
+            pGetSource (sourceId, i, out state);
+        }
 
         public static ALSourceState GetSourceState(int sourceId) {
             int state = (int)ALSourceState.Stopped;
@@ -409,18 +557,39 @@ namespace OpenAL
             }
         }
 
+       // public static void DistanceModel (ALDistanceModel model) { }
+
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetListenerfv", ExactSpelling = true)]
-        unsafe private static extern void GetListener (ALListenerfv i, float* values);
-
-        public static void DistanceModel(ALDistanceModel model) { }
-
+        unsafe private static extern void pGetListener (ALListenerfv i, float* values);
+       
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceQueueBuffers")]
-        public unsafe static extern void SourceQueueBuffers (int sourceId, int numEntries, [In] int* buffers);
+        public unsafe static extern void pSourceQueueBuffers (int sourceId, int numEntries, [In] int* buffers);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceUnqueueBuffers")]
-        public unsafe static extern void SourceUnqueueBuffers (int sourceId, int numEntries, [In] int* salvaged);
+        public unsafe static extern void pSourceUnqueueBuffers (int sourceId, int numEntries, [In] int* salvaged);
+
+        unsafe private static void GetListener (ALListenerfv i, float* values)
+        {
+            Android.Util.Log.Debug ("ropo", "GetListener B tid: " + Environment.CurrentManagedThreadId);
+
+            pGetListener (i, values);
+        }
+
+        public unsafe static void SourceQueueBuffers (int sourceId, int numEntries, [In] int* buffers)
+        {
+            Android.Util.Log.Debug ("ropo", "SourceQueueBuffers tid: " + Environment.CurrentManagedThreadId);
+
+            pSourceUnqueueBuffers (sourceId, numEntries, buffers);
+        }
+
+        public unsafe static void SourceUnqueueBuffers (int sourceId, int numEntries, [In] int* salvaged)
+        {
+            Android.Util.Log.Debug ("ropo", "SourceUnqueueBuffers tid: " + Environment.CurrentManagedThreadId);
+
+            pSourceUnqueueBuffers (sourceId, numEntries, salvaged);
+        }
 
         [CLSCompliant (false)]
         public unsafe static void SourceQueueBuffers (int sourceId, int numEntries, int [] buffers)
@@ -435,9 +604,6 @@ namespace OpenAL
             AL.SourceQueueBuffers (sourceId, 1, &buffer);
         }
 
-        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceUnqueueBuffers")]
-        public static extern void SourceUnqueueBuffers (int sid, int numEntries, [Out] int [] bids);
-
         public static unsafe int [] SourceUnqueueBuffers (int sourceId, int numEntries)
         {
             if (numEntries <= 0) {
@@ -451,17 +617,55 @@ namespace OpenAL
             return array;
         }
 
+        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alSourceUnqueueBuffers")]
+        public static extern void pSourceUnqueueBuffers (int sid, int numEntries, [Out] int[] bids);
+
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetEnumValue")]
-        public static extern int GetEnumValue (string enumName);
+        public static extern int pGetEnumValue (string enumName);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alIsExtensionPresent")]
-        public static extern bool IsExtensionPresent (string extensionName);
+        public static extern bool pIsExtensionPresent (string extensionName);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetProcAddress")]
-        public static extern IntPtr GetProcAddress (string functionName);
+        public static extern IntPtr pGetProcAddress (string functionName);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alGetString")]
-        private static extern IntPtr alGetString (int p);
+        private static extern IntPtr palGetString (int p);
+
+        public static void SourceUnqueueBuffers (int sid, int numEntries, [Out] int[] bids)
+        {
+            Android.Util.Log.Debug ("ropo", "SourceUnqueueBuffers tid: " + Environment.CurrentManagedThreadId);
+
+            pSourceUnqueueBuffers (sid, numEntries, bids);
+        }
+
+        public static int GetEnumValue (string enumName)
+        {
+            Android.Util.Log.Debug ("ropo", "GetEnumValue tid: " + Environment.CurrentManagedThreadId);
+
+            return pGetEnumValue (enumName);
+        }
+
+        public static bool IsExtensionPresent (string extensionName)
+        {
+            Android.Util.Log.Debug ("ropo", "IsExtensionPresent tid: " + Environment.CurrentManagedThreadId);
+
+            return pIsExtensionPresent (extensionName);
+        }
+
+        public static IntPtr GetProcAddress (string functionName)
+        {
+            Android.Util.Log.Debug ("ropo", "GetProcAddress tid: " + Environment.CurrentManagedThreadId);
+
+            return pGetProcAddress (functionName);
+        }
+
+        private static IntPtr alGetString (int p)
+        {
+            Android.Util.Log.Debug ("ropo", "alGetString tid: " + Environment.CurrentManagedThreadId);
+
+            return palGetString (p);
+        }
 
         public static string GetString (int p)
         {
@@ -484,44 +688,112 @@ namespace OpenAL
         public const string NativeLibName = "soft_oal.dll";
 #endif
 
-        [CLSCompliant (false)]
-        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCreateContext")]
-        public static extern IntPtr CreateContext (IntPtr device, int [] attributes);
 
-        public static AlcError GetError()
+        public static AlcError GetError ()
         {
             return GetError (IntPtr.Zero);
         }
 
         [CLSCompliant (false)]
+        [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCreateContext")]
+        public static extern IntPtr pCreateContext (IntPtr device, int [] attributes);
+
+        [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetError")]
-        public static extern AlcError GetError (IntPtr device);
+        public static extern AlcError pGetError (IntPtr device);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetCurrentContext")]
-        public static extern IntPtr GetCurrentContext ();
+        public static extern IntPtr pGetCurrentContext ();
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcMakeContextCurrent")]
-        public static extern void MakeContextCurrent (IntPtr context);
+        public static extern void pMakeContextCurrent (IntPtr context);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcDestroyContext")]
-        public static extern void DestroyContext (IntPtr context);
+        public static extern void pDestroyContext (IntPtr context);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcCloseDevice")]
-        public static extern void CloseDevice (IntPtr device);
+        public static extern void pCloseDevice (IntPtr device);
 
         [CLSCompliant (false)]
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcOpenDevice")]
-        public static extern IntPtr OpenDevice ([MarshalAs (UnmanagedType.LPStr)]  string device);
+        public static extern IntPtr pOpenDevice ([MarshalAs (UnmanagedType.LPStr)]  string device);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcIsExtensionPresent")]
-        public static extern bool IsExtensionPresent (IntPtr device, [MarshalAs (UnmanagedType.LPStr)] string extensionName);
+        public static extern bool pIsExtensionPresent (IntPtr device, [MarshalAs (UnmanagedType.LPStr)] string extensionName);
 
         [DllImport (NativeLibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "alcGetString")]
-        internal static extern IntPtr alGetString (IntPtr device, int p);
+        internal static extern IntPtr palGetString (IntPtr device, int p);
+
+        ////
+
+        public static IntPtr CreateContext (IntPtr device, int[] attributes)
+        {
+            Android.Util.Log.Debug ("ropo", "CreateContext tid: " + Environment.CurrentManagedThreadId);
+
+            return pCreateContext (device, attributes);
+        }
+
+        public static AlcError GetError (IntPtr device)
+        {
+            Android.Util.Log.Debug ("ropo", "GetError tid: " + Environment.CurrentManagedThreadId);
+
+            return pGetError (device);
+        }
+
+        public static IntPtr GetCurrentContext ()
+        {
+            Android.Util.Log.Debug ("ropo", "GetCurrentContext tid: " + Environment.CurrentManagedThreadId);
+
+            return pGetCurrentContext ();
+        }
+
+        public static void MakeContextCurrent (IntPtr context)
+        {
+            Android.Util.Log.Debug ("ropo", "MakeContextCurrent tid: " + Environment.CurrentManagedThreadId);
+
+            pMakeContextCurrent (context);
+        }
+
+        public static void DestroyContext (IntPtr context)
+        {
+            Android.Util.Log.Debug ("ropo", "DestroyContext tid: " + Environment.CurrentManagedThreadId);
+
+            pDestroyContext (context);
+        }
+
+        public static void CloseDevice (IntPtr device)
+        {
+            Android.Util.Log.Debug ("ropo", "CloseDevice tid: " + Environment.CurrentManagedThreadId);
+
+            pCloseDevice (device);
+        }
+
+        public static IntPtr OpenDevice ([MarshalAs (UnmanagedType.LPStr)]  string device)
+        {
+            Android.Util.Log.Debug ("ropo", "OpenDevice tid: " + Environment.CurrentManagedThreadId);
+
+            return pOpenDevice (device);
+        }
+
+        public static bool IsExtensionPresent (IntPtr device, [MarshalAs (UnmanagedType.LPStr)] string extensionName)
+        {
+            Android.Util.Log.Debug ("ropo", "IsExtensionPresent tid: " + Environment.CurrentManagedThreadId);
+
+            return pIsExtensionPresent (device, extensionName);
+        }
+
+        internal static IntPtr alGetString (IntPtr device, int p)
+        {
+            Android.Util.Log.Debug ("ropo", "alGetString tid: " + Environment.CurrentManagedThreadId);
+
+            return palGetString (device, p);
+        }
+
+        ////
 
         public static string GetString (IntPtr device, int p)
         {

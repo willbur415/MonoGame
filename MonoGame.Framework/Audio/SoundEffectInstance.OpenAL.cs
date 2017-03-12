@@ -117,7 +117,7 @@ namespace Microsoft.Xna.Framework.Audio
 				return;
 
 			// Distance Model
-			AL.DistanceModel (ALDistanceModel.InverseDistanceClamped);
+			//AL.DistanceModel (ALDistanceModel.InverseDistanceClamped);
             ALHelper.CheckError("Failed set source distance.");
 			// Pan
 			AL.Source (SourceId, ALSourcefv.Position, _pan, 0, 0.1f);

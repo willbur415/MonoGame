@@ -287,10 +287,6 @@ namespace Microsoft.Xna.Framework
                         TouchPanelState.ReleaseAllTouches();
                     }
 
-                    // Set flag to recreate gl surface or rendering can be bad on orienation change or if app 
-                    // is closed in one orientation and re-opened in another.
-                    GameView.ForceRecreateGLSurface ();
-
                     OnOrientationChanged ();
                 }
             }

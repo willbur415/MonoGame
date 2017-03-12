@@ -475,12 +475,23 @@ namespace Microsoft.Xna.Framework.Audio
         const CallingConvention Style = CallingConvention.Cdecl;
 
         [DllImport(Lib, EntryPoint = "alcDevicePauseSOFT", ExactSpelling = true, CallingConvention = Style)]
-        unsafe static extern void alcDevicePauseSOFT(IntPtr device);
+        unsafe static extern void palcDevicePauseSOFT(IntPtr device);
 
         [DllImport(Lib, EntryPoint = "alcDeviceResumeSOFT", ExactSpelling = true, CallingConvention = Style)]
-        unsafe static extern void alcDeviceResumeSOFT(IntPtr device);
+        unsafe static extern void palcDeviceResumeSOFT(IntPtr device);
 
-        void Activity_Paused(object sender, EventArgs e)
+        unsafe static  void alcDevicePauseSOFT (IntPtr device)
+        {
+            palcDevicePauseSOFT (device);
+        }
+
+        unsafe static  void alcDeviceResumeSOFT (IntPtr device)
+        {
+            palcDeviceResumeSOFT (device);
+        }
+
+
+        void Activity_Paused (object sender, EventArgs e)
         {
             // Pause all currently playing sounds. The internal pause count in OALSoundBuffer
             // will take care of sounds that were already paused.

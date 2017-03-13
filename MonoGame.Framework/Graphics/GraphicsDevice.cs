@@ -470,21 +470,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void Clear(Color color)
         {
-            MonoGameAndroidGameView.s = 900801;
-
             var options = ClearOptions.Target;
             options |= ClearOptions.DepthBuffer;
             options |= ClearOptions.Stencil;
-            MonoGameAndroidGameView.s = 900802;
-
+        
             PlatformClear (options, color.ToVector4(), _viewport.MaxDepth, 0);
 
             unchecked
             {
                 _graphicsMetrics._clearCount++;
             }
-            MonoGameAndroidGameView.s = 900803;
-
         }
 
         public void Clear(ClearOptions options, Color color, float depth, int stencil)

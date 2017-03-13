@@ -475,30 +475,10 @@ namespace Microsoft.Xna.Framework.Audio
         const CallingConvention Style = CallingConvention.Cdecl;
 
         [DllImport(Lib, EntryPoint = "alcDevicePauseSOFT", ExactSpelling = true, CallingConvention = Style)]
-        unsafe static extern void palcDevicePauseSOFT(IntPtr device);
+        unsafe static extern void alcDevicePauseSOFT (IntPtr device);
 
         [DllImport(Lib, EntryPoint = "alcDeviceResumeSOFT", ExactSpelling = true, CallingConvention = Style)]
-        unsafe static extern void palcDeviceResumeSOFT(IntPtr device);
-
-        unsafe static  void alcDevicePauseSOFT (IntPtr device)
-        {
-            Android.Util.Log.Debug ("ropo_openal", "alcDevicePauseSOFT 1: "+Environment.CurrentManagedThreadId);
-
-            palcDevicePauseSOFT (device);
-
-            Android.Util.Log.Debug ("ropo_openal", "alcDevicePauseSOFT end: " + Environment.CurrentManagedThreadId);
-
-        }
-
-        unsafe static  void alcDeviceResumeSOFT (IntPtr device)
-        {
-            Android.Util.Log.Debug ("ropo_openal", "alcDeviceResumeSOFT 1: " + Environment.CurrentManagedThreadId);
-
-            palcDeviceResumeSOFT (device);
-
-            Android.Util.Log.Debug ("ropo_openal", "alcDeviceResumeSOFT end: " + Environment.CurrentManagedThreadId);
-        }
-
+        unsafe static extern void alcDeviceResumeSOFT (IntPtr device);
 
         void Activity_Paused (object sender, EventArgs e)
         {

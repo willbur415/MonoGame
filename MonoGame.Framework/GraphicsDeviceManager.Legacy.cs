@@ -599,7 +599,6 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         internal void ResetClientBounds()
         {
-            Android.Util.Log.Debug ("MonoGame", "GraphicsDeviceManager.ResetClientBounds: 1");
 #if ANDROID
             float preferredAspectRatio = (float)PreferredBackBufferWidth /
                                          (float)PreferredBackBufferHeight;
@@ -638,16 +637,16 @@ namespace Microsoft.Xna.Framework
                 newClientBounds.Width = GraphicsDevice.DisplayMode.Width;
                 newClientBounds.Height = GraphicsDevice.DisplayMode.Height;
             }
-            Android.Util.Log.Debug ("MonoGame", "GraphicsDeviceManager.ResetClientBounds: 2");
+
             // Ensure buffer size is reported correctly
             _graphicsDevice.PresentationParameters.BackBufferWidth = newClientBounds.Width;
             _graphicsDevice.PresentationParameters.BackBufferHeight = newClientBounds.Height;
 
             // Set the veiwport so the (potentially) resized client bounds are drawn in the middle of the screen
             _graphicsDevice.Viewport = new Viewport(newClientBounds.X, -newClientBounds.Y, newClientBounds.Width, newClientBounds.Height);
-            Android.Util.Log.Debug ("MonoGame", "GraphicsDeviceManager.ResetClientBounds: 3");
+
             ((AndroidGameWindow)_game.Window).ChangeClientBounds(newClientBounds);
-            Android.Util.Log.Debug ("MonoGame", "GraphicsDeviceManager.ResetClientBounds: 4");
+
             // Touch panel needs latest buffer size for scaling
             TouchPanel.DisplayWidth = newClientBounds.Width;
             TouchPanel.DisplayHeight = newClientBounds.Height;

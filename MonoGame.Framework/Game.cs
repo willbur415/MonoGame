@@ -419,8 +419,7 @@ namespace Microsoft.Xna.Framework
             // with even what looks like a safe change.  Be sure to test 
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
-            MonoGameAndroidGameView.s = 900501;
-
+  
             RetryTick:
 
             // Advance the accumulated elapsed time.
@@ -450,8 +449,6 @@ namespace Microsoft.Xna.Framework
             if (_accumulatedElapsedTime > _maxElapsedTime)
                 _accumulatedElapsedTime = _maxElapsedTime;
 
-            MonoGameAndroidGameView.s = 900502;
-
             if (IsFixedTimeStep)
             {
                 _gameTime.ElapsedGameTime = TargetElapsedTime;
@@ -463,11 +460,8 @@ namespace Microsoft.Xna.Framework
                     _gameTime.TotalGameTime += TargetElapsedTime;
                     _accumulatedElapsedTime -= TargetElapsedTime;
                     ++stepCount;
-                    MonoGameAndroidGameView.s = 900503;
-
-                    DoUpdate (_gameTime);
-                    MonoGameAndroidGameView.s = 900504;
-
+                 
+                    DoUpdate (_gameTime);                 
                 }
 
                 //Every update after the first accumulates lag

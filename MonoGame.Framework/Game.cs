@@ -419,8 +419,9 @@ namespace Microsoft.Xna.Framework
             // with even what looks like a safe change.  Be sure to test 
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
+            MonoGameAndroidGameView.s = 900501;
 
-        RetryTick:
+            RetryTick:
 
             // Advance the accumulated elapsed time.
             var currentTicks = _gameTimer.Elapsed.Ticks;
@@ -449,6 +450,8 @@ namespace Microsoft.Xna.Framework
             if (_accumulatedElapsedTime > _maxElapsedTime)
                 _accumulatedElapsedTime = _maxElapsedTime;
 
+            MonoGameAndroidGameView.s = 900502;
+
             if (IsFixedTimeStep)
             {
                 _gameTime.ElapsedGameTime = TargetElapsedTime;
@@ -460,8 +463,11 @@ namespace Microsoft.Xna.Framework
                     _gameTime.TotalGameTime += TargetElapsedTime;
                     _accumulatedElapsedTime -= TargetElapsedTime;
                     ++stepCount;
+                    MonoGameAndroidGameView.s = 900503;
 
-                    DoUpdate(_gameTime);
+                    DoUpdate (_gameTime);
+                    MonoGameAndroidGameView.s = 900504;
+
                 }
 
                 //Every update after the first accumulates lag
@@ -493,16 +499,24 @@ namespace Microsoft.Xna.Framework
                 _gameTime.ElapsedGameTime = _accumulatedElapsedTime;
                 _gameTime.TotalGameTime += _accumulatedElapsedTime;
                 _accumulatedElapsedTime = TimeSpan.Zero;
+                MonoGameAndroidGameView.s = 900505;
 
-                DoUpdate(_gameTime);
+                DoUpdate (_gameTime);
+                MonoGameAndroidGameView.s = 900506;
+
             }
+            MonoGameAndroidGameView.s = 900507;
 
             // Draw unless the update suppressed it.
             if (_suppressDraw)
                 _suppressDraw = false;
             else
             {
-                DoDraw(_gameTime);
+                MonoGameAndroidGameView.s = 900508;
+
+                DoDraw (_gameTime);
+                MonoGameAndroidGameView.s = 900509;
+
             }
 
             if (_shouldExit)

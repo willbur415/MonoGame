@@ -482,12 +482,21 @@ namespace Microsoft.Xna.Framework.Audio
 
         unsafe static  void alcDevicePauseSOFT (IntPtr device)
         {
+            Android.Util.Log.Debug ("ropo_openal", "alcDevicePauseSOFT 1: "+Environment.CurrentManagedThreadId);
+
             palcDevicePauseSOFT (device);
+
+            Android.Util.Log.Debug ("ropo_openal", "alcDevicePauseSOFT end: " + Environment.CurrentManagedThreadId);
+
         }
 
         unsafe static  void alcDeviceResumeSOFT (IntPtr device)
         {
+            Android.Util.Log.Debug ("ropo_openal", "alcDeviceResumeSOFT 1: " + Environment.CurrentManagedThreadId);
+
             palcDeviceResumeSOFT (device);
+
+            Android.Util.Log.Debug ("ropo_openal", "alcDeviceResumeSOFT end: " + Environment.CurrentManagedThreadId);
         }
 
 

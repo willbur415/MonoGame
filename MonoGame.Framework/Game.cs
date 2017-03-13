@@ -499,24 +499,16 @@ namespace Microsoft.Xna.Framework
                 _gameTime.ElapsedGameTime = _accumulatedElapsedTime;
                 _gameTime.TotalGameTime += _accumulatedElapsedTime;
                 _accumulatedElapsedTime = TimeSpan.Zero;
-                MonoGameAndroidGameView.s = 900505;
-
+               
                 DoUpdate (_gameTime);
-                MonoGameAndroidGameView.s = 900506;
-
             }
-            MonoGameAndroidGameView.s = 900507;
 
             // Draw unless the update suppressed it.
             if (_suppressDraw)
                 _suppressDraw = false;
             else
-            {
-                MonoGameAndroidGameView.s = 900508;
-
-                DoDraw (_gameTime);
-                MonoGameAndroidGameView.s = 900509;
-
+            {             
+                DoDraw (_gameTime);             
             }
 
             if (_shouldExit)

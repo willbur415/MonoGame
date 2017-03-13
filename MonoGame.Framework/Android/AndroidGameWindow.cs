@@ -62,46 +62,26 @@ namespace Microsoft.Xna.Framework
 
         private void OnUpdateFrame(object sender, MonoGameAndroidGameView.FrameEventArgs frameEventArgs)
         {
-            MonoGameAndroidGameView.s = 9001;
-
             GameView.MakeCurrent();
-            MonoGameAndroidGameView.s = 9002;
-
+           
             Threading.Run();
-            MonoGameAndroidGameView.s = 9003;
-
+           
             if (_game != null)
-            {
-                MonoGameAndroidGameView.s = 9004;
-
+            {              
                 if (!GameView.IsResuming && _game.Platform.IsActive && !ScreenReceiver.ScreenLocked) //Only call draw if an update has occured
-                {
-                    MonoGameAndroidGameView.s = 9005;
-
+                {                
                     _game.Tick();
-
-                    MonoGameAndroidGameView.s = 9006;
-
                 }
                 else if (_game.GraphicsDevice != null)
-                {
-                    MonoGameAndroidGameView.s = 9008;
-
+                {              
                     _game.GraphicsDevice.Clear(Color.Black);
-                    MonoGameAndroidGameView.s = 9009;
-
+                  
                     if (GameView.IsResuming && Resumer != null)
                     {
-                        MonoGameAndroidGameView.s = 9010;
-
                         Resumer.Draw();
-
-                        MonoGameAndroidGameView.s = 9011;
-
                     }
                     _game.Platform.Present();
-                    MonoGameAndroidGameView.s = 9012;
-
+                   
                 }
             }
         }

@@ -126,30 +126,54 @@ namespace Microsoft.Xna.Framework
         // EnterForeground
         void Activity_Resumed(object sender, EventArgs e)
         {
+            Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Resumed 1");
+
             if (!IsActive)
             {
                 IsActive = true;
-				_gameWindow.GameView.Resume();
-				if(_MediaPlayer_PrevState == MediaState.Playing && Game.Activity.AutoPauseAndResumeMediaPlayer)
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Resumed 2");
+
+                _gameWindow.GameView.Resume();
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Resumed 3");
+
+                if (_MediaPlayer_PrevState == MediaState.Playing && Game.Activity.AutoPauseAndResumeMediaPlayer)
                 	MediaPlayer.Resume();
-				if (!_gameWindow.GameView.IsFocused)
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Resumed 4");
+
+                if (!_gameWindow.GameView.IsFocused)
 					_gameWindow.GameView.RequestFocus();
             }
+            Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Resumed end");
+
         }
 
-		MediaState _MediaPlayer_PrevState = MediaState.Stopped;
+        MediaState _MediaPlayer_PrevState = MediaState.Stopped;
 	    // EnterBackground
         void Activity_Paused(object sender, EventArgs e)
         {
+            Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused 1");
+
             if (IsActive)
             {
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused 11");
+
                 IsActive = false;
-				_MediaPlayer_PrevState = MediaPlayer.State;
-				_gameWindow.GameView.Pause();
-				_gameWindow.GameView.ClearFocus();
-				if(Game.Activity.AutoPauseAndResumeMediaPlayer)
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused 12");
+
+                _MediaPlayer_PrevState = MediaPlayer.State;
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused 2");
+
+                _gameWindow.GameView.Pause();
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused 3");
+
+                _gameWindow.GameView.ClearFocus();
+                Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused 4");
+
+                if (Game.Activity.AutoPauseAndResumeMediaPlayer)
                 	MediaPlayer.Pause();
             }
+            Android.Util.Log.Verbose ("AndroidGameView", "AndrGmPlatform: RenderLoop: Activity_Paused end");
+
         }
 
         public override GameRunBehavior DefaultRunBehavior

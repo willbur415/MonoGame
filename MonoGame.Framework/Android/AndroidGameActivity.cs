@@ -30,21 +30,30 @@ namespace Microsoft.Xna.Framework
 		/// </param>
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
-            RequestWindowFeature(WindowFeatures.NoTitle);
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "Run 1");
+
+            RequestWindowFeature (WindowFeatures.NoTitle);
             base.OnCreate(savedInstanceState);
 
-			IntentFilter filter = new IntentFilter();
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "Run 2");
+
+            IntentFilter filter = new IntentFilter();
 		    filter.AddAction(Intent.ActionScreenOff);
 		    filter.AddAction(Intent.ActionScreenOn);
 		    filter.AddAction(Intent.ActionUserPresent);
-		    
-		    screenReceiver = new ScreenReceiver();
+
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "Run 3");
+
+            screenReceiver = new ScreenReceiver();
 		    RegisterReceiver(screenReceiver, filter);
 
             _orientationListener = new OrientationListener(this);
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "Run 4");
 
-			Game.Activity = this;
-		}
+            Game.Activity = this;
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "Run end");
+
+        }
 
         public static event EventHandler Paused;
 
@@ -56,18 +65,26 @@ namespace Microsoft.Xna.Framework
 
         protected override void OnPause()
         {
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "OnPause 1");
+
             base.OnPause();
             if (Paused != null)
                 Paused(this, EventArgs.Empty);
 
             if (_orientationListener.CanDetectOrientation())
                 _orientationListener.Disable();
+
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "OnPause end");
+
         }
 
         public static event EventHandler Resumed;
         protected override void OnResume()
         {
             base.OnResume();
+
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "OnResume 1");
+
             if (Resumed != null)
                 Resumed(this, EventArgs.Empty);
 
@@ -81,9 +98,13 @@ namespace Microsoft.Xna.Framework
                 if (_orientationListener.CanDetectOrientation())
                     _orientationListener.Enable();
             }
+
+            Android.Util.Log.Verbose ("AndroidGameView_AndroidGameActivity", "OnResume end");
+
+
         }
 
-		protected override void OnDestroy ()
+        protected override void OnDestroy ()
 		{
             UnregisterReceiver(screenReceiver);
             ScreenReceiver.ScreenLocked = false;

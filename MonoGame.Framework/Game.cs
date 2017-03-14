@@ -375,20 +375,24 @@ namespace Microsoft.Xna.Framework
 
         public void Run(GameRunBehavior runBehavior)
         {
-            AssertNotDisposed();
+            Android.Util.Log.Verbose ("AndroidGameView_Game", "Run 1");
+
+            AssertNotDisposed ();
             if (!Platform.BeforeRun())
             {
                 BeginRun();
                 _gameTimer = Stopwatch.StartNew();
                 return;
             }
+            Android.Util.Log.Verbose ("AndroidGameView_Game", "Run 2");
 
             if (!_initialized) {
                 DoInitialize ();
                 _initialized = true;
             }
+            Android.Util.Log.Verbose ("AndroidGameView_Game", "Run 3");
 
-            BeginRun();
+            BeginRun ();
             _gameTimer = Stopwatch.StartNew();
             switch (runBehavior)
             {
@@ -405,6 +409,8 @@ namespace Microsoft.Xna.Framework
                 throw new ArgumentException(string.Format(
                     "Handling for the run behavior {0} is not implemented.", runBehavior));
             }
+            Android.Util.Log.Verbose ("AndroidGameView_Game", "Run end");
+
         }
 
         private TimeSpan _accumulatedElapsedTime;

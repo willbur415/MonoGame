@@ -112,10 +112,11 @@ namespace Microsoft.Xna.Framework
             Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
             Sdl.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
 
+            var entryAssembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly ();
             using (
                 var stream =
-                    Assembly.GetEntryAssembly().GetManifestResourceStream(Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.bmp") ??
-                    Assembly.GetEntryAssembly().GetManifestResourceStream("Icon.bmp") ??
+                    (entryAssembly.EntryPoint != null ? entryAssembly.GetManifestResourceStream(entryAssembly.EntryPoint.DeclaringType.Namespace + ".Icon.bmp") : null) ??
+                    entryAssembly.GetManifestResourceStream("Icon.bmp") ??
                     Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
             {
                 if (stream != null)

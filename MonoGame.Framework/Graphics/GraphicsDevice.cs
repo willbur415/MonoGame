@@ -233,6 +233,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void Setup()
         {
+            Android.Util.Log.Verbose ("AndroidGameView", "GraphicsDevice: Setup 1");
+
 #if DEBUG
             if (DisplayMode == null)
             {
@@ -276,6 +278,9 @@ namespace Microsoft.Xna.Framework.Graphics
             RasterizerState = RasterizerState.CullCounterClockwise;
 
             EffectCache = new Dictionary<int, Effect>();
+
+            Android.Util.Log.Verbose ("AndroidGameView", "GraphicsDevice: Setup end");
+
         }
 
         ~GraphicsDevice()
@@ -285,7 +290,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal void Initialize()
         {
-            PlatformInitialize();
+            Android.Util.Log.Verbose ("AndroidGameView", "GraphicsDevice: Initialize 1");
+
+            PlatformInitialize ();
 
             // Force set the default render states.
             _blendStateDirty = _depthStencilStateDirty = _rasterizerStateDirty = true;
@@ -317,6 +324,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Set the default render target.
             ApplyRenderTargets(null);
+
+            Android.Util.Log.Verbose ("AndroidGameView", "GraphicsDevice: Initialize end");
+
         }
 
         public RasterizerState RasterizerState

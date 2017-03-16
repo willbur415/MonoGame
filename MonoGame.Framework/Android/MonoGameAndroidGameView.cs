@@ -541,6 +541,10 @@ namespace Microsoft.Xna.Framework
 
         void processStateRunning(CancellationToken  token)
         {
+            if (runs>0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning 1, " + _internalState);
+            }
 
             // do not run game if surface is not avalible
             lock (_lockObject)
@@ -564,7 +568,10 @@ namespace Microsoft.Xna.Framework
  
                 return;
             }
-
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning 2, " + _internalState);
+            }
             try
             {
                 UpdateAndRenderFrame ();
@@ -586,7 +593,11 @@ namespace Microsoft.Xna.Framework
                    
                 }
             }
-
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning end, " + _internalState);
+            }
+            --runs;
         }
 
         void processStatePausing ()
@@ -610,6 +621,7 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        int runs = 0;
         void processStateResuming ()
         {
            // Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 1, " + _internalState);
@@ -741,6 +753,8 @@ namespace Microsoft.Xna.Framework
         bool RunIteration(CancellationToken token)
         {
 
+            Thread.Sleep (100); this seems to fix it
+
             // set main game thread global ID
             Threading.ResetThread (Thread.CurrentThread.ManagedThreadId);
 
@@ -817,6 +831,8 @@ namespace Microsoft.Xna.Framework
 
                     Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateResuming end out, " + _internalState);
 
+                    runs = 1;
+
                     break;
 
                 case InternalState.Running_GameThread: // when we are running game 
@@ -892,7 +908,18 @@ namespace Microsoft.Xna.Framework
                 renderEventArgs.Time = t < 0 ? 0 : t;
             }
 
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: UpdateAndRenderFrame 1, " + _internalState);
+            }
+
             RenderFrameInternal (renderEventArgs);
+
+
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: UpdateAndRenderFrame 2, " + _internalState);
+            }
 
             prevRenderTime = curRenderTime;
         }
@@ -902,9 +929,21 @@ namespace Microsoft.Xna.Framework
             if (LogFPS) {
                 Mark ();
             }
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderFrameInternal 1, " + _internalState);
+            }
             OnRenderFrame (e);
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderFrameInternal 2, " + _internalState);
+            }
             if (RenderFrame != null)
                 RenderFrame (this, e);
+            if (runs > 0)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderFrameInternal end, " + _internalState);
+            }
         }
 
         protected virtual void OnRenderFrame (FrameEventArgs e)

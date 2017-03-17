@@ -54,6 +54,7 @@ namespace Microsoft.Xna.Framework
         bool _wasExitStateProcessed = false;
 
         AutoResetEvent _waitForMainGameLoop2 = new AutoResetEvent (false);
+        AutoResetEvent _workerThreadUIRenderingWait = new AutoResetEvent (false);
 
         object _lockObject = new object ();
 
@@ -246,11 +247,13 @@ namespace Microsoft.Xna.Framework
 
             Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Run 1, " + Environment.CurrentManagedThreadId + ", " + System.Threading.Thread.CurrentThread.Name + ", " + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
+            assertThreadPriority ();
+       
             // We always start a new task, regardless if we render on UI thread or not.
             renderTask = Task.Factory.StartNew (() =>
             {
                 Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Run 2, " + Environment.CurrentManagedThreadId + ", " + System.Threading.Thread.CurrentThread.Name + ", " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
+               
                 WorkerThreadFrameDispatcher (syncContext);
 
             }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
@@ -260,15 +263,23 @@ namespace Microsoft.Xna.Framework
                 });
         }
 
+        volatile int numResume = 0;
         public virtual void Pause ()
         {
+            --numResume;
             // lock the entire block if you are doing anything otherwise deadlocks will creep on you because game thread will call "pulse" before you reach "wait" here.
 
             EnsureUndisposed ();
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 1, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 1, " + _internalState+", p: "+ numResume);
 
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-            // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
+            // if triggered in quick succession and blocked by graphics device creation, 
+            // pause can be triggered twice, without resume in between on some phones.
+            if (_internalState != InternalState.Running_GameThread)
+            {
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 11, " + _internalState + ", p: " + numResume);
+                return;
+            }
+
 
             // this guarantees that resume finished processing, since we cannot wait inside resume because we deadlock as surface wouldn't get created
             if (RenderOnUIThread == false)
@@ -285,7 +296,7 @@ namespace Microsoft.Xna.Framework
 
             _waitForMainGameLoop2.Reset ();  // in case it was enabled
 
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 2, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 2, " + _internalState + ", p: " + numResume);
 
             // make app more reponsive by making locks easier to aqcuire by the UI thread
          //   Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
@@ -295,12 +306,12 @@ namespace Microsoft.Xna.Framework
             bool isAndroidSurfaceAvalible = false; // use local because the wait below must be outside lock
             lock (_lockObject)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 3, " + _internalState);
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 3, " + _internalState + ", p: " + numResume);
                 isAndroidSurfaceAvalible = androidSurfaceAvailable;
 
                 if (!isAndroidSurfaceAvalible)
                 {
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 4, " + _internalState);
+                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 4, " + _internalState + ", p: " + numResume);
                     _internalState = InternalState.Paused_GameThread; // prepare for next game loop iteration
                 }
             }
@@ -315,23 +326,24 @@ namespace Microsoft.Xna.Framework
                 return;
             }*/
 
-             Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 6, " + _internalState);
+             Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 6, " + _internalState + ", p: " + numResume);
 
             // make app more reponsive by making locks easier to aqcuire by the UI thread
            // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
 
             lock (_lockObject)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 7, " + _internalState);
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 7, " + _internalState + ", p: " + numResume);
 
                 // processing the pausing state only if the surface was created already
                 if (androidSurfaceAvailable)
-                {                    
-                       _internalState = InternalState.Pausing_UIThread;
+                {
+                    _wasPausedStateProcessed = false;
+                    _internalState = InternalState.Pausing_UIThread;
                 }              
             }
 
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 8, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 8, " + _internalState + ", p: " + numResume);
 
             if(RenderOnUIThread == false)
             {
@@ -345,19 +357,20 @@ namespace Microsoft.Xna.Framework
                 }
             }
 
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause end, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause end, " + _internalState + ", p: " + numResume);
 
         }
 
         public virtual void Resume ()
         {
+            numResume++;
             // lock the entire block if you are doing anything otherwise deadlocks will creep on you because game thread will call "pulse" before you reach "wait" here.
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 1, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 1, " + _internalState + ", p: " + numResume);
 
             EnsureUndisposed ();
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 2, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 2, " + _internalState + ", p: " + numResume);
 
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 21, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 21, " + _internalState + ", p: " + numResume);
 
 
             // make app more reponsive by making locks easier to aqcuire by the UI thread
@@ -365,9 +378,9 @@ namespace Microsoft.Xna.Framework
 
             lock (_lockObject)
             {
-               Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 4, " + _internalState);
+               Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 4, " + _internalState + ", p: " + numResume);
 
-
+                _wasResumeStateProcessed = false;
                 _internalState = InternalState.Resuming_UIThread;
             }
 
@@ -375,7 +388,7 @@ namespace Microsoft.Xna.Framework
 
                  _waitForMainGameLoop2.Set ();
 
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 5, " + _internalState);
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 5, " + _internalState + ", p: " + numResume);
 
                 try
                 {
@@ -383,10 +396,10 @@ namespace Microsoft.Xna.Framework
                         RequestFocus ();
                 }
                 catch {  }
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 6, " + _internalState);
+                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 6, " + _internalState + ", p: " + numResume);
 
           
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume end, " + _internalState);
+            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume end, " + _internalState + ", p: " + numResume);
 
 
             // do not wait for state transition here since surface creation must be triggered first
@@ -451,10 +464,20 @@ namespace Microsoft.Xna.Framework
                 tick = 0;
                 prevUpdateTime = DateTime.Now;
                 Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop 2, " + _internalState);
-  
-              
+               
                 while (!cts.IsCancellationRequested)
                 {
+                    // todo comment 
+                   /* if (!RenderOnUIThread)
+                    {
+                        uiThreadSyncContext.Send ((s) =>
+                        {
+
+                        }, null);
+                    }*/
+
+                    assertThreadPriority (); // in case users try change thread priority
+
                     // either use UI thread to render one frame or this worker thread
                     bool pauseThread = false;
                     if(RenderOnUIThread)
@@ -467,28 +490,25 @@ namespace Microsoft.Xna.Framework
                     else
                     {
                         pauseThread = RunIteration (cts.Token);
+
+                        // allows CPU to switch to some other thread of same priority if any is waiting. If none is waiting it does nothing.
+                        // (UI thread is what we are interested in giving CPU cycles to), needed for one phone (droid razr M),
+                        // otherwise pause/resume doesn't get called. As if it has bad scheduling??
+                       // Thread.Sleep (1); 
                     }
 
-
-                    // continue UI thread that is waiting in pause
-                   /* bool pauseWorkerThread = false;
-                    lock (_lockObject)
-                    {
-                        if (_internalState == InternalState.Paused_GameThread && _wasPausedStateProcessed == false)
-                        {
-                            _wasPausedStateProcessed = true;
-                            pauseWorkerThread = true;
-                        }                   
-                    }*/
 
                     if(pauseThread)
                     {
                         Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop pausing, " + _internalState);
 
-                        _wasPausedStateProcessed = true;
+                        lock (_lockObject)
+                        {
+                            _wasPausedStateProcessed = true;
+                        }
+                       
                         _waitForMainGameLoop2.WaitOne (); // pause this thread
                     }
-                        
                 }
 
 
@@ -521,6 +541,14 @@ namespace Microsoft.Xna.Framework
             }
             Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop end, " + _internalState);
 
+        }
+
+        void assertThreadPriority()
+        {
+            if (Thread.CurrentThread.Priority != ThreadPriority.Normal)
+            {
+                throw new Exception ("Error: MonoGameAndroidGameView.cs: UI thread and worker thread priority must be Normal. If you set it some other value some phones may not trigger pause or resume anymore. Remove at your own peril.");
+            }
         }
 
         DateTime prevUpdateTime;
@@ -753,7 +781,7 @@ namespace Microsoft.Xna.Framework
         bool RunIteration(CancellationToken token)
         {
 
-            Thread.Sleep (100); this seems to fix it
+            //Thread.Sleep (100); this seems to fix it
 
             // set main game thread global ID
             Threading.ResetThread (Thread.CurrentThread.ManagedThreadId);

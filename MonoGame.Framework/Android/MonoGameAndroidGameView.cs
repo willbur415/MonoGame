@@ -412,8 +412,7 @@ namespace Microsoft.Xna.Framework
             }
             base.Dispose (disposing);
         }
-
-   
+ 
         public void Stop ()
         {
             Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Stop 1, " + _internalState);
@@ -467,15 +466,6 @@ namespace Microsoft.Xna.Framework
                
                 while (!cts.IsCancellationRequested)
                 {
-                    // todo comment 
-                   /* if (!RenderOnUIThread)
-                    {
-                        uiThreadSyncContext.Send ((s) =>
-                        {
-
-                        }, null);
-                    }*/
-
                     assertThreadPriority (); // in case users try change thread priority
 
                     // either use UI thread to render one frame or this worker thread
@@ -509,6 +499,12 @@ namespace Microsoft.Xna.Framework
                        
                         _waitForMainGameLoop2.WaitOne (); // pause this thread
                     }
+
+                    uiThreadSyncContext.Post ((s) =>
+                    {
+                        int x = 0;
+                        int y = x;
+                    }, null);
                 }
 
 
@@ -569,6 +565,7 @@ namespace Microsoft.Xna.Framework
 
         void processStateRunning(CancellationToken  token)
         {
+
             if (runs>0)
             {
                 Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning 1, " + _internalState);
@@ -802,7 +799,7 @@ namespace Microsoft.Xna.Framework
 
             lock (_lockObject)
             {
-                currentState = _internalState; // todo: remove now that no lock?
+                currentState = _internalState;
             }
        
             switch (currentState)
@@ -914,8 +911,6 @@ namespace Microsoft.Xna.Framework
         // this method is called on the main thread
         void UpdateAndRenderFrame ()
         {
-            //  if (token.IsCancellationRequested) // todo, no problem right if this is not used I presume, since 
-            //  return;
             curUpdateTime = DateTime.Now;
             if (prevUpdateTime.Ticks != 0) {
                 var t = (curUpdateTime - prevUpdateTime).TotalMilliseconds;
@@ -1189,15 +1184,6 @@ namespace Microsoft.Xna.Framework
 
         protected void CreateGLSurface ()
         {          
-            // todo: remove this lock
-            lock (_lockObject)
-            {
-                if (!androidSurfaceAvailable)
-                {
-                    Log.Error ("AndroidGameView", "CreateGLSurface isSurfaceAvalible == false");
-                }
-            }        
-
             if ( !glSurfaceAvailable)
             {
                 try

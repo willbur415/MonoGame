@@ -41,19 +41,11 @@ namespace Microsoft.Xna.Framework
         ISurfaceHolder mHolder;
         Size size;
 
-        // we use signals to increase responsiveness of the app instead of using blocking while loops
-       /* AutoResetEvent _waitForPauseProcessingToFinish = new AutoResetEvent (false); // more reliable than monitor, the set (==pulse) doesn't get lost if wait is not called yet
-        AutoResetEvent _waitForResumeToFinishProcessing = new AutoResetEvent (false); // we cannot nicely wait inside resume as we can in pause because surface creation doesn't get triggered so we deadlock
-        AutoResetEvent _waitForExitProcessingToFinish = new AutoResetEvent (false); 
-        //AutoResetEvent _waitForAndroidSurfaceCreation = new AutoResetEvent (false);
-        AutoResetEvent _waitForMainGameLoop = new AutoResetEvent (false);*/
-       // int _interlockedSlowGameThread = 0; // if 1 game thread starts waiting 50 ms per frame, needed to increase responsiveness on some older phones
-
-        bool _wasPausedStateProcessed = false; // more reliable than monitor, the set (==pulse) doesn't get lost if wait is not called yet
-        bool _wasResumeStateProcessed = false; // we cannot nicely wait inside resume as we can in pause because surface creation doesn't get triggered so we deadlock
-        bool _wasExitStateProcessed = false;
-
-        AutoResetEvent _waitForMainGameLoop2 = new AutoResetEvent (false);
+        ManualResetEvent _waitForPausedStateProcessed = new ManualResetEvent (false);
+        ManualResetEvent _waitForResumedStateProcessed = new ManualResetEvent (false);
+        ManualResetEvent _waitForExitedStateProcessed = new ManualResetEvent (false);
+     
+        AutoResetEvent _waitForMainGameLoop = new AutoResetEvent (false);
         AutoResetEvent _workerThreadUIRenderingWait = new AutoResetEvent (false);
 
         object _lockObject = new object ();
@@ -113,75 +105,33 @@ namespace Microsoft.Xna.Framework
 
         public void SurfaceChanged (ISurfaceHolder holder, global::Android.Graphics.Format format, int width, int height)
         {
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceChanged 1, " + _internalState);
-
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-           // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
-
             // Set flag to recreate gl surface or rendering can be bad on orienation change or if app 
             // is closed in one orientation and re-opened in another.
             lock (_lockObject)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceChanged 2, " + _internalState);
-
                 // can only be triggered when main loop is running, is unsafe to overwrite other states
                 if (_internalState == InternalState.Running_GameThread)
                 {
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceChanged 3, " + _internalState);
-
                     _internalState = InternalState.ForceRecreateSurface;
                 }
                     
             }
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceChanged end, " + _internalState);
-
         }
 
         public void SurfaceCreated (ISurfaceHolder holder)
         {
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceCreated 1, " + _internalState);
-
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-           // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
-
             lock (_lockObject)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceCreated 2, " + _internalState);
-
                 androidSurfaceAvailable = true;
             }
-            //_waitForAndroidSurfaceCreation.Set ();
-
-            // if main thread is waiting in resuming state send signal to wake it because it goes to sleep if no surface, otherwise not responsive enough
-            /*  if (_internalState == InternalState.Resuming_UIThread)
-              {
-
-                  Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceCreated pulse, " + _internalState);
-
-                  _pauseSignal.Set ();
-              }*/
-
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceCreated end, " + _internalState);
-
         }
 
         public void SurfaceDestroyed (ISurfaceHolder holder)
         {
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceDestroyed 1, " + _internalState);
-
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-            //Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
-
             lock (_lockObject)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceDestroyed 2, " + _internalState);
-
                 androidSurfaceAvailable = false;
             }
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: SurfaceDestroyed end, " + _internalState);
-
         }
 
         public bool OnTouch (View v, MotionEvent e)
@@ -244,16 +194,10 @@ namespace Microsoft.Xna.Framework
 
             //var syncContext = new SynchronizationContext ();
             var syncContext = SynchronizationContext.Current;
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Run 1, " + Environment.CurrentManagedThreadId + ", " + System.Threading.Thread.CurrentThread.Name + ", " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
-            assertThreadPriority ();
-       
+   
             // We always start a new task, regardless if we render on UI thread or not.
             renderTask = Task.Factory.StartNew (() =>
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Run 2, " + Environment.CurrentManagedThreadId + ", " + System.Threading.Thread.CurrentThread.Name + ", " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-               
                 WorkerThreadFrameDispatcher (syncContext);
 
             }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)
@@ -263,132 +207,63 @@ namespace Microsoft.Xna.Framework
                 });
         }
 
-        volatile int numResume = 0;
         public virtual void Pause ()
         {
-            --numResume;
-            // lock the entire block if you are doing anything otherwise deadlocks will creep on you because game thread will call "pulse" before you reach "wait" here.
-
             EnsureUndisposed ();
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 1, " + _internalState+", p: "+ numResume);
 
             // if triggered in quick succession and blocked by graphics device creation, 
             // pause can be triggered twice, without resume in between on some phones.
             if (_internalState != InternalState.Running_GameThread)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 11, " + _internalState + ", p: " + numResume);
                 return;
             }
-
 
             // this guarantees that resume finished processing, since we cannot wait inside resume because we deadlock as surface wouldn't get created
             if (RenderOnUIThread == false)
             {
-                while (true)
-                {
-                    lock (_lockObject)
-                    {
-                        if (_wasResumeStateProcessed)
-                            break;
-                    }
-                }
+                _waitForResumedStateProcessed.WaitOne ();
             }
 
-            _waitForMainGameLoop2.Reset ();  // in case it was enabled
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 2, " + _internalState + ", p: " + numResume);
-
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-         //   Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
+            _waitForMainGameLoop.Reset ();  // in case it was enabled
 
             // happens if pause is called immediately after resume so that the surfaceCreated callback was not called yet.
-
             bool isAndroidSurfaceAvalible = false; // use local because the wait below must be outside lock
             lock (_lockObject)
             {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 3, " + _internalState + ", p: " + numResume);
-                isAndroidSurfaceAvalible = androidSurfaceAvailable;
-
+                 isAndroidSurfaceAvalible = androidSurfaceAvailable;
                 if (!isAndroidSurfaceAvalible)
                 {
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 4, " + _internalState + ", p: " + numResume);
                     _internalState = InternalState.Paused_GameThread; // prepare for next game loop iteration
                 }
             }
 
-            // must be outside lock
-           /* if( !isAndroidSurfaceAvalible )
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 5, " + _internalState + ", xx: " + xx);
-
-                _waitForPauseProcessingToFinish.WaitOne (); // now wait for the game thread to finish processing paused state
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause return, " + _internalState + ", xx: " + xx);
-                return;
-            }*/
-
-             Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 6, " + _internalState + ", p: " + numResume);
-
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-           // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
-
             lock (_lockObject)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 7, " + _internalState + ", p: " + numResume);
-
+            {          
                 // processing the pausing state only if the surface was created already
                 if (androidSurfaceAvailable)
                 {
-                    _wasPausedStateProcessed = false;
+                    _waitForPausedStateProcessed.Reset ();
                     _internalState = InternalState.Pausing_UIThread;
                 }              
             }
 
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause 8, " + _internalState + ", p: " + numResume);
-
             if(RenderOnUIThread == false)
             {
-                while (true)
-                {
-                    lock (_lockObject)
-                    {
-                        if (_wasPausedStateProcessed)
-                            break;
-                    }
-                }
+                _waitForPausedStateProcessed.WaitOne ();
             }
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Pause end, " + _internalState + ", p: " + numResume);
-
         }
 
         public virtual void Resume ()
         {
-            numResume++;
-            // lock the entire block if you are doing anything otherwise deadlocks will creep on you because game thread will call "pulse" before you reach "wait" here.
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 1, " + _internalState + ", p: " + numResume);
-
             EnsureUndisposed ();
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 2, " + _internalState + ", p: " + numResume);
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 21, " + _internalState + ", p: " + numResume);
-
-
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-           // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
-
+     
             lock (_lockObject)
-            {
-               Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 4, " + _internalState + ", p: " + numResume);
-
-                _wasResumeStateProcessed = false;
+            {         
+                _waitForResumedStateProcessed.Reset ();
                 _internalState = InternalState.Resuming_UIThread;
             }
 
-            // Monitor.PulseAll (_lockObject); // restart main loop if it was paused previously
-
-                 _waitForMainGameLoop2.Set ();
-
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 5, " + _internalState + ", p: " + numResume);
+            _waitForMainGameLoop.Set ();
 
                 try
                 {
@@ -396,11 +271,6 @@ namespace Microsoft.Xna.Framework
                         RequestFocus ();
                 }
                 catch {  }
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume 6, " + _internalState + ", p: " + numResume);
-
-          
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Resume end, " + _internalState + ", p: " + numResume);
-
 
             // do not wait for state transition here since surface creation must be triggered first
         }
@@ -415,14 +285,9 @@ namespace Microsoft.Xna.Framework
  
         public void Stop ()
         {
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Stop 1, " + _internalState);
-
             EnsureUndisposed ();
             if (cts != null)
             {
-                // make app more reponsive by making locks easier to aqcuire by the UI thread
-               // Interlocked.Exchange (ref _interlockedSlowGameThread, 1);
-
                 lock (_lockObject)
                 {
                     _internalState = InternalState.Exiting;
@@ -430,44 +295,27 @@ namespace Microsoft.Xna.Framework
                
                 cts.Cancel ();
 
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: WAITALL stop, " + _internalState);
-
                 if( RenderOnUIThread == false)
                 {
-                    while (true)
-                    {
-                        lock (_lockObject)
-                        {
-                            if (_wasExitStateProcessed)
-                                break;
-                        }
-                    }
+                    _waitForExitedStateProcessed.Reset ();
                 }
 
             }
-
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Stop end, " + _internalState);
-
         }
 
         FrameEventArgs renderEventArgs = new FrameEventArgs ();
   
         protected void WorkerThreadFrameDispatcher (SynchronizationContext uiThreadSyncContext)
         {
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop 1, " + _internalState);
-
             Threading.ResetThread (Thread.CurrentThread.ManagedThreadId);
             try
             {
                 stopWatch = System.Diagnostics.Stopwatch.StartNew ();
                 tick = 0;
                 prevUpdateTime = DateTime.Now;
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop 2, " + _internalState);
-               
+
                 while (!cts.IsCancellationRequested)
                 {
-                    assertThreadPriority (); // in case users try change thread priority
-
                     // either use UI thread to render one frame or this worker thread
                     bool pauseThread = false;
                     if(RenderOnUIThread)
@@ -480,36 +328,15 @@ namespace Microsoft.Xna.Framework
                     else
                     {
                         pauseThread = RunIteration (cts.Token);
-
-                        // allows CPU to switch to some other thread of same priority if any is waiting. If none is waiting it does nothing.
-                        // (UI thread is what we are interested in giving CPU cycles to), needed for one phone (droid razr M),
-                        // otherwise pause/resume doesn't get called. As if it has bad scheduling??
-                       // Thread.Sleep (1); 
                     }
 
 
                     if(pauseThread)
-                    {
-                        Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop pausing, " + _internalState);
-
-                        lock (_lockObject)
-                        {
-                            _wasPausedStateProcessed = true;
-                        }
-                       
-                        _waitForMainGameLoop2.WaitOne (); // pause this thread
+                    {                    
+                        _waitForPausedStateProcessed.Set ();
+                        _waitForMainGameLoop.WaitOne (); // pause this thread
                     }
-
-                    uiThreadSyncContext.Post ((s) =>
-                    {
-                        int x = 0;
-                        int y = x;
-                    }, null);
                 }
-
-
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop 3, " + _internalState);
-
             }
             catch (Exception ex)
             {
@@ -535,16 +362,7 @@ namespace Microsoft.Xna.Framework
                     _internalState = InternalState.Exited_GameThread;
                 }
             }
-            Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: RenderLoop end, " + _internalState);
-
-        }
-
-        void assertThreadPriority()
-        {
-            if (Thread.CurrentThread.Priority != ThreadPriority.Normal)
-            {
-                throw new Exception ("Error: MonoGameAndroidGameView.cs: UI thread and worker thread priority must be Normal. If you set it some other value some phones may not trigger pause or resume anymore. Remove at your own peril.");
-            }
+ 
         }
 
         DateTime prevUpdateTime;
@@ -565,18 +383,11 @@ namespace Microsoft.Xna.Framework
 
         void processStateRunning(CancellationToken  token)
         {
-
-            if (runs>0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning 1, " + _internalState);
-            }
-
             // do not run game if surface is not avalible
             lock (_lockObject)
             {
                 if (!androidSurfaceAvailable)
                 {
-
                     return;
                 }
             }
@@ -593,10 +404,7 @@ namespace Microsoft.Xna.Framework
  
                 return;
             }
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning 2, " + _internalState);
-            }
+           
             try
             {
                 UpdateAndRenderFrame ();
@@ -618,11 +426,7 @@ namespace Microsoft.Xna.Framework
                    
                 }
             }
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateRunning end, " + _internalState);
-            }
-            --runs;
+    
         }
 
         void processStatePausing ()
@@ -646,35 +450,20 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        int runs = 0;
         void processStateResuming ()
         {
-           // Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 1, " + _internalState);
-
-            // do not execute yet, must wait for android callbacks that surface was created,
-            // need signaling to increase responsiveness
-           
             bool isSurfaceAvalible = false;
             lock (_lockObject)
             {
-               // Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 2, " + _internalState);
-
                 isSurfaceAvalible = androidSurfaceAvailable;
             }
-           // Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 3, " + _internalState);
 
             // must sleep outside lock!
-            if (!isSurfaceAvalible)
+            if (!RenderOnUIThread && !isSurfaceAvalible)
             {
-                //  _waitForAndroidSurfaceCreation.WaitOne ();
-              //  Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming no surf, " + _internalState);
-
                 Thread.Sleep (50); // sleep so UI thread easier acquires lock
                 return;
             }
-
-            //    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 4, " + _internalState);
-
 
             // this can happen if pause is triggered immediately after resume so that SurfaceCreated callback doesn't get called yet,
             // in this case we skip the resume process and pause sets a new state.   
@@ -682,8 +471,6 @@ namespace Microsoft.Xna.Framework
             {
                 if (!androidSurfaceAvailable)
                     return;
-
-             //   Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 5, " + _internalState);
 
                 // create surface if context is avalible
                 if (glContextAvailable && !lostglContext)
@@ -698,8 +485,7 @@ namespace Microsoft.Xna.Framework
                         Log.Verbose ("AndroidGameView", ex.ToString ());
                     }
                 }
-             //   Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming 6, " + _internalState);
-
+           
                 // create context if not avalible
                 if ((!glContextAvailable || lostglContext))
                 {
@@ -739,9 +525,6 @@ namespace Microsoft.Xna.Framework
                     _internalState = InternalState.Running_GameThread;
                 }
             }
-
-            //Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: processStateResuming end, " + _internalState);
-
         }
 
         void processStateExiting ()
@@ -777,25 +560,10 @@ namespace Microsoft.Xna.Framework
         // Return true to trigger worker thread pause
         bool RunIteration(CancellationToken token)
         {
-
-            //Thread.Sleep (100); this seems to fix it
-
             // set main game thread global ID
             Threading.ResetThread (Thread.CurrentThread.ManagedThreadId);
 
             InternalState currentState = InternalState.Exited_GameThread;
-         
-            // make app more reponsive by making locks easier to aqcuire by the UI thread
-            /* int shouldSlowDownGameThread = Interlocked.CompareExchange (ref _interlockedSlowGameThread, 1, 1);
-             if (shouldSlowDownGameThread == 1)
-             {
-                 Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: shouldSlowDownGameThread, " + _internalState);
-                 xx = 3;
-                 Thread.Sleep (100);
-             }*/
-    
-            // THIS CAN ONLY BE SET BY THE EXISTING STATE OR IN CASE OF ERROR, NO OTHER STATE MUST SET THIS OR STATES CAN BE MISSED!
-            bool exitGameLoop = false;
 
             lock (_lockObject)
             {
@@ -806,90 +574,54 @@ namespace Microsoft.Xna.Framework
             {
                 // exit states
                 case InternalState.Exiting: // when ui thread wants to exit
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateExiting 1 out, " + _internalState);
-
                     processStateExiting ();
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateExiting end out, " + _internalState);
-
                     break;
 
                 case InternalState.Exited_GameThread: // when game thread processed exiting event
-                    exitGameLoop = true;
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: Exited_GameThread  pulse, " + _internalState);
-
                     lock (_lockObject)
                     {
-                        _wasExitStateProcessed = true;
+                        _waitForExitedStateProcessed.Set ();
+                        cts.Cancel ();
                     }
-
-                    //  Monitor.PulseAll (_lockObject); // continue UI thread Stop function execution
                     break;
 
                 // pause states
-                case InternalState.Pausing_UIThread: // when ui thread wants to pause
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStatePausing 1 out, " + _internalState);
-
+                case InternalState.Pausing_UIThread: // when ui thread wants to pause              
                     processStatePausing ();
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStatePausing end out, " + _internalState);
-
                     break;
 
                 case InternalState.Paused_GameThread: // when game thread processed pausing event
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: WAITALL Paused_GameThread, " + _internalState);
-
+                  
                     // this must be processed outside of this loop, in the new task thread!
                     return true; // trigger pause of worker thread
 
-                    break; // for sanity in case of future fixes
-
                 // other states
                 case InternalState.Resuming_UIThread: // when ui thread wants to resume
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateResuming 1 out, " + _internalState);
-
                     processStateResuming ();
 
                     // pause must wait for resume in case pause/resume is called in very quick succession
                     lock (_lockObject)
                     {
-                        _wasResumeStateProcessed = true;
+                        _waitForResumedStateProcessed.Set ();
                     }
-
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateResuming end out, " + _internalState);
-
-                    runs = 1;
-
                     break;
 
                 case InternalState.Running_GameThread: // when we are running game 
-                  
-                    // disable slowed-down game loop
-                    //  Interlocked.Exchange (ref _interlockedSlowGameThread, 0);
-
                     processStateRunning (token);
                    
                     break;
 
                 case InternalState.ForceRecreateSurface:
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateForceSurfaceRecreation 1 out, " + _internalState);
-
                     processStateForceSurfaceRecreation ();
-                    Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: processStateForceSurfaceRecreation end out, " + _internalState);
-
                     break;
 
                 // default case, error
                 default:
                     processStateDefault ();
-                    exitGameLoop = true;
+                    cts.Cancel ();
                     break;
             }
-         
-            // if game wants to exit OR if error happens so that we rather exit than hang app
-            if (exitGameLoop)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderLoop: exitGameLoop, " + _internalState);
-            }
-
+ 
             return false;
         }
 
@@ -931,18 +663,7 @@ namespace Microsoft.Xna.Framework
                 renderEventArgs.Time = t < 0 ? 0 : t;
             }
 
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: UpdateAndRenderFrame 1, " + _internalState);
-            }
-
             RenderFrameInternal (renderEventArgs);
-
-
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: UpdateAndRenderFrame 2, " + _internalState);
-            }
 
             prevRenderTime = curRenderTime;
         }
@@ -952,21 +673,11 @@ namespace Microsoft.Xna.Framework
             if (LogFPS) {
                 Mark ();
             }
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderFrameInternal 1, " + _internalState);
-            }
+
             OnRenderFrame (e);
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderFrameInternal 2, " + _internalState);
-            }
+
             if (RenderFrame != null)
                 RenderFrame (this, e);
-            if (runs > 0)
-            {
-                Android.Util.Log.Verbose ("AndroidGameView", "MnGAndGameView: RenderFrameInternal end, " + _internalState);
-            }
         }
 
         protected virtual void OnRenderFrame (FrameEventArgs e)

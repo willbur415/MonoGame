@@ -651,7 +651,7 @@ namespace Microsoft.Xna.Framework
             TouchPanel.DisplayWidth = newClientBounds.Width;
             TouchPanel.DisplayHeight = newClientBounds.Height;
 
-            Android.Util.Log.Debug("MonoGame", "GraphicsDeviceManager.ResetClientBounds: newClientBounds=" + newClientBounds.ToString());
+           // Android.Util.Log.Debug("MonoGame", "GraphicsDeviceManager.ResetClientBounds: newClientBounds=" + newClientBounds.ToString());
 #endif
         }
 

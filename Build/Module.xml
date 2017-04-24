@@ -2,7 +2,7 @@
 <Module>
   <Name>MonoGame.Framework</Name>
   <DefaultAction>Generate</DefaultAction>
-  <DefaultLinuxPlatforms>Angle,Linux,WindowsGL</DefaultLinuxPlatforms>
+  <DefaultLinuxPlatforms>Angle,Linux,WindowsGL,Android</DefaultLinuxPlatforms>
   <DefaultMacOSPlatforms>Angle,MacOS,iOS,WindowsGL,Android,tvOS,Linux</DefaultMacOSPlatforms>
   <DefaultWindowsPlatforms>Android,Angle,Linux,Windows8,Windows,WindowsGL,WindowsPhone81,WindowsUniversal,iOS,tvOS</DefaultWindowsPlatforms>
   <SupportedPlatforms>Android,Angle,Linux,Windows8,Windows,WindowsGL,WindowsPhone81,WindowsUniversal,iOS,MacOS,Web,tvOS,PSVita,XBoxOne</SupportedPlatforms>

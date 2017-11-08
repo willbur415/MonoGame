@@ -1451,7 +1451,12 @@ namespace MonoGame.OpenGL
                 var addr = EntryPointHelper.GetAddress(proc);
                 if (addr == IntPtr.Zero)
                     return null;
+                    
+#if NETSTANDARD
+                return Marshal.GetDelegateForFunctionPointer<T>(addr);
+#else
                 return (T)(object)Marshal.GetDelegateForFunctionPointer(addr, typeof(T));
+#endif
             }
             catch (EntryPointNotFoundException)
             {

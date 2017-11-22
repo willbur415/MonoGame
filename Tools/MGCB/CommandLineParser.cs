@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace MGCB
 {
@@ -85,6 +86,7 @@ namespace MGCB
         private readonly Dictionary<string, MemberInfo> _optionalOptions;
         private readonly Dictionary<string, string> _flags;
         private readonly List<string> _requiredUsageHelp;
+        private List<Regex> _excludeRules;
 
         public readonly PreprocessorPropertyCollection _properties;
 
@@ -99,6 +101,7 @@ namespace MGCB
             _requiredOptions = new Queue<MemberInfo>();
             _optionalOptions = new Dictionary<string, MemberInfo>();
             _requiredUsageHelp = new List<string>();
+            _excludeRules = new List<Regex>();
 
             _properties = new PreprocessorPropertyCollection();
 
@@ -224,7 +227,7 @@ namespace MGCB
             var fileStack = new Stack<string>();
 
             while (lines.Count > 0)
-            {            
+            {
                 var arg = lines[0];
                 lines.RemoveAt(0);
 
@@ -246,7 +249,7 @@ namespace MGCB
                     ifstack.Pop();
                     continue;
                 }
-                
+
                 if (ifstack.Count > 0)
                 {
                     var skip = false;
@@ -286,7 +289,7 @@ namespace MGCB
 
                     var condition = new Tuple<string, string>(name, value);
                     ifstack.Push(condition);
-                    
+
                     continue;
                 }
 
@@ -325,12 +328,52 @@ namespace MGCB
                     lines.Insert(offset, string.Format("# End:{0}", file));
 
                     continue;
-                }                
+                }
+
+                if (arg.StartsWith("/e") || arg.StartsWith("/exclude") || arg.StartsWith("--exclude") || arg.StartsWith("-e"))
+                {
+                    var sep = new char[] { ':', '=' };
+                    var rule = arg.Split(sep)[1];
+
+                    _excludeRules.Add(new Regex(rule, RegexOptions.Compiled));
+                    continue;
+                }
+
+                if (arg.StartsWith("/a") || arg.StartsWith("/autoinclude") || arg.StartsWith("--autoinclude") || arg.StartsWith("-a"))
+                {
+                    var sep = new char[] { ':', '=' };
+                    var dir = arg.Split(sep)[1];
+
+                    ProcessDirectory(lines, dir);
+                    continue;
+                }
                 
                 output.Add(arg);
             }
 
             return output.ToArray();
+        }
+
+        private void ProcessDirectory(List<string> lines, string dir)
+        {
+            foreach (var d in Directory.GetDirectories(dir))
+                ProcessDirectory(lines, d);
+
+            foreach (var f in Directory.GetFiles(dir))
+            {
+                var ok = true;
+                foreach (var reg in _excludeRules)
+                {
+                    if (reg.IsMatch(f))
+                    {
+                        ok = false;
+                        break;
+                    }
+                }
+
+                if (ok)
+                    lines.Insert(0, "/build:" + f);
+            }
         }
 
         private bool ParseFlags(string arg)

@@ -41,6 +41,30 @@ namespace MGCB
         }
 
         [CommandLineParameter(
+            Name = "autoinclude",
+            Flag = "a",
+            ValueName = "directory",
+            Description = "Autoincludes all the files for the specified directory.")]
+        // This property only exists for documentation.
+        public List<string> AutoInclude
+        {
+            get { throw new InvalidOperationException(); }
+            set { throw new InvalidOperationException(); }
+        }
+
+        [CommandLineParameter(
+            Name = "exclude",
+            Flag = "e",
+            ValueName = "regex",
+            Description = "Extra regex rules for excluding files from autoinclude command.")]
+        // This property only exists for documentation.
+        public string Exclude
+        {
+            get { throw new InvalidOperationException(); }
+            set { throw new InvalidOperationException(); }
+        }
+
+        [CommandLineParameter(
             Name = "workingDir",
             Flag = "w",
             ValueName = "directoryPath",

@@ -9,7 +9,7 @@ using System.Linq;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
-
+using System.Text.RegularExpressions;
 
 namespace MGCB
 {
@@ -38,6 +38,27 @@ namespace MGCB
         {
             get { throw new InvalidOperationException(); }
             set { throw new InvalidOperationException(); }
+        }
+
+        [CommandLineParameter(
+            Name = "autoinclude",
+            Flag = "a",
+            ValueName = "directory",
+            Description = "Automatically includes all the files for the specified directory.")]
+        public void Autoinclude(string directory)
+        {
+            ProcessDirectory(directory);
+            _excludeRules.Clear();
+        }
+
+        [CommandLineParameter(
+            Name = "exclude",
+            Flag = "e",
+            ValueName = "regex",
+            Description = "Extra regex rules for excluding files from autoinclude command.")]
+        public void Exclude(string regex)
+        {
+            _excludeRules.Add(new Regex(regex, RegexOptions.Compiled));
         }
 
         [CommandLineParameter(
@@ -222,6 +243,8 @@ namespace MGCB
 
         private readonly List<string> _copyItems = new List<string>();
 
+        private readonly List<Regex> _excludeRules = new List<Regex>();
+
         private PipelineManager _manager;
 
         public bool HasWork
@@ -238,6 +261,28 @@ namespace MGCB
                 .Replace("$(Configuration)", Config)
                 .Replace("$(Config)", Config)
                 .Replace("$(Profile)", this.Profile.ToString());
+        }
+
+        private void ProcessDirectory(string dir)
+        {
+            foreach (var d in Directory.GetDirectories(dir))
+                ProcessDirectory(d);
+
+            foreach (var f in Directory.GetFiles(dir))
+            {
+                var ok = true;
+                foreach (var reg in _excludeRules)
+                {
+                    if (reg.IsMatch(f))
+                    {
+                        ok = false;
+                        break;
+                    }
+                }
+
+                if (ok)
+                    OnBuild(f);
+            }
         }
 
         public void Build(out int successCount, out int errorCount)

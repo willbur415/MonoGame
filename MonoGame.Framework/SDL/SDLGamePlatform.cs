@@ -36,6 +36,10 @@ namespace Microsoft.Xna.Framework
             if (PlatformParameters.DetectWindowsArchitecture)
                 NativeHelper.InitDllDirectory();
 
+            // Run games on dedicated GPUs on Linux
+            if (CurrentPlatform.OS == OS.Linux)
+                Environment.SetEnvironmentVariable("DRI_PRIME", "1");
+
             _game = game;
             _keys = new List<Keys>();
             Keyboard.SetKeys(_keys);

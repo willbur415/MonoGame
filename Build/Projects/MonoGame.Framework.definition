@@ -959,6 +959,9 @@
     <Compile Include="Input\Joystick.SDL.cs">
       <Platforms>Linux,WindowsGL,MacOS</Platforms>
     </Compile>
+    <Compile Include="Input\Joystick.Linux.cs">
+      <Platforms>Linux,WindowsGL,MacOS</Platforms>
+    </Compile>
     <Compile Include="Input\Joystick.Web.cs">
       <Platforms>Web</Platforms>
     </Compile>
@@ -1253,6 +1256,9 @@
       <Platforms>Angle,Linux,WindowsGL,MacOS</Platforms>
     </Compile>
     <Compile Include="SDL\SDL2.cs">
+      <Platforms>WindowsGL,Linux,MacOS</Platforms>
+    </Compile>
+    <Compile Include="Linux\Libc.cs">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
     </Compile>
     <Compile Include="Input\KeyboardUtil.SDL.cs">

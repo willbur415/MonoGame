@@ -9,6 +9,16 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
     public struct JoystickCapabilities
     {
+        internal static JoystickCapabilities Default = new JoystickCapabilities
+        {
+            IsConnected = false,
+            Identifier = "",
+            IsGamepad = false,
+            AxisCount = 0,
+            ButtonCount = 0,
+            HatCount = 0
+        };
+        
         /// <summary>
         /// Gets a value indicating whether the joystick is connected.
         /// </summary>

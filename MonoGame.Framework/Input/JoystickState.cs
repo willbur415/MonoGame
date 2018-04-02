@@ -12,6 +12,14 @@ namespace Microsoft.Xna.Framework.Input
     /// </summary>
     public struct JoystickState
     {
+        internal static JoystickState Default = new JoystickState
+        {
+            IsConnected = false,
+            Axes = new int[0],
+            Buttons = new ButtonState[0],
+            Hats = new JoystickHat[0]
+        };
+        
         /// <summary>
         /// Gets a value indicating whether the joystick is connected.
         /// </summary>
@@ -34,7 +42,7 @@ namespace Microsoft.Xna.Framework.Input
         /// Gets the joystick hat values.
         /// </summary>
         /// <value>An array list of <see cref="JoystickHat"/> that indicate hat values.</value>
-        public JoystickHat[] Hats{ get; internal set; }
+        public JoystickHat[] Hats { get; internal set; }
 
         /// <summary>
         /// Determines whether a specified instance of <see cref="Microsoft.Xna.Framework.Input.JoystickState"/> is

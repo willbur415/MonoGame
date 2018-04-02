@@ -48,20 +48,10 @@ namespace Microsoft.Xna.Framework.Input
             Joysticks.Clear ();
         }
 
-        private const bool PlatformIsSupported = true;
-
-        private static JoystickCapabilities PlatformGetCapabilities(int index)
+        private static JoystickCapabilities SdlPlatformGetCapabilities(int index)
         {
             if (!Joysticks.ContainsKey(index))
-                return new JoystickCapabilities
-                {
-                    IsConnected = false,
-                    Identifier = "",
-                    IsGamepad = false,
-                    AxisCount = 0,
-                    ButtonCount = 0,
-                    HatCount = 0
-                };
+                return JoystickCapabilities.Default;
 
             var jdevice = Joysticks[index];
             return new JoystickCapabilities
@@ -75,16 +65,10 @@ namespace Microsoft.Xna.Framework.Input
             };
         }
 
-        private static JoystickState PlatformGetState(int index)
+        private static JoystickState SdlPlatformGetState(int index)
         {
             if (!Joysticks.ContainsKey(index))
-                return new JoystickState
-                {
-                    IsConnected = false,
-                    Axes = new int[0],
-                    Buttons = new ButtonState[0],
-                    Hats = new JoystickHat[0]
-                };
+                return JoystickState.Default;
 
             var jcap = PlatformGetCapabilities(index);
             var jdevice = Joysticks[index];

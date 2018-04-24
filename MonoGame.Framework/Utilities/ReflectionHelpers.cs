@@ -86,7 +86,9 @@ namespace Microsoft.Xna.Framework.Utilities
                 throw new NullReferenceException("Must supply the property parameter");
             }
 
-#if NET45            
+#if WEB
+            return property.GetMethod;
+#elif NET45
             return property.GetMethod;
 #else
             return property.GetGetMethod();
@@ -100,7 +102,9 @@ namespace Microsoft.Xna.Framework.Utilities
                 throw new NullReferenceException("Must supply the property parameter");
             }
 
-#if NET45            
+#if WEB
+            return property.SetMethod;
+#elif NET45            
             return property.SetMethod;
 #else
             return property.GetSetMethod();
@@ -112,7 +116,13 @@ namespace Microsoft.Xna.Framework.Utilities
             if (member == null)
                 throw new NullReferenceException("Must supply the member parameter");
 
-#if NET45            
+#if WEB
+            foreach (var attr in member.GetCustomAttributes())
+                if (attr is T)
+                    return attr as T;
+
+            return default(T);
+#elif NET45
             return member.GetCustomAttribute(typeof(T)) as T;
 #else
             return Attribute.GetCustomAttribute(member, typeof(T)) as T;

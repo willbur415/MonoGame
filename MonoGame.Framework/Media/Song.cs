@@ -10,7 +10,7 @@ namespace Microsoft.Xna.Framework.Media
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {
         private string _name;
-		private int _playCount = 0;
+        private int _playCount = 0;
         private TimeSpan _duration = TimeSpan.Zero;
         bool disposed;
         /// <summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Media
         {
             get { return PlatformGetGenre(); }
         }
-        
+
         public bool IsDisposed
         {
             get { return disposed; }
@@ -57,22 +57,24 @@ namespace Microsoft.Xna.Framework.Media
             _duration = TimeSpan.FromMilliseconds(durationMS);
         }
 
-		internal Song(string fileName)
-		{			
-			_name = fileName;
+        internal Song(string fileName)
+        {
+            _name = fileName;
 
             PlatformInitialize(fileName);
         }
 
+#if !WEB
         ~Song()
         {
             Dispose(false);
         }
+#endif
 
         internal string FilePath
-		{
-			get { return _name; }
-		}
+        {
+            get { return _name; }
+        }
 
         /// <summary>
         /// Returns a song that can be played via <see cref="MediaPlayer"/>.
@@ -82,7 +84,11 @@ namespace Microsoft.Xna.Framework.Media
         /// <returns></returns>
         public static Song FromUri(string name, Uri uri)
         {
+#if WEB
+            var song = new Song(uri.ToString());
+#else
             var song = new Song(uri.OriginalString);
+#endif
             song._name = name;
             return song;
         }

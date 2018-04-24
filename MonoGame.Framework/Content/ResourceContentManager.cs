@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Resources;
 
+#if WEB
+using ResourceManager = Microsoft.Xna.Framework.ResourceManager;
+using IServiceProvider = Microsoft.Xna.Framework.IServiceProvider;
+#endif
+
 namespace Microsoft.Xna.Framework.Content
 {
     public class ResourceContentManager : ContentManager

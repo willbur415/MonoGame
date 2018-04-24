@@ -116,12 +116,12 @@ namespace Microsoft.Xna.Framework.Graphics
         // collected by holding a strong reference to it in this list.
         private readonly List<WeakReference> _resources = new List<WeakReference>();
 
-		// TODO Graphics Device events need implementing
-		public event EventHandler<EventArgs> DeviceLost;
-		public event EventHandler<EventArgs> DeviceReset;
-		public event EventHandler<EventArgs> DeviceResetting;
-		public event EventHandler<ResourceCreatedEventArgs> ResourceCreated;
-		public event EventHandler<ResourceDestroyedEventArgs> ResourceDestroyed;
+        // TODO Graphics Device events need implementing
+        public event EventHandler<EventArgs> DeviceLost;
+        public event EventHandler<EventArgs> DeviceReset;
+        public event EventHandler<EventArgs> DeviceResetting;
+        public event EventHandler<ResourceCreatedEventArgs> ResourceCreated;
+        public event EventHandler<ResourceDestroyedEventArgs> ResourceDestroyed;
         public event EventHandler<EventArgs> Disposing;
 
         internal event EventHandler<PresentationEventArgs> PresentationChanged;
@@ -138,13 +138,15 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-		public bool IsContentLost {
-			get {
-				// We will just return IsDisposed for now
-				// as that is the only case I can see for now
-				return IsDisposed;
-			}
-		}
+        public bool IsContentLost
+        {
+            get
+            {
+                // We will just return IsDisposed for now
+                // as that is the only case I can see for now
+                return IsDisposed;
+            }
+        }
 
         internal bool IsRenderTargetBound
         {
@@ -191,7 +193,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         internal GraphicsDevice()
-		{
+        {
             PresentationParameters = new PresentationParameters();
             PresentationParameters.DepthStencilFormat = DepthFormat.Depth24;
             Setup();
@@ -240,9 +242,9 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
             // Initialize the main viewport
-            _viewport = new Viewport (0, 0,
-			                         DisplayMode.Width, DisplayMode.Height);
-			_viewport.MaxDepth = 1.0f;
+            _viewport = new Viewport(0, 0,
+                                     DisplayMode.Width, DisplayMode.Height);
+            _viewport.MaxDepth = 1.0f;
 
             PlatformSetup();
 
@@ -274,10 +276,12 @@ namespace Microsoft.Xna.Framework.Graphics
             EffectCache = new Dictionary<int, Effect>();
         }
 
+#if !WEB
         ~GraphicsDevice()
         {
             Dispose(false);
         }
+#endif
 
         internal int GetClampedMultisampleCount(int multiSampleCount)
         {

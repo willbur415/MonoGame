@@ -5,32 +5,18 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
-using XnaKeys = Microsoft.Xna.Framework.Input.Keys;
-
-using JSIL;
-using JSIL.Meta;
-
-using MonoGame.Web;
 
 namespace Microsoft.Xna.Framework
 {
-    using MonoGame.Web;
-
-    public interface IHasCallback
-    {
-        void Callback();
-    }
-
-    class WebGamePlatform : GamePlatform, IHasCallback
+    class WebGamePlatform : GamePlatform
     {
         private WebGameWindow _view;
+        private int _threadId;
 
         public WebGamePlatform(Game game)
             : base(game)
         {
-            Window = new WebGameWindow(this);
-
-            _view = (WebGameWindow)Window;
+            Window = _view = new WebGameWindow();
         }
 
         public virtual void Callback()
@@ -40,20 +26,21 @@ namespace Microsoft.Xna.Framework
         
         public override void Exit()
         {
+            Bridge.Html5.Window.ClearInterval(_threadId);
         }
 
         public override void RunLoop()
         {
-            throw new InvalidOperationException("You can not run a synchronous loop on the web platform.");
+            throw new Exception("How did this happen?");
         }
 
         public override void StartRunLoop()
         {
-            ResetWindowBounds();
-            _view.window.setInterval((Action)(() => {
-                _view.ProcessEvents();
+            _threadId = Bridge.Html5.Window.SetInterval(() =>
+            {
+                // Process Events
                 Game.Tick();
-            }), 25);
+            }, 20);
         }
 
         public override bool BeforeUpdate(GameTime gameTime)
@@ -78,17 +65,7 @@ namespace Microsoft.Xna.Framework
 
         internal void ResetWindowBounds()
         {
-            var graphicsDeviceManager = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
-
-            if (graphicsDeviceManager.IsFullScreen)
-            {
-                
-            }
-            else
-            {
-                _view.glcanvas.style.width = graphicsDeviceManager.PreferredBackBufferWidth + "px";
-                _view.glcanvas.style.height = graphicsDeviceManager.PreferredBackBufferHeight + "px";
-            }
+            
         }
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)

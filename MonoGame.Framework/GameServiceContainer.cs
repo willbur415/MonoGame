@@ -6,6 +6,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Utilities;
 
+#if WEB
+using IServiceProvider = Microsoft.Xna.Framework.IServiceProvider;
+#endif
+
 namespace Microsoft.Xna.Framework
 {
     public class GameServiceContainer : IServiceProvider

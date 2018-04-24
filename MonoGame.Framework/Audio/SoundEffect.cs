@@ -1,7 +1,7 @@
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
-﻿
+
 using System;
 using System.IO;
 
@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Audio
         #region Internal Audio Data
 
         private string _name = string.Empty;
-        
+
         private bool _isDisposed = false;
         private readonly TimeSpan _duration;
 
@@ -150,6 +150,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         #region Finalizer
 
+#if !WEB
         /// <summary>
         /// Releases unmanaged resources and performs other cleanup operations before the
         /// <see cref="Microsoft.Xna.Framework.Audio.SoundEffect"/> is reclaimed by garbage collection.
@@ -158,6 +159,7 @@ namespace Microsoft.Xna.Framework.Audio
         {
             Dispose(false);
         }
+#endif
 
         #endregion
 
@@ -261,9 +263,9 @@ namespace Microsoft.Xna.Framework.Audio
             return (int)sizeInBytes;
         }
 
-        #endregion
+#endregion
 
-        #region Play
+#region Play
 
         /// <summary>Gets an internal SoundEffectInstance and plays it.</summary>
         /// <returns>True if a SoundEffectInstance was successfully played, false if not.</returns>
@@ -323,9 +325,9 @@ namespace Microsoft.Xna.Framework.Audio
             return inst;
         }
 
-        #endregion
+#endregion
 
-        #region Public Properties
+#region Public Properties
 
         /// <summary>Gets the duration of the SoundEffect.</summary>
         public TimeSpan Duration { get { return _duration; } }
@@ -337,9 +339,9 @@ namespace Microsoft.Xna.Framework.Audio
             set { _name = value; }
         }
 
-        #endregion
+#endregion
 
-        #region Static Members
+#region Static Members
 
         static float _masterVolume = 1.0f;
         /// <summary>
@@ -427,9 +429,9 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable Members
+#region IDisposable Members
 
         /// <summary>Indicates whether the object is disposed.</summary>
         public bool IsDisposed { get { return _isDisposed; } }
@@ -460,7 +462,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
         }
 
-        #endregion
+#endregion
 
     }
 }

@@ -7,12 +7,18 @@ using Microsoft.Xna.Framework.Input.Touch;
 using System;
 using System.ComponentModel;
 
+#if WEB
+using IntPtr = Microsoft.Xna.Framework.IntPtr;
+#endif
+
 namespace Microsoft.Xna.Framework {
 	public abstract class GameWindow {
-		#region Properties
+        #region Properties
 
-		[DefaultValue(false)]
-		public abstract bool AllowUserResizing { get; set; }
+#if !WEB
+        [DefaultValue(false)]
+#endif
+        public abstract bool AllowUserResizing { get; set; }
 
 		public abstract Rectangle ClientBounds { get; }
 

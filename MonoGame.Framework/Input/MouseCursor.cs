@@ -5,6 +5,10 @@
 using System;
 using Microsoft.Xna.Framework.Graphics;
 
+#if WEB
+using IntPtr = Microsoft.Xna.Framework.IntPtr;
+#endif
+
 namespace Microsoft.Xna.Framework.Input
 {
     /// <summary>

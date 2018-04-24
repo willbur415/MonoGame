@@ -42,11 +42,11 @@ namespace Microsoft.Xna.Framework.Content
 
         private Dictionary<Type, ContentTypeReader> _contentReaders;
 
-		private static readonly string _assemblyName;
-		
+        private static readonly string _assemblyName;
 
-		static ContentTypeReaderManager()
-		{
+
+        static ContentTypeReaderManager()
+        {
             _locker = new object();
             _contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
             _assemblyName = ReflectionHelpers.GetAssembly(typeof(ContentTypeReaderManager)).FullName;
@@ -54,8 +54,13 @@ namespace Microsoft.Xna.Framework.Content
 
         public ContentTypeReader GetTypeReader(Type targetType)
         {
+#if WEB
+            if (targetType.IsArray)
+                targetType = typeof(Array);
+#else
             if (targetType.IsArray && targetType.GetArrayRank() > 1)
                 targetType = typeof(Array);
+#endif
 
             ContentTypeReader reader;
             if (_contentReaders.TryGetValue(targetType, out reader))
@@ -67,7 +72,7 @@ namespace Microsoft.Xna.Framework.Content
         // Trick to prevent the linker removing the code, but not actually execute the code
         static bool falseflag = false;
 
-		internal ContentTypeReader[] LoadAssetReaders(ContentReader reader)
+        internal ContentTypeReader[] LoadAssetReaders(ContentReader reader)
         {
 #pragma warning disable 0219, 0649
             // Trick to prevent the linker removing the code, but not actually execute the code
@@ -87,8 +92,8 @@ namespace Microsoft.Xna.Framework.Content
                 var hRectangleArrayReader = new ArrayReader<Rectangle>();
                 var hVector3ListReader = new ListReader<Vector3>();
                 var hStringListReader = new ListReader<StringReader>();
-				var hIntListReader = new ListReader<Int32>();
-                var hSpriteFontReader = new SpriteFontReader();
+                var hIntListReader = new ListReader<Int32>();
+                // var hSpriteFontReader = new SpriteFontReader();
                 var hTexture2DReader = new Texture2DReader();
                 var hCharReader = new CharReader();
                 var hRectangleReader = new RectangleReader();
@@ -103,18 +108,18 @@ namespace Microsoft.Xna.Framework.Content
                 var hBasicEffectReader = new BasicEffectReader();
                 var hVertexBufferReader = new VertexBufferReader();
                 var hAlphaTestEffectReader = new AlphaTestEffectReader();
-                var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteEffects>();
+                // var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteEffects>();
                 var hArrayFloatReader = new ArrayReader<float>();
                 var hArrayVector2Reader = new ArrayReader<Vector2>();
                 var hListVector2Reader = new ListReader<Vector2>();
                 var hArrayMatrixReader = new ArrayReader<Matrix>();
                 var hEnumBlendReader = new EnumReader<Graphics.Blend>();
                 var hNullableRectReader = new NullableReader<Rectangle>();
-				var hEffectMaterialReader = new EffectMaterialReader();
-				var hExternalReferenceReader = new ExternalReferenceReader();
+                var hEffectMaterialReader = new EffectMaterialReader();
+                var hExternalReferenceReader = new ExternalReferenceReader();
                 var hSoundEffectReader = new SoundEffectReader();
                 var hSongReader = new SongReader();
-                var hModelReader = new ModelReader();
+                // var hModelReader = new ModelReader();
                 var hInt32Reader = new Int32Reader();
                 var hEffectReader = new EffectReader();
                 var hSingleReader = new SingleReader();
@@ -127,7 +132,7 @@ namespace Microsoft.Xna.Framework.Content
             }
 #pragma warning restore 0219, 0649
 
-		    // The first content byte i read tells me the number of content readers in this XNB file
+            // The first content byte i read tells me the number of content readers in this XNB file
             var numberOfReaders = reader.Read7BitEncodedInt();
             var contentReaders = new ContentTypeReader[numberOfReaders];
             var needsInitialize = new BitArray(numberOfReaders);
@@ -167,9 +172,13 @@ namespace Microsoft.Xna.Framework.Content
                             ContentTypeReader typeReader;
                             if (!_contentReadersCache.TryGetValue(l_readerType, out typeReader))
                             {
+
+#if !WEB
                                 try
                                 {
+#endif
                                     typeReader = l_readerType.GetDefaultConstructor().Invoke(null) as ContentTypeReader;
+#if !WEB
                                 }
                                 catch (TargetInvocationException ex)
                                 {
@@ -179,6 +188,7 @@ namespace Microsoft.Xna.Framework.Content
                                         "Failed to get default constructor for ContentTypeReader. To work around, add a creation function to ContentTypeReaderManager.AddTypeCreator() " +
                                         "with the following failed type string: " + originalReaderTypeString, ex);
                                 }
+#endif
 
                                 needsInitialize[i] = true;
 

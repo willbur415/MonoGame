@@ -5,7 +5,7 @@
 using System;
 
 namespace Microsoft.Xna.Framework
-{   
+{
     public class GameComponent : IGameComponent, IUpdateable, IComparable<GameComponent>, IDisposable
     {
         bool _enabled = true;
@@ -47,10 +47,12 @@ namespace Microsoft.Xna.Framework
             this.Game = game;
         }
 
+#if !WEB
         ~GameComponent()
         {
             Dispose(false);
         }
+#endif
 
         public virtual void Initialize() { }
 
@@ -80,13 +82,13 @@ namespace Microsoft.Xna.Framework
             GC.SuppressFinalize(this);
         }
 
-        #region IComparable<GameComponent> Members
+#region IComparable<GameComponent> Members
         // TODO: Should be removed, as it is not part of XNA 4.0
         public int CompareTo(GameComponent other)
         {
             return other.UpdateOrder - this.UpdateOrder;
         }
 
-        #endregion
+#endregion
     }
 }

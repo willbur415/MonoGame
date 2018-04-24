@@ -24,17 +24,19 @@ namespace Microsoft.Xna.Framework
 
         #region Construction/Destruction
 
-		protected GamePlatform(Game game)
+        protected GamePlatform(Game game)
         {
             if (game == null)
                 throw new ArgumentNullException("game");
             Game = game;
         }
 
+#if !WEB
         ~GamePlatform()
         {
             Dispose(false);
         }
+#endif
 
         #endregion Construction/Destruction
 
@@ -100,9 +102,9 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        #endregion
+#endregion
 
-        #region Events
+#region Events
 
         public event EventHandler<EventArgs> AsyncRunLoopEnded;
         public event EventHandler<EventArgs> Activated;
@@ -118,9 +120,9 @@ namespace Microsoft.Xna.Framework
             EventHelpers.Raise(this, AsyncRunLoopEnded, EventArgs.Empty);
         }
 
-        #endregion Events
+#endregion Events
 
-        #region Methods
+#region Methods
 
         /// <summary>
         /// Gives derived classes an opportunity to do work before any
@@ -255,9 +257,9 @@ namespace Microsoft.Xna.Framework
         {
         }
 
-        #endregion Methods
+#endregion Methods
 
-        #region IDisposable implementation
+#region IDisposable implementation
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing,
@@ -290,7 +292,7 @@ namespace Microsoft.Xna.Framework
 		public virtual void Log(string Message) {}		
 			
 
-        #endregion
+#endregion
     }
 }
 

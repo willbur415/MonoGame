@@ -10,8 +10,7 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         private void PlatformInitialize(GraphicsDevice device)
         {
-            throw new NotImplementedException();
+            
         }
-
     }
 }

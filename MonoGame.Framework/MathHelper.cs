@@ -11,41 +11,41 @@ namespace Microsoft.Xna.Framework
     /// </summary>
     public static class MathHelper
     {
-    	/// <summary>
+        /// <summary>
         /// Represents the mathematical constant e(2.71828175).
         /// </summary>
         public const float E = (float)Math.E;
-        
+
         /// <summary>
         /// Represents the log base ten of e(0.4342945).
         /// </summary>
         public const float Log10E = 0.4342945f;
-        
+
         /// <summary>
         /// Represents the log base two of e(1.442695).
         /// </summary>
         public const float Log2E = 1.442695f;
-        
+
         /// <summary>
         /// Represents the value of pi(3.14159274).
         /// </summary>
         public const float Pi = (float)Math.PI;
-        
+
         /// <summary>
         /// Represents the value of pi divided by two(1.57079637).
         /// </summary>
         public const float PiOver2 = (float)(Math.PI / 2.0);
-        
+
         /// <summary>
         /// Represents the value of pi divided by four(0.7853982).
         /// </summary>
         public const float PiOver4 = (float)(Math.PI / 4.0);
-        
+
         /// <summary>
         /// Represents the value of pi times two(6.28318548).
         /// </summary>
         public const float TwoPi = (float)(Math.PI * 2.0);
-        
+
         /// <summary>
         /// Returns the Cartesian coordinate for one axis of a point that is defined by a given triangle and two normalized barycentric (areal) coordinates.
         /// </summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework
             return value1 + (value2 - value1) * amount1 + (value3 - value1) * amount2;
         }
 
-	/// <summary>
+        /// <summary>
         /// Performs a Catmull-Rom interpolation using the specified positions.
         /// </summary>
         /// <param name="value1">The first position in the interpolation.</param>
@@ -81,7 +81,7 @@ namespace Microsoft.Xna.Framework
                 (3.0 * value2 - value1 - 3.0 * value3 + value4) * amountCubed));
         }
 
- 	/// <summary>
+        /// <summary>
         /// Restricts a value to be within a specified range.
         /// </summary>
         /// <param name="value">The value to clamp.</param>
@@ -99,7 +99,7 @@ namespace Microsoft.Xna.Framework
             // There's no check to see if min > max.
             return value;
         }
-        
+
         /// <summary>
         /// Restricts a value to be within a specified range.
         /// </summary>
@@ -108,12 +108,12 @@ namespace Microsoft.Xna.Framework
         /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
         /// <returns>The clamped value.</returns>
         public static int Clamp(int value, int min, int max)
-        { 
-            value = (value > max) ? max : value; 
-            value = (value < min) ? min : value; 
+        {
+            value = (value > max) ? max : value;
+            value = (value < min) ? min : value;
             return value;
         }
-        
+
         /// <summary>
         /// Calculates the absolute value of the difference of two values.
         /// </summary>
@@ -122,7 +122,11 @@ namespace Microsoft.Xna.Framework
         /// <returns>Distance between the two values.</returns>
         public static float Distance(float value1, float value2)
         {
+#if WEB
+            return (float)Math.Abs(value1 - value2);
+#else
             return Math.Abs(value1 - value2);
+#endif
         }
         
         /// <summary>

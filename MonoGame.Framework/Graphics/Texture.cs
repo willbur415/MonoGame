@@ -6,6 +6,10 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
+#if WEB
+using Interlocked = Microsoft.Xna.Framework.Interlocked;
+#endif
+
 namespace Microsoft.Xna.Framework.Graphics
 {
 	public abstract partial class Texture : GraphicsResource

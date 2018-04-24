@@ -5,6 +5,10 @@
 using System;
 using System.Collections.Generic;
 
+#if WEB
+using IntPtr = Microsoft.Xna.Framework.IntPtr;
+#endif
+
 namespace Microsoft.Xna.Framework.Input.Touch
 {
     public class TouchPanelState

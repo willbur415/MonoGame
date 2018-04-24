@@ -4,207 +4,74 @@
 
 using System;
 using System.Collections.Generic;
-using JSIL;
-using Microsoft.Xna.Framework.Input;
-using MonoGame.Web;
+using Bridge.Html5;
+using Bridge.WebGL;
+
+#if WEB
+using IntPtr = Microsoft.Xna.Framework.IntPtr;
+#endif
 
 namespace Microsoft.Xna.Framework
 {
     class WebGameWindow : GameWindow
     {
-        private WebGamePlatform _platform;
-        private List<Keys> _keys;
+        public static WebGLRenderingContext GL;
 
-        public dynamic document, glcanvas, gl, window;
+        HTMLCanvasElement _canvas;
 
-        private Action<dynamic> _onmousemove, _onmousedown, _onmouseup, _onkeydown, _onkeyup, _onwheel;
-
-        public WebGameWindow(WebGamePlatform platform)
+        public WebGameWindow()
         {
-            _platform = platform;
-            _keys = new List<Keys>();
+            _canvas = Document.GetElementById("monogamecanvas") as HTMLCanvasElement;
 
-            _onmousemove = (Action<dynamic>)OnMouseMove;
-            _onmousedown = (Action<dynamic>)OnMouseDown;
-            _onmouseup = (Action<dynamic>)OnMouseUp;
-            _onkeydown = (Action<dynamic>)OnKeyDown;
-            _onkeyup = (Action<dynamic>)OnKeyUp;
-            _onwheel = (Action<dynamic>)OnMouseWheel;
-            
-            document = Builtins.Global["document"];
-            window = Builtins.Global["window"];
-            glcanvas = document.getElementById("mgcanvas");
-            gl = glcanvas.getContext("webgl");
+            var possiblecontexts = new[] { "webgl", "experimental-webgl", "webkit-3d", "moz-webgl" };
 
-            WebGL.gl = gl;
-
-            if (glcanvas.mozRequestPointerLock)
-                glcanvas.requestPointerLock = glcanvas.mozRequestPointerLock;
-            else if(glcanvas.webkitRequestPointerLock)
-                glcanvas.requestPointerLock = glcanvas.webkitRequestPointerLock;
-
-            document.addEventListener("pointerlockchange", (Action)OnCursorLockChange, false);
-            document.addEventListener("mozpointerlockchange", (Action)OnCursorLockChange, false);
-            document.addEventListener("webkitpointerlockchange", (Action)OnCursorLockChange, false);
-
-            glcanvas.addEventListener("contextmenu", (Action<dynamic>)((e) => e.preventDefault()), false);
-
-            glcanvas.onclick = (Action<dynamic>)OnMouseClick;
-
-            Mouse.PrimaryWindow = this;
-        }
-
-        private void OnCursorLockChange()
-        {
-            if (document.pointerLockElement == glcanvas || document.mozPointerLockElement == glcanvas || document.webkitPointerLockElement == glcanvas)
+            foreach(var context in possiblecontexts)
             {
-                document.addEventListener("mousemove", _onmousemove, false);
-                document.addEventListener("mousedown", _onmousedown, false);
-                document.addEventListener("mouseup", _onmouseup, false);
-                glcanvas.addEventListener("wheel", _onwheel, false);
-                document.addEventListener("keydown", _onkeydown, false);
-                document.addEventListener("keyup", _onkeyup, false);
-
-                Joystick.TrackEvents = true;
+                try
+                {
+                    GL = _canvas.GetContext(context).As<WebGLRenderingContext>();
+                    if (GL != null)
+                        break;
+                }
+                catch { }
             }
-            else
-            {
-                document.removeEventListener("mousemove", _onmousemove, false);
-                document.removeEventListener("mousedown", _onmousedown, false);
-                document.removeEventListener("mouseup", _onmouseup, false);
-                glcanvas.removeEventListener("wheel", _onwheel, false);
-                document.removeEventListener("keydown", _onkeydown, false);
-                document.removeEventListener("keyup", _onkeyup, false);
 
-                Joystick.TrackEvents = false;
-            }
-        }
-
-        private void OnMouseClick(dynamic e)
-        {
-            glcanvas.requestPointerLock();
-        }
-
-        private void OnMouseMove(dynamic e)
-        {
-            var movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
-            var movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
-
-            this.MouseState.X = Math.Min(Math.Max(this.MouseState.X + movementX, 0), glcanvas.clientWidth);
-            this.MouseState.Y = Math.Min(Math.Max(this.MouseState.Y + movementY, 0), glcanvas.clientHeight);
-        }
-
-        private void OnMouseDown(dynamic e)
-        {
-            if (e.button == 0)
-                this.MouseState.LeftButton = ButtonState.Pressed;
-            else if (e.button == 1)
-                this.MouseState.MiddleButton = ButtonState.Pressed;
-            else if (e.button == 2)
-                this.MouseState.RightButton = ButtonState.Pressed;
-        }
-
-        private void OnMouseUp(dynamic e)
-        {
-            if (e.button == 0)
-                this.MouseState.LeftButton = ButtonState.Released;
-            else if (e.button == 1)
-                this.MouseState.MiddleButton = ButtonState.Released;
-            else if (e.button == 2)
-                this.MouseState.RightButton = ButtonState.Released;
-        }
-
-        private void OnMouseWheel(dynamic e)
-        {
-            if (e.deltaY < 0)
-                this.MouseState.ScrollWheelValue += 120;
-            else
-                this.MouseState.ScrollWheelValue -= 120;
-        }
-
-        private void OnKeyDown(dynamic e)
-        {
-            Keys xnaKey = KeyboardUtil.ToXna(e.keyCode, e.location);
-
-            if (!_keys.Contains(xnaKey))
-                _keys.Add(xnaKey);
-        }
-
-        private void OnKeyUp(dynamic e)
-        {
-            Keys xnaKey = KeyboardUtil.ToXna(e.keyCode, e.location);
-
-            if (_keys.Contains(xnaKey))
-                _keys.Remove(xnaKey);
-        }
-
-        internal void ProcessEvents()
-        {
-            Keyboard.SetKeys(_keys);
-        }
-
-        public override void BeginScreenDeviceChange(bool willBeFullScreen)
-        {
-        }
-
-        public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
-        {
-        }
-
-        protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
-        {
-        }
-
-        protected override void SetTitle(string title)
-        {
-            Builtins.Eval("window.title = '" + title + "';");
+            if (GL == null)
+                throw new Exception("Failed to get WebGL context :|");
         }
 
         public override bool AllowUserResizing
         {
-            get
-            {
-                return false;
-            }
-            set
-            {
-                throw new NotSupportedException();
-            }
+            get => false;
+            set { }
         }
 
-        public override Rectangle ClientBounds
-        {
-            get
-            {
-                int width = glcanvas.clientWidth;
-                int height = glcanvas.clientHeight;
+        public override Rectangle ClientBounds => new Rectangle(0, 0, _canvas.Width, _canvas.Height);
 
-                return new Rectangle(0, 0, width, height);
-            }
+        public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
+
+        public override IntPtr Handle => IntPtr.Zero;
+
+        public override string ScreenDeviceName => string.Empty;
+
+        public override void BeginScreenDeviceChange(bool willBeFullScreen)
+        {
+            
         }
 
-        public override DisplayOrientation CurrentOrientation
+        public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
-            get
-            {
-                return DisplayOrientation.Default;
-            }
+            
         }
 
-        public override IntPtr Handle
+        protected override void SetTitle(string title)
         {
-            get
-            {
-                return IntPtr.Zero;
-            }
+            
         }
 
-        public override string ScreenDeviceName
+        protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
         {
-            get
-            {
-                return string.Empty;
-            }
+            
         }
     }
 }

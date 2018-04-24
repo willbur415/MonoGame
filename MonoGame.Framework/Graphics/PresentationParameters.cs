@@ -13,6 +13,10 @@ using UIKit;
 using Microsoft.Xna.Framework.Input.Touch;
 #endif
 
+#if WEB
+using IntPtr = Microsoft.Xna.Framework.IntPtr;
+#endif
+
 namespace Microsoft.Xna.Framework.Graphics
 {
     public class PresentationParameters

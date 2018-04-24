@@ -56,14 +56,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal GraphicsResource()
         {
-            
+
         }
 
+#if !WEB
         ~GraphicsResource()
         {
             // Pass false so the managed objects are not released
             Dispose(false);
         }
+#endif
 
         /// <summary>
         /// Called before the device is reset. Allows graphics resources to 

@@ -53,7 +53,7 @@ namespace Microsoft.Xna.Framework.Audio
         /// <param name="settingsFile">Path to a XACT settings file.</param>
         public AudioEngine(string settingsFile)
             : this(settingsFile, TimeSpan.Zero, "")
-        {            
+        {
         }
 
         internal static Stream OpenStream(string filePath, bool useMemoryStream = false)
@@ -90,69 +90,69 @@ namespace Microsoft.Xna.Framework.Audio
             // Read the xact settings file
             // Credits to alisci01 for initial format documentation
             using (var stream = OpenStream(settingsFile))
-            using (var reader = new BinaryReader(stream)) 
+            using (var reader = new BinaryReader(stream))
             {
-                uint magic = reader.ReadUInt32 ();
+                uint magic = reader.ReadUInt32();
                 if (magic != 0x46534758) //'XGFS'
-                    throw new ArgumentException ("XGS format not recognized");
+                    throw new ArgumentException("XGS format not recognized");
 
-                reader.ReadUInt16 (); // toolVersion
+                reader.ReadUInt16(); // toolVersion
                 uint formatVersion = reader.ReadUInt16();
                 if (formatVersion != 42)
                     Debug.WriteLine("Warning: XGS format " + formatVersion + " not supported!");
 
-                reader.ReadUInt16 (); // crc
-                reader.ReadUInt32 (); // lastModifiedLow
-                reader.ReadUInt32 (); // lastModifiedHigh
-                reader.ReadByte (); //unkn, 0x03. Platform?
+                reader.ReadUInt16(); // crc
+                reader.ReadUInt32(); // lastModifiedLow
+                reader.ReadUInt32(); // lastModifiedHigh
+                reader.ReadByte(); //unkn, 0x03. Platform?
 
-                uint numCats = reader.ReadUInt16 ();
-                uint numVars = reader.ReadUInt16 ();
+                uint numCats = reader.ReadUInt16();
+                uint numVars = reader.ReadUInt16();
 
-                reader.ReadUInt16 (); //unkn, 0x16
-                reader.ReadUInt16 (); //unkn, 0x16
+                reader.ReadUInt16(); //unkn, 0x16
+                reader.ReadUInt16(); //unkn, 0x16
 
-                uint numRpc = reader.ReadUInt16 ();
-                uint numDspPresets = reader.ReadUInt16 (); 
-                uint numDspParams = reader.ReadUInt16 (); 
+                uint numRpc = reader.ReadUInt16();
+                uint numDspPresets = reader.ReadUInt16();
+                uint numDspParams = reader.ReadUInt16();
 
-                uint catsOffset = reader.ReadUInt32 ();
-                uint varsOffset = reader.ReadUInt32 ();
+                uint catsOffset = reader.ReadUInt32();
+                uint varsOffset = reader.ReadUInt32();
 
-                reader.ReadUInt32 (); //unknown, leads to a short with value of 1?
-                reader.ReadUInt32 (); // catNameIndexOffset
-                reader.ReadUInt32 (); //unknown, two shorts of values 2 and 3?
-                reader.ReadUInt32 (); // varNameIndexOffset
+                reader.ReadUInt32(); //unknown, leads to a short with value of 1?
+                reader.ReadUInt32(); // catNameIndexOffset
+                reader.ReadUInt32(); //unknown, two shorts of values 2 and 3?
+                reader.ReadUInt32(); // varNameIndexOffset
 
-                uint catNamesOffset = reader.ReadUInt32 ();
-                uint varNamesOffset = reader.ReadUInt32 ();
-                uint rpcOffset = reader.ReadUInt32 ();
+                uint catNamesOffset = reader.ReadUInt32();
+                uint varNamesOffset = reader.ReadUInt32();
+                uint rpcOffset = reader.ReadUInt32();
                 reader.ReadUInt32(); // dspPresetsOffset
-                uint dspParamsOffset = reader.ReadUInt32 (); 
+                uint dspParamsOffset = reader.ReadUInt32();
 
-                reader.BaseStream.Seek (catNamesOffset, SeekOrigin.Begin);
+                reader.BaseStream.Seek(catNamesOffset, SeekOrigin.Begin);
                 string[] categoryNames = ReadNullTerminatedStrings(numCats, reader);
 
                 _categories = new AudioCategory[numCats];
-                reader.BaseStream.Seek (catsOffset, SeekOrigin.Begin);
-                for (int i=0; i<numCats; i++) 
+                reader.BaseStream.Seek(catsOffset, SeekOrigin.Begin);
+                for (int i = 0; i < numCats; i++)
                 {
-                    _categories [i] = new AudioCategory (this, categoryNames [i], reader);
-                    _categoryLookup.Add (categoryNames [i], i);
+                    _categories[i] = new AudioCategory(this, categoryNames[i], reader);
+                    _categoryLookup.Add(categoryNames[i], i);
                 }
 
-                reader.BaseStream.Seek (varNamesOffset, SeekOrigin.Begin);
+                reader.BaseStream.Seek(varNamesOffset, SeekOrigin.Begin);
                 string[] varNames = ReadNullTerminatedStrings(numVars, reader);
 
                 var variables = new List<RpcVariable>();
                 var cueVariables = new List<RpcVariable>();
                 var globalVariables = new List<RpcVariable>();
-                reader.BaseStream.Seek (varsOffset, SeekOrigin.Begin);
-                for (var i=0; i < numVars; i++)
+                reader.BaseStream.Seek(varsOffset, SeekOrigin.Begin);
+                for (var i = 0; i < numVars; i++)
                 {
                     var v = new RpcVariable();
                     v.Name = varNames[i];
-                    v.Flags = reader.ReadByte();						
+                    v.Flags = reader.ReadByte();
                     v.InitValue = reader.ReadSingle();
                     v.MinValue = reader.ReadSingle();
                     v.MaxValue = reader.ReadSingle();
@@ -164,7 +164,7 @@ namespace Microsoft.Xna.Framework.Audio
                     else
                     {
                         globalVariables.Add(v);
-                        _variableLookup.Add(v.Name, globalVariables.Count - 1);                        
+                        _variableLookup.Add(v.Name, globalVariables.Count - 1);
                     }
                 }
                 _cueVariables = cueVariables.ToArray();
@@ -175,12 +175,12 @@ namespace Microsoft.Xna.Framework.Audio
                 if (numRpc > 0)
                 {
                     reader.BaseStream.Seek(rpcOffset, SeekOrigin.Begin);
-                    for (var i=0; i < numRpc; i++)
+                    for (var i = 0; i < numRpc; i++)
                     {
                         var curve = new RpcCurve();
                         curve.FileOffset = (uint)reader.BaseStream.Position;
 
-                        var variable = variables[ reader.ReadUInt16() ];
+                        var variable = variables[reader.ReadUInt16()];
                         if (variable.IsGlobal)
                         {
                             curve.IsGlobal = true;
@@ -196,7 +196,7 @@ namespace Microsoft.Xna.Framework.Audio
                         curve.Parameter = (RpcParameter)reader.ReadUInt16();
 
                         curve.Points = new RpcPoint[pointCount];
-                        for (var j=0; j < pointCount; j++) 
+                        for (var j = 0; j < pointCount; j++)
                         {
                             curve.Points[j].Position = reader.ReadSingle();
                             curve.Points[j].Value = reader.ReadSingle();
@@ -249,12 +249,12 @@ namespace Microsoft.Xna.Framework.Audio
         private static string[] ReadNullTerminatedStrings(uint count, BinaryReader reader)
         {
             var ret = new string[count];
-            
-            for (var i=0; i < count; i++) 
+
+            for (var i = 0; i < count; i++)
             {
                 var s = new List<char>();
-                while (reader.PeekChar() != 0) 
-                    s.Add(reader.ReadChar()); 
+                while (reader.PeekChar() != 0)
+                    s.Add(reader.ReadChar());
 
                 reader.ReadChar();
                 ret[i] = new string(s.ToArray());
@@ -276,7 +276,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             lock (UpdateLock)
             {
-                for (var x = 0; x < ActiveCues.Count; )
+                for (var x = 0; x < ActiveCues.Count;)
                 {
                     var cue = ActiveCues[x];
 
@@ -307,7 +307,7 @@ namespace Microsoft.Xna.Framework.Audio
                 SoundEffect.PlatformSetReverbSettings(_reverbSettings);
             }
         }
-        
+
         /// <summary>Returns an audio category by name.</summary>
         /// <param name="name">Friendly name of the category to get.</param>
         /// <returns>The AudioCategory with a matching name. Throws an exception if not found.</returns>
@@ -381,10 +381,12 @@ namespace Microsoft.Xna.Framework.Audio
             GC.SuppressFinalize(this);
         }
 
+#if !WEB
         ~AudioEngine()
         {
             Dispose(false);
         }
+#endif
 
         private void Dispose(bool disposing)
         {

@@ -35,7 +35,7 @@ using System.Resources;
 
 // This was needed in WinRT releases to inform the system that we
 // don't need to load any language specific resources.
-[assembly: NeutralResourcesLanguageAttribute("en-US")]
+// [assembly: NeutralResourcesLanguageAttribute("en-US")]
 
 // Version information for the assembly which is automatically
 // set by our automated build process.

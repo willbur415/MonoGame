@@ -8,7 +8,9 @@ namespace Microsoft.Xna.Framework.Content
     {
         public static ConstructorInfo GetDefaultConstructor(this Type type)
         {
-#if NET45
+#if WEB
+            return type.GetConstructor(new Type[0]);
+#elif NET45
             var typeInfo = type.GetTypeInfo();
             var ctor = typeInfo.DeclaredConstructors.FirstOrDefault(c => !c.IsStatic && c.GetParameters().Length == 0);
             return ctor;
@@ -26,7 +28,12 @@ namespace Microsoft.Xna.Framework.Content
             // all properties in this list are defined in this class by comparing
             // its get method with that of it's base class. If they're the same
             // Then it's an overridden property.
-#if NET45
+#if WEB
+            const BindingFlags attrs = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            var allProps = type.GetProperties(attrs).ToList();
+            var props = allProps.FindAll(p => p.GetMethod != null).ToArray();
+            return props;
+#elif NET45
             PropertyInfo[] infos= type.GetTypeInfo().DeclaredProperties.ToArray();
             var nonStaticPropertyInfos = from p in infos
                                          where (p.GetMethod != null) && (!p.GetMethod.IsStatic) &&

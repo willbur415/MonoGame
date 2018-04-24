@@ -50,9 +50,13 @@ namespace Microsoft.Xna.Framework.Content
         }
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
-        {			
-			Type readerType = Enum.GetUnderlyingType(typeof(T));
+        {
+#if WEB
+            elementReader = manager.GetTypeReader(typeof(T));
+#else
+            Type readerType = Enum.GetUnderlyingType(typeof(T));
 			elementReader = manager.GetTypeReader(readerType);
+#endif
         }
 		
         protected internal override T Read(ContentReader input, T existingInstance)

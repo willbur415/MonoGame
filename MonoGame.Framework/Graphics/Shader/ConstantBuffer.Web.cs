@@ -18,7 +18,7 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new NotImplementedException();
         }
 
-        public unsafe void PlatformApply(GraphicsDevice device, int program)
+        public void PlatformApply(GraphicsDevice device, int program)
         {
             throw new NotImplementedException();
         }

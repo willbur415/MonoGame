@@ -32,6 +32,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
+#if !WEB
                 if (_bytecode == null)
                 {
                     lock (_locker)
@@ -49,6 +50,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         }
                     }
                 }
+#endif
 
                 return _bytecode;
             }

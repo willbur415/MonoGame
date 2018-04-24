@@ -13,7 +13,7 @@ namespace Microsoft.Xna.Framework
     {
         static partial void PlatformInit();
 
-        static TitleContainer() 
+        static TitleContainer()
         {
             Location = string.Empty;
             PlatformInit();
@@ -66,10 +66,14 @@ namespace Microsoft.Xna.Framework
 
         internal static string NormalizeRelativePath(string name)
         {
+#if WEB
+            return name;
+#else
             var uri = new Uri("file:///" + name);
             var path = uri.LocalPath;
             path = path.Substring(1);
             return path.Replace(FileHelpers.NotSeparator, FileHelpers.Separator);
+#endif
         }
     }
 }

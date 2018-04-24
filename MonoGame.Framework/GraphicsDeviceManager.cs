@@ -6,6 +6,10 @@ using System;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 
+#if WEB
+using IntPtr = Microsoft.Xna.Framework.IntPtr;
+#endif
+
 namespace Microsoft.Xna.Framework
 {
     /// <summary>
@@ -95,10 +99,12 @@ namespace Microsoft.Xna.Framework
             _game.Services.AddService(typeof(IGraphicsDeviceService), this);
         }
 
+#if !WEB
         ~GraphicsDeviceManager()
         {
             Dispose(false);
         }
+#endif
 
         private void CreateDevice()
         {
@@ -165,7 +171,7 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        #region IGraphicsDeviceService Members
+#region IGraphicsDeviceService Members
 
         public event EventHandler<EventArgs> DeviceCreated;
         public event EventHandler<EventArgs> DeviceDisposing;
@@ -218,9 +224,9 @@ namespace Microsoft.Xna.Framework
             return gdi;
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable Members
+#region IDisposable Members
 
         public void Dispose()
         {
@@ -245,7 +251,7 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        #endregion
+#endregion
 
         partial void PlatformApplyChanges();
 

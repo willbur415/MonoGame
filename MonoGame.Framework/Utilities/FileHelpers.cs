@@ -39,6 +39,19 @@ namespace Microsoft.Xna.Framework.Utilities
         /// <param name="relativeFile">Relative location of another file to resolve the path to</param>
         public static string ResolveRelativePath(string filePath, string relativeFile)
         {
+#if WEB
+            filePath = filePath.Replace(BackwardSlash, ForwardSlash);
+            relativeFile = relativeFile.Replace(BackwardSlash, ForwardSlash);
+
+            var len = filePath.Length - 1;
+            while (len > 0 && filePath[len] != ForwardSlash)
+                len--;
+
+            if (len > 0)
+                filePath = filePath.Substring(0, len);
+
+            return Path.Combine(filePath, relativeFile);
+#else
             // Uri accepts forward slashes
             filePath = filePath.Replace(BackwardSlash, ForwardSlash);
 
@@ -61,6 +74,7 @@ namespace Microsoft.Xna.Framework.Utilities
             // Convert the directory separator characters to the 
             // correct platform specific separator.
             return NormalizeFilePathSeparators(localPath);
+#endif
         }
 
         private static string UrlEncode(string url)

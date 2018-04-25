@@ -892,7 +892,17 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-#if OPENGL
+#if WEB
+        [Conditional("DEBUG")]
+		[DebuggerHidden]
+        public static void CheckGLError()
+        {
+            var error = Web.GL.GetError();
+
+            if (error != Web.GL.NO_ERROR)
+                throw new MonoGameGLException("GL.GetError() returned " + error.ToString());
+        }
+#elif OPENGL
 
         public static int GetBoundTexture2D()
         {
@@ -913,7 +923,7 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 #endif
 
-#if OPENGL
+#if OPENGL || WEB
         [Conditional("DEBUG")]
         public static void LogGLError(string location)
         {

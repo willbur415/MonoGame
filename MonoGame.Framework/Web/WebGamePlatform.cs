@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Microsoft.Xna.Framework
@@ -16,12 +17,7 @@ namespace Microsoft.Xna.Framework
         public WebGamePlatform(Game game)
             : base(game)
         {
-            Window = _view = new WebGameWindow();
-        }
-
-        public virtual void Callback()
-        {
-            this.Game.Tick();
+            Window = _view = new WebGameWindow(game);
         }
         
         public override void Exit()
@@ -38,7 +34,8 @@ namespace Microsoft.Xna.Framework
         {
             _threadId = Bridge.Html5.Window.SetInterval(() =>
             {
-                // Process Events
+                // Process Events?
+
                 Game.Tick();
             }, 20);
         }
@@ -55,34 +52,31 @@ namespace Microsoft.Xna.Framework
 
         public override void EnterFullScreen()
         {
-            ResetWindowBounds();
+
         }
 
         public override void ExitFullScreen()
         {
-            ResetWindowBounds();
+
         }
 
-        internal void ResetWindowBounds()
+        internal override void OnPresentationChanged(PresentationParameters pp)
         {
-            
+            BeginScreenDeviceChange(pp.IsFullScreen);
+            EndScreenDeviceChange(string.Empty, pp.BackBufferWidth, pp.BackBufferHeight);
         }
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)
         {
+            _view.BeginScreenDeviceChange(willBeFullScreen);
         }
 
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
+            _view.EndScreenDeviceChange(screenDeviceName, clientWidth, clientHeight);
         }
 
-        public override GameRunBehavior DefaultRunBehavior
-        {
-            get
-            {
-                return GameRunBehavior.Asynchronous;
-            }
-        }
+        public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Asynchronous;
     }
 }
 

@@ -9,10 +9,11 @@ namespace Microsoft.Xna.Framework.Input
     public static partial class Keyboard
     {
         static List<Keys> _keys;
+        internal static bool CapsLock, NumLock;
 
         private static KeyboardState PlatformGetState()
         {
-            return new KeyboardState(_keys);
+            return new KeyboardState(_keys, CapsLock, NumLock);
         }
 
         internal static void SetKeys(List<Keys> keys)

@@ -36,6 +36,14 @@ namespace Microsoft.Xna.Framework
 
 namespace System
 {
+    class PlatformNotSupportedException : Exception
+    {
+        public PlatformNotSupportedException(string message)
+        {
+            
+        }
+    }
+
     static class GC
     {
         public static void SuppressFinalize(object obj)

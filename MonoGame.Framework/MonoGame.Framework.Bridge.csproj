@@ -151,7 +151,6 @@
     <Compile Include="Graphics\Shader\ConstantBufferCollection.cs" />
     <Compile Include="Graphics\Shader\Shader.cs" />
     <Compile Include="Graphics\Shader\Shader.Web.cs" />
-    <Compile Include="Graphics\Shader\ShaderProgramCache.cs" />
     <Compile Include="Graphics\Shader\ShaderStage.cs" />
     <Compile Include="Graphics\States\Blend.cs" />
     <Compile Include="Graphics\States\BlendFunction.cs" />
@@ -374,6 +373,13 @@
     <Compile Include="Media\MediaPlayer.Default.cs" />
     <Compile Include="Media\MediaState.cs" />
     <Compile Include="Media\MediaQueue.cs" />
+    <Compile Include="Input\Keyboard.cs" />
+    <Compile Include="Input\Keyboard.Default.cs" />
+    <Compile Include="Input\KeyboardState.cs" />
+    <Compile Include="PlayerIndex.cs" />
+    <Compile Include="Input\KeyboardUtil.Web.cs" />
+    <Compile Include="Graphics\GraphicsDevice.Web.FramebufferHelper.cs" />
+    <Compile Include="Graphics\Shader\ShaderProgramCache.Web.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Bridge">

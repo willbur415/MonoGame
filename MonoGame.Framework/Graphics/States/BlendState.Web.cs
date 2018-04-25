@@ -9,7 +9,7 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class BlendState
     {
-        internal void PlatformApplyState(GraphicsDevice device)
+        internal void PlatformApplyState(GraphicsDevice device, bool force = false)
         {
             
         }

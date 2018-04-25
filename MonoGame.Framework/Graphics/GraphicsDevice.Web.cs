@@ -15,27 +15,157 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class GraphicsDevice
     {
+        // List<ResourceHandle> _disposeThisFrame = new List<ResourceHandle>();
+        // List<ResourceHandle> _disposeNextFrame = new List<ResourceHandle>();
+        object _disposeActionsLock = new object();
+
+        static List<IntPtr> _disposeContexts = new List<IntPtr>();
+        static object _disposeContextsLock = new object();
+
+        // private ShaderProgramCache _programCache;
+        // private ShaderProgram _shaderProgram = null;
+
+        static readonly float[] _posFixup = new float[4];
+
+        // private static BufferBindingInfo[] _bufferBindingInfos;
+        private static bool[] _newEnabledVertexAttributes;
+        internal static readonly List<int> _enabledVertexAttributes = new List<int>();
+        internal static bool _attribsDirty;
+
+        internal FramebufferHelper framebufferHelper;
+
+        internal int glFramebuffer = 0;
+        internal int MaxVertexAttributes;
+        internal int _maxTextureSize = 0;
+
+        // Keeps track of last applied state to avoid redundant OpenGL calls
+        internal bool _lastBlendEnable = false;
+        internal BlendState _lastBlendState = new BlendState();
+        internal DepthStencilState _lastDepthStencilState = new DepthStencilState();
+        internal RasterizerState _lastRasterizerState = new RasterizerState();
+        private Vector4 _lastClearColor = Vector4.Zero;
+        private float _lastClearDepth = 1.0f;
+        private int _lastClearStencil = 0;
+        private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
+
         private void PlatformSetup()
         {
-            
+            MaxTextureSlots = (int)Web.GL.GetParameter(Web.GL.MAX_TEXTURE_IMAGE_UNITS);
+            GraphicsExtensions.CheckGLError();
+
+            _maxTextureSize = (int)Web.GL.GetParameter(Web.GL.MAX_TEXTURE_SIZE);
+            GraphicsExtensions.CheckGLError();
+
+            MaxVertexAttributes = (int)Web.GL.GetParameter(Web.GL.MAX_VERTEX_ATTRIBS);
+            GraphicsExtensions.CheckGLError();
+
+            _maxVertexBufferSlots = MaxVertexAttributes;
+            _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
+
+            // Console.WriteLine(Web.GL.GetParameter(Web.GL.VERSION).ToString());
         }
 
         private void PlatformInitialize()
         {
+            _viewport = new Viewport(0, 0, PresentationParameters.BackBufferWidth, PresentationParameters.BackBufferHeight);
+
+            // Ensure the vertex attributes are reset
+            _enabledVertexAttributes.Clear();
         }
 
         internal void OnPresentationChanged()
         {
+            ApplyRenderTargets(null);
         }
 
         public void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
         {
-            WebGameWindow.GL.ClearColor(color.X, color.Y, color.Z, color.W);
-            WebGameWindow.GL.Clear(WebGameWindow.GL.DEPTH_BUFFER_BIT | WebGameWindow.GL.COLOR_BUFFER_BIT);
+            // TODO: We need to figure out how to detect if we have a
+            // depth stencil buffer or not, and clear options relating
+            // to them if not attached.
+
+            // Unlike with XNA and DirectX...  GL.Clear() obeys several
+            // different render states:
+            //
+            //  - The color write flags.
+            //  - The scissor rectangle.
+            //  - The depth/stencil state.
+            //
+            // So overwrite these states with what is needed to perform
+            // the clear correctly and restore it afterwards.
+            //
+		    var prevScissorRect = ScissorRectangle;
+		    var prevDepthStencilState = DepthStencilState;
+            var prevBlendState = BlendState;
+            ScissorRectangle = _viewport.Bounds;
+            // DepthStencilState.Default has the Stencil Test disabled; 
+            // make sure stencil test is enabled before we clear since
+            // some drivers won't clear with stencil test disabled
+            DepthStencilState = this.clearDepthStencilState;
+		    BlendState = BlendState.Opaque;
+            ApplyState(false);
+
+            int bufferMask = 0;
+            if ((options & ClearOptions.Target) == ClearOptions.Target)
+            {
+                if (color != _lastClearColor)
+                {
+                    Web.GL.ClearColor(color.X, color.Y, color.Z, color.W);
+                    GraphicsExtensions.CheckGLError();
+                    _lastClearColor = color;
+                }
+
+                bufferMask = bufferMask | Web.GL.COLOR_BUFFER_BIT;
+            }
+			if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
+            {
+                if (stencil != _lastClearStencil)
+                {
+				    Web.GL.ClearStencil(stencil);
+                    GraphicsExtensions.CheckGLError();
+                    _lastClearStencil = stencil;
+                }
+                bufferMask = bufferMask | Web.GL.STENCIL_BUFFER_BIT;
+			}
+
+			if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer) 
+            {
+                if (depth != _lastClearDepth)
+                {
+                    Web.GL.ClearDepth(depth);
+                    GraphicsExtensions.CheckGLError();
+                    _lastClearDepth = depth;
+                }
+				bufferMask = bufferMask | Web.GL.DEPTH_BUFFER_BIT;
+			}
+
+            Web.GL.Clear(bufferMask);
+            GraphicsExtensions.CheckGLError();
+           		
+            // Restore the previous render state.
+		    ScissorRectangle = prevScissorRect;
+		    DepthStencilState = prevDepthStencilState;
+		    BlendState = prevBlendState;
         }
 
         private void PlatformDispose()
         {
+
+        }
+
+        internal void DisposeShader(WebGLShader handle)
+        {
+        }
+
+        internal void DisposeProgram(WebGLProgram handle)
+        {
+            /*if (!_isDisposed)
+            {
+                lock (_disposeActionsLock)
+                {
+                    _disposeNextFrame.Add(ResourceHandle.Program(handle));
+                }
+            }*/
         }
 
         public void PlatformPresent()
@@ -44,6 +174,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetViewport(ref Viewport value)
         {
+            if (IsRenderTargetBound)
+                Web.GL.Viewport(value.X, value.Y, value.Width, value.Height);
+            else
+                Web.GL.Viewport(value.X, PresentationParameters.BackBufferHeight - value.Y - value.Height, value.Width, value.Height);
+            GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.Viewport");
+
+            Web.GL.DepthRange(value.MinDepth, value.MaxDepth);
+            GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.DepthRange");
+                
+            // In OpenGL we have to re-apply the special "posFixup"
+            // vertex shader uniform if the viewport changes.
+            _vertexShaderDirty = true;
         }
 
         private void PlatformApplyDefaultRenderTarget()
@@ -64,8 +206,20 @@ namespace Microsoft.Xna.Framework.Graphics
         {
         }
 
-        private void PlatformApplyBlend()
+        private void PlatformApplyBlend(bool force = false)
         {
+            _actualBlendState.PlatformApplyState(this, force);
+
+            if (force || BlendFactor != _lastBlendState.BlendFactor)
+            {
+                Web.GL.BlendColor(
+                    this.BlendFactor.R/255.0f,
+                    this.BlendFactor.G/255.0f,
+                    this.BlendFactor.B/255.0f,
+                    this.BlendFactor.A/255.0f);
+                GraphicsExtensions.CheckGLError();
+                _lastBlendState.BlendFactor = this.BlendFactor;
+            }
         }
 
         internal void PlatformApplyState(bool applyShaders)
@@ -108,7 +262,7 @@ namespace Microsoft.Xna.Framework.Graphics
         
         internal void PlatformSetMultiSamplingToMaximum(PresentationParameters presentationParameters, out int quality)
         {
-            presentationParameters.MultiSampleCount = 0;
+            presentationParameters.MultiSampleCount = 4;
             quality = 0;
         }
     }

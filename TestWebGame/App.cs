@@ -16,6 +16,9 @@ namespace TestWebGame
 			canvas.Height = 480;
 			canvas.Id = "monogamecanvas";
 
+            var divdata = new Bridge.Html5.HTMLDivElement();
+			divdata.Id = "testoutput";
+
             var button = new HTMLButtonElement();
             button.InnerHTML = "Run Game";
 
@@ -28,6 +31,7 @@ namespace TestWebGame
 
 			Document.Body.AppendChild(canvas);
             Document.Body.AppendChild(button);
+			Document.Body.AppendChild(divdata);
         }
     }
 }

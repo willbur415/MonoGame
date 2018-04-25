@@ -10,8 +10,12 @@ namespace TestWebGame
     /// </summary>
     public class Game1 : Game
     {
+        Bridge.Html5.HTMLDivElement divdata;
         GraphicsDeviceManager graphics;
         Song song;
+        MouseState prevstate;
+        bool playing;
+        KeyboardState prevkstate;
         // SpriteBatch spriteBatch;
         
         public Game1()
@@ -42,8 +46,12 @@ namespace TestWebGame
             // Create a new SpriteBatch, which can be used to draw textures.
             // spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            divdata = Bridge.Html5.Document.GetElementById("testoutput") as Bridge.Html5.HTMLDivElement;
+
             song = Content.Load<Song>("awake");
+            MediaPlayer.Play(song);
+            MediaPlayer.Pause(); 
+            MediaPlayer.Volume = 0.1f;
         }
 
         /// <summary>
@@ -62,10 +70,32 @@ namespace TestWebGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            //     Exit();
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
 
-            // TODO: Add your update logic here
+            var state = Mouse.GetState();
+            var kstate = Keyboard.GetState();
+
+            if (prevstate.RightButton == ButtonState.Released && state.RightButton == ButtonState.Pressed)
+            {
+                graphics.IsFullScreen = !graphics.IsFullScreen;
+                graphics.ApplyChanges();
+            }
+
+            if (prevkstate.IsKeyUp(Keys.M) && kstate.IsKeyDown(Keys.M))
+            {
+                if (playing)
+                    MediaPlayer.Pause();
+                else
+                    MediaPlayer.Resume();
+
+                playing = !playing;
+            }
+
+            divdata.InnerHTML = "Left: " + state.LeftButton + "<br>Right: " + state.RightButton + "<br>Mouse pos: " + state.Position + "<br>A: " + kstate.IsKeyDown(Keys.A) + "<br>Caps: " + kstate.CapsLock;
+
+            prevstate = state;
+            prevkstate = kstate;
 
             base.Update(gameTime);
         }

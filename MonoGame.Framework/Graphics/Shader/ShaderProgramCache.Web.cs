@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Bridge.WebGL;
+using static Retyped.dom;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_uniformLocations.ContainsKey(name))
                 return _uniformLocations[name];
 
-            var location = Web.GL.GetUniformLocation(Program, name);
+            var location = gl.getUniformLocation(Program, name);
             GraphicsExtensions.CheckGLError();
             _uniformLocations[name] = location;
             return location;
@@ -76,36 +77,35 @@ namespace Microsoft.Xna.Framework.Graphics
             // NOTE: No need to worry about background threads here
             // as this is only called at draw time when we're in the
             // main drawing thread.
-            var program = (WebGLProgram)Web.GL.CreateProgram();
+            var program = (WebGLProgram)gl.createProgram();
             GraphicsExtensions.CheckGLError();
 
-            Web.GL.AttachShader(program, vertexShader.GetShaderHandle());
+            gl.attachShader(program, vertexShader.GetShaderHandle());
             GraphicsExtensions.CheckGLError();
 
-            Web.GL.AttachShader(program, pixelShader.GetShaderHandle());
+            gl.attachShader(program, pixelShader.GetShaderHandle());
             GraphicsExtensions.CheckGLError();
 
             //vertexShader.BindVertexAttributes(program);
 
-            Web.GL.LinkProgram(program);
+            gl.linkProgram(program);
             GraphicsExtensions.CheckGLError();
 
-            Web.GL.UseProgram(program);
+            gl.useProgram(program);
             GraphicsExtensions.CheckGLError();
 
             vertexShader.GetVertexAttributeLocations(program);
 
             pixelShader.ApplySamplerTextureUnits(program);
 
-            var linked = (int)Web.GL.GetProgramParameter(program, Web.GL.LINK_STATUS);
+            var linked = (int)gl.getProgramParameter(program, gl.LINK_STATUS);
             GraphicsExtensions.LogGLError("VertexShaderCache.Link(), GL.GetProgram");
 
             if (linked == 0)
             {
-                var log = Web.GL.GetProgramInfoLog(program);
-                Console.WriteLine(log);
-                Web.GL.DetachShader(program, vertexShader.GetShaderHandle());
-                Web.GL.DetachShader(program, pixelShader.GetShaderHandle());
+                var log = gl.getProgramInfoLog(program);
+                gl.detachShader(program, vertexShader.GetShaderHandle());
+                gl.detachShader(program, pixelShader.GetShaderHandle());
                 _graphicsDevice.DisposeProgram(program);
                 throw new InvalidOperationException("Unable to link effect program");
             }

@@ -4,9 +4,10 @@
 
 using System;
 using System.IO;
-using Bridge.WebGL;
-using Bridge.Html5;
-using Bridge;
+using static Retyped.dom;
+using static Retyped.es5;
+using static WebHelper;
+using Math = System.Math;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -14,7 +15,7 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         private void PlatformConstruct(int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
-            this.glTarget = Web.GL.TEXTURE_2D;
+            this.glTarget = gl.TEXTURE_2D;
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
             
             GenerateGLTextureIfRequired();
@@ -24,7 +25,7 @@ namespace Microsoft.Xna.Framework.Graphics
             while (true)
             {
 
-                if (glFormat == Web.GL.COMPRESSED_TEXTURE_FORMATS)
+                if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
                 {
                     int imageSize = 0;
                     // PVRTC has explicit calculations for imageSize
@@ -56,7 +57,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     // GraphicsExtensions.CheckGLError();
                 }
 
-                Web.GL.TexImage2D(Web.GL.TEXTURE_2D, level, glInternalFormat, glFormat, glType, new Bridge.Html5.ImageData(1, 1));
+                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, glFormat, glType, new ImageData(1, 1));
                 GraphicsExtensions.CheckGLError();
 
                 if ((w == 1 && h == 1) || !mipmap)
@@ -73,24 +74,24 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             if (this.glTexture == null)
             {
-                glTexture = Web.GL.CreateTexture();
+                glTexture = gl.createTexture();
                 GraphicsExtensions.CheckGLError();
 
                 // For best compatibility and to keep the default wrap mode of XNA, only set ClampToEdge if either
                 // dimension is not a power of two.
-                var wrap = Web.GL.REPEAT;
+                var wrap = gl.REPEAT;
                 if (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0))
-                    wrap = Web.GL.CLAMP_TO_EDGE;
+                    wrap = gl.CLAMP_TO_EDGE;
 
-                Web.GL.BindTexture(Web.GL.TEXTURE_2D, glTexture);
+                gl.bindTexture(gl.TEXTURE_2D, glTexture);
                 GraphicsExtensions.CheckGLError();
-                Web.GL.TexParameteri(Web.GL.TEXTURE_2D, Web.GL.TEXTURE_MIN_FILTER, (_levelCount > 1) ? Web.GL.LINEAR_MIPMAP_LINEAR : Web.GL.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, (_levelCount > 1) ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
                 GraphicsExtensions.CheckGLError();
-                Web.GL.TexParameteri(Web.GL.TEXTURE_2D, Web.GL.TEXTURE_MAG_FILTER, Web.GL.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                 GraphicsExtensions.CheckGLError();
-                Web.GL.TexParameteri(Web.GL.TEXTURE_2D, Web.GL.TEXTURE_WRAP_S, wrap);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
                 GraphicsExtensions.CheckGLError();
-                Web.GL.TexParameteri(Web.GL.TEXTURE_2D, Web.GL.TEXTURE_WRAP_T, wrap);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
                 GraphicsExtensions.CheckGLError();
                 // Set mipmap levels
                 // WebGL 2
@@ -116,7 +117,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
-            Console.WriteLine(LastTSize);
+            // Console.WriteLine(LastTSize);
 
             int w, h;
             GetSizeForLevel(Width, Height, level, out w, out h);
@@ -132,14 +133,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (prevTexture != glTexture)
             {
-                Web.GL.BindTexture(Web.GL.TEXTURE_2D, glTexture);
+                gl.bindTexture(gl.TEXTURE_2D, glTexture);
                 GraphicsExtensions.CheckGLError();
             }
 
             GenerateGLTextureIfRequired();
-            Web.GL.PixelStorei(Web.GL.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
+            gl.pixelStorei(gl.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
 
-            if (glFormat == Web.GL.COMPRESSED_TEXTURE_FORMATS)
+            if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
             {
                 throw new NotImplementedException();
                 /*ArrayBufferView arr = new Uint32Array(elementCount);
@@ -152,14 +153,14 @@ namespace Microsoft.Xna.Framework.Graphics
                 for (int i = startIndex; i < elementCount; i++)
                     arr[i] = Convert.ToByte(data[i]);
 
-                Web.GL.TexImage2D(Web.GL.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr);
+                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
             }
             GraphicsExtensions.CheckGLError();
             
             // Restore the bound texture.
             if (prevTexture != glTexture)
             {
-                Script.InvokeMethod(Web.GL, "bindTexture", Web.GL.TEXTURE_2D, prevTexture);
+                gl.bindTexture(gl.TEXTURE_2D, prevTexture);
                 GraphicsExtensions.CheckGLError();
             }
         }

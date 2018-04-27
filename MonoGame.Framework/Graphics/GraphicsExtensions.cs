@@ -14,6 +14,9 @@ using PixelFormat = MonoGame.OpenGL.PixelFormat;
 using OpenTK.Graphics;
 #endif
 #endif
+#if WEB
+using static WebHelper;
+#endif
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -897,9 +900,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		[DebuggerHidden]
         public static void CheckGLError()
         {
-            var error = Web.GL.GetError();
+            var error = gl.getError();
 
-            if (error != Web.GL.NO_ERROR)
+            if (error != gl.NO_ERROR)
                 throw new MonoGameGLException("GL.GetError() returned " + error.ToString());
         }
 #elif OPENGL

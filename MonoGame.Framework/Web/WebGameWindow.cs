@@ -5,17 +5,16 @@
 using System;
 using System.Collections.Generic;
 using Bridge;
-using Bridge.Html5;
-using Bridge.WebGL;
 using Microsoft.Xna.Framework.Input;
+using static Retyped.dom;
 
 #if WEB
 using IntPtr = Microsoft.Xna.Framework.IntPtr;
 #endif
 
-static class Web
+static class WebHelper
 {
-    public static WebGLRenderingContext GL;
+    public static WebGLRenderingContext gl;
 }
 
 namespace Microsoft.Xna.Framework
@@ -35,18 +34,15 @@ namespace Microsoft.Xna.Framework
 
             Keyboard.SetKeys(_keys);
 
-            _canvas = Document.GetElementById("monogamecanvas") as HTMLCanvasElement;
-            _canvas.Width = GraphicsDeviceManager.DefaultBackBufferWidth;
-            _canvas.Height = GraphicsDeviceManager.DefaultBackBufferHeight;
-            _canvas.TabIndex = 1000;
+            _canvas = document.getElementById("monogamecanvas") as HTMLCanvasElement;
+            _canvas.width = GraphicsDeviceManager.DefaultBackBufferWidth;
+            _canvas.height = GraphicsDeviceManager.DefaultBackBufferHeight;
+            _canvas.tabIndex = 1000;
 
             // Disable selection
-            _canvas.Style.SetProperty("-webkit-touch-callout", "none");
-            _canvas.Style.SetProperty("-webkit-user-select", "none");
-            _canvas.Style.SetProperty("-khtml-user-select", "none");
-            _canvas.Style.SetProperty("-moz-user-select", "none");
-            _canvas.Style.SetProperty("-ms-user-select", "none");
-            _canvas.Style.SetProperty("user-select", "none");
+            _canvas.style.userSelect = "none";
+            _canvas.style.webkitUserSelect = "none";
+            _canvas.style.msUserSelect = "none";
 
             // TODO: Move "GL context" creation outside the game window
             var possiblecontexts = new[] { "webgl", "experimental-webgl", "webkit-3d", "moz-webgl" };
@@ -54,31 +50,35 @@ namespace Microsoft.Xna.Framework
             {
                 try
                 {
-                    Web.GL = _canvas.GetContext(context).As<WebGLRenderingContext>();
-                    if (Web.GL != null)
+                    WebHelper.gl = _canvas.getContext(context).As<Retyped.dom.WebGLRenderingContext>();
+                    if (WebHelper.gl != null)
                         break;
                 }
                 catch { }
             }
 
-            if (Web.GL == null)
+            if (WebHelper.gl == null)
                 throw new Exception("Failed to get WebGL context :|");
 
             // Block context menu on the canvas element
-            _canvas.OnContextMenu += (e) => e.PreventDefault();
+            _canvas.oncontextmenu += (e) => {
+                e.preventDefault();
+
+                return true;
+            };
 
             // Connect events
-            _canvas.OnMouseMove += Canvas_MouseMove;
-            _canvas.OnMouseDown += Canvas_MouseDown;
-            _canvas.OnMouseUp += Canvas_MouseUp;
-            _canvas.OnMouseWheel += Canvas_MouseWheel;
-            _canvas.OnKeyDown += Canvas_KeyDown;
-            _canvas.OnKeyUp += Canvas_KeyUp;
+            _canvas.onmousemove += (e) => Canvas_MouseMove(e);
+            _canvas.onmousedown += (e) => Canvas_MouseDown(e);
+            _canvas.onmouseup += (e) => Canvas_MouseUp(e);
+            _canvas.onmousewheel += (e) => Canvas_MouseWheel(e);
+            _canvas.onkeydown += (e) => Canvas_KeyDown(e);
+            _canvas.onkeyup += (e) => Canvas_KeyUp(e);
 
-            Document.AddEventListener("webkitfullscreenchange", Document_FullscreenChange);
-            Document.AddEventListener("mozfullscreenchange", Document_FullscreenChange);
-            Document.AddEventListener("fullscreenchange", Document_FullscreenChange);
-            Document.AddEventListener("MSFullscreenChange", Document_FullscreenChange);
+            document.addEventListener("webkitfullscreenchange", Document_FullscreenChange);
+            document.addEventListener("mozfullscreenchange", Document_FullscreenChange);
+            document.addEventListener("fullscreenchange", Document_FullscreenChange);
+            document.addEventListener("MSFullscreenChange", Document_FullscreenChange);
         }
 
         // Fullscreen can only be interacted with on user interaction events
@@ -107,33 +107,35 @@ namespace Microsoft.Xna.Framework
             }
         }
 
-        private void Document_FullscreenChange()
+        private void Document_FullscreenChange(Event e)
         {
             _isFullscreen = Script.Eval<bool>("(document.fullScreenElement && document.fullScreenElement !== null) || document.mozFullScreen || document.webkitIsFullScreen");
             
             if (_isFullscreen)
             {
-                _canvas.Width = Document.DocumentElement.ClientWidth;
-                _canvas.Height = Document.DocumentElement.ClientHeight;
+                _canvas.width = document.documentElement.clientWidth;
+                _canvas.height = document.documentElement.clientHeight;
             }
             else
             {
-                _canvas.Width = GraphicsDeviceManager.DefaultBackBufferWidth;
-                _canvas.Height = GraphicsDeviceManager.DefaultBackBufferHeight;
+                _canvas.width = GraphicsDeviceManager.DefaultBackBufferWidth;
+                _canvas.height = GraphicsDeviceManager.DefaultBackBufferHeight;
             }
 
             _game.graphicsDeviceManager.IsFullScreen = _isFullscreen;
         }
 
-        private void Canvas_MouseMove(MouseEvent e)
+        private bool Canvas_MouseMove(MouseEvent e)
         {
-            this.MouseState.X = e.ClientX - _canvas.OffsetLeft;
-            this.MouseState.Y = e.ClientY - _canvas.OffsetTop;
+            this.MouseState.X = (int)(e.clientX - _canvas.offsetLeft);
+            this.MouseState.Y = (int)(e.clientY - _canvas.offsetTop);
+
+            return true;
         }
 
-        private void Canvas_MouseDown(MouseEvent e)
+        private bool Canvas_MouseDown(MouseEvent e)
         {
-            switch(e.Button)
+            switch(e.button)
             {
                 case 0:
                     this.MouseState.LeftButton = ButtonState.Pressed;
@@ -147,11 +149,12 @@ namespace Microsoft.Xna.Framework
             }
 
             EnsureFullscreen();
+            return true;
         }
 
-        private void Canvas_MouseUp(MouseEvent e)
+        private bool Canvas_MouseUp(MouseEvent e)
         {
-            switch(e.Button)
+            switch(e.button)
             {
                 case 0:
                     this.MouseState.LeftButton = ButtonState.Released;
@@ -165,34 +168,39 @@ namespace Microsoft.Xna.Framework
             }
 
             EnsureFullscreen();
+            return true;
         }
 
-        private void Canvas_MouseWheel(MouseEvent e)
+        private bool Canvas_MouseWheel(MouseEvent e)
         {
-            if (e.Detail < 0)
+            if (e.detail < 0)
                 this.MouseState.ScrollWheelValue += 120;
             else
                 this.MouseState.ScrollWheelValue -= 120;
+
+            return true;
         }
 
-        private void Canvas_KeyDown(KeyboardEvent e)
+        private bool Canvas_KeyDown(KeyboardEvent e)
         {
-            var xnaKey = KeyboardUtil.ToXna(e.KeyCode, int.Parse(e.Location.ToString()));
+            var xnaKey = KeyboardUtil.ToXna((int)e.keyCode, (int)e.location);
 
             if (!_keys.Contains(xnaKey))
                 _keys.Add(xnaKey);
 
-            Keyboard.CapsLock = (e.KeyCode == 20) ? !Keyboard.CapsLock : e.GetModifierState("CapsLock");
-            Keyboard.NumLock = (e.KeyCode == 144) ? !Keyboard.NumLock : e.GetModifierState("NumLock");
+            Keyboard.CapsLock = ((int)e.keyCode == 20) ? !Keyboard.CapsLock : e.getModifierState("CapsLock");
+            Keyboard.NumLock = ((int)e.keyCode == 144) ? !Keyboard.NumLock : e.getModifierState("NumLock");
 
             EnsureFullscreen();
+            return true;
         }
 
-        private void Canvas_KeyUp(KeyboardEvent e)
+        private bool Canvas_KeyUp(KeyboardEvent e)
         {
-            _keys.Remove(KeyboardUtil.ToXna(e.KeyCode, int.Parse(e.Location.ToString())));
+            _keys.Remove(KeyboardUtil.ToXna((int)e.keyCode, int.Parse(e.location.ToString())));
 
             EnsureFullscreen();
+            return true;
         }
 
         public override bool AllowUserResizing
@@ -201,7 +209,7 @@ namespace Microsoft.Xna.Framework
             set { }
         }
 
-        public override Rectangle ClientBounds => new Rectangle(0, 0, _canvas.Width, _canvas.Height);
+        public override Rectangle ClientBounds => new Rectangle(0, 0, (int)_canvas.width, (int)_canvas.height);
 
         public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
 
@@ -220,8 +228,8 @@ namespace Microsoft.Xna.Framework
 
             if (!_isFullscreen && !_willBeFullScreen)
             {
-                _canvas.Width = clientWidth;
-                _canvas.Height = clientHeight;
+                _canvas.width = clientWidth;
+                _canvas.height = clientHeight;
             }
 
             _isFullscreen = _willBeFullScreen;
@@ -229,7 +237,7 @@ namespace Microsoft.Xna.Framework
 
         protected override void SetTitle(string title)
         {
-            Document.Title = title;
+            document.title = title;
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)

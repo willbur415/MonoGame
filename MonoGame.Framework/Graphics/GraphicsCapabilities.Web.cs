@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -27,7 +28,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformInitialize(GraphicsDevice device)
         {
-            var exts = Web.GL.GetSupportedExtensions();
+            var exts = gl.getSupportedExtensions();
 
             SupportsNonPowerOfTwo = exts.Contains("OES_fbo_render_mipmap");
             SupportsTextureFilterAnisotropic = exts.Contains("EXT_texture_filter_anisotropic");
@@ -53,8 +54,8 @@ namespace Microsoft.Xna.Framework.Graphics
             int anisotropy = 0;
             if (SupportsTextureFilterAnisotropic)
             {
-                var ext = Web.GL.GetExtension("EXT_texture_filter_anisotropic");
-                anisotropy = (int)Web.GL.GetParameter(0x84FF); // 0x84FF / MAX_TEXTURE_MAX_ANISOTROPY_EXT
+                var ext = gl.getExtension("EXT_texture_filter_anisotropic");
+                anisotropy = (int)gl.getParameter(0x84FF); // 0x84FF / MAX_TEXTURE_MAX_ANISOTROPY_EXT
                 GraphicsExtensions.CheckGLError();
             }
             MaxTextureAnisotropy = anisotropy;
@@ -70,7 +71,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             SupportsVertexTextures = false; // For now, until we implement vertex textures in OpenGL.
 
-            _maxMultiSampleCount = (int)Web.GL.GetParameter(Web.GL.SAMPLES);
+            _maxMultiSampleCount = (int)gl.getParameter(gl.SAMPLES);
 
             SupportsInstancing = false;
         }

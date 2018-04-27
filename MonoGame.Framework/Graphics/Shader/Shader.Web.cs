@@ -5,7 +5,8 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using Bridge.WebGL;
+using static Retyped.dom;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -32,20 +33,20 @@ namespace Microsoft.Xna.Framework.Graphics
         internal WebGLShader GetShaderHandle()
         {
             // If the shader has already been created then return it.
-            if (Web.GL.IsShader(_shaderHandle))
+            if (gl.isShader(_shaderHandle))
                 return _shaderHandle;
 
-            _shaderHandle = Web.GL.CreateShader(Stage == ShaderStage.Vertex ? Web.GL.VERTEX_SHADER : Web.GL.FRAGMENT_SHADER);
+            _shaderHandle = gl.createShader(Stage == ShaderStage.Vertex ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER);
             GraphicsExtensions.CheckGLError();
-            Web.GL.ShaderSource(_shaderHandle, _glslCode);
+            gl.shaderSource(_shaderHandle, _glslCode);
             GraphicsExtensions.CheckGLError();
-            Web.GL.CompileShader(_shaderHandle);
+            gl.compileShader(_shaderHandle);
             GraphicsExtensions.CheckGLError();
-            var compiled = (int)Web.GL.GetShaderParameter(_shaderHandle, Web.GL.COMPILE_STATUS);
+            var compiled = (int)gl.getShaderParameter(_shaderHandle, gl.COMPILE_STATUS);
             GraphicsExtensions.CheckGLError();
             if (compiled != 1)
             {
-                var log = Web.GL.GetShaderInfoLog(_shaderHandle);
+                var log = gl.getShaderInfoLog(_shaderHandle);
                 Debug.WriteLine(log);
 
                 GraphicsDevice.DisposeShader(_shaderHandle);
@@ -60,7 +61,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             for (int i = 0; i < Attributes.Length; ++i)
             {
-                Attributes[i].location = Web.GL.GetAttribLocation(program, Attributes[i].name);
+                Attributes[i].location = (int)gl.getAttribLocation(program, Attributes[i].name);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -80,23 +81,23 @@ namespace Microsoft.Xna.Framework.Graphics
             // Assign the texture unit index to the sampler uniforms.
             foreach (var sampler in Samplers)
             {
-                var loc = Web.GL.GetUniformLocation(program, sampler.name);
+                var loc = gl.getUniformLocation(program, sampler.name);
                 GraphicsExtensions.CheckGLError();
                 
-                Web.GL.Uniform1f(loc, sampler.textureSlot);
+                gl.uniform1f(loc, sampler.textureSlot);
                 GraphicsExtensions.CheckGLError();
             }
         }
 
         private void PlatformGraphicsDeviceResetting()
         {
-            if (Web.GL.IsShader(_shaderHandle))
+            if (gl.isShader(_shaderHandle))
                 GraphicsDevice.DisposeShader(_shaderHandle);
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (!IsDisposed && Web.GL.IsShader(_shaderHandle))
+            if (!IsDisposed && gl.isShader(_shaderHandle))
                 GraphicsDevice.DisposeShader(_shaderHandle);
 
             base.Dispose(disposing);

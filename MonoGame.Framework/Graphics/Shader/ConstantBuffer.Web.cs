@@ -3,7 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using Bridge.WebGL;
+using static Retyped.dom;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -72,7 +73,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // and cast this correctly... else it doesn't work as i guess
             // GL is checking the type of the uniform.
             
-            Web.GL.Uniform4f(_location, 
+            gl.uniform4f(_location, 
                 BitConverter.ToSingle(_buffer, 0),
                 BitConverter.ToSingle(_buffer, 4),
                 BitConverter.ToSingle(_buffer, 8),

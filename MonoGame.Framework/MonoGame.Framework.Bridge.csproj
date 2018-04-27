@@ -391,14 +391,20 @@
     <Reference Include="Bridge">
       <HintPath>..\..\..\Projects\TestWebGame\packages\Bridge.Core.17.0.0\lib\net40\Bridge.dll</HintPath>
     </Reference>
-    <Reference Include="Bridge.Html5">
-      <HintPath>..\..\..\Projects\TestWebGame\packages\Bridge.Html5.17.0.0\lib\net40\Bridge.Html5.dll</HintPath>
-    </Reference>
-    <Reference Include="Bridge.WebGL">
-      <HintPath>..\..\..\Projects\TestWebGame\packages\Bridge.WebGL.1.13.0\lib\net40\Bridge.WebGL.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\Projects\TestWebGame\packages\Bridge.Newtonsoft.Json.1.7.0\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Retyped.Core">
+      <HintPath>..\packages\Retyped.Core.1.5.6685\lib\net40\Retyped.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Retyped.es5">
+      <HintPath>..\packages\Retyped.es5.2.8.6685\lib\net40\Retyped.es5.dll</HintPath>
+    </Reference>
+    <Reference Include="Retyped.dom">
+      <HintPath>..\packages\Retyped.dom.2.8.6685\lib\net40\Retyped.dom.dll</HintPath>
+    </Reference>
+    <Reference Include="Retyped.webgl-ext">
+      <HintPath>..\packages\Retyped.webgl-ext.0.1.6685\lib\net40\Retyped.webgl-ext.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

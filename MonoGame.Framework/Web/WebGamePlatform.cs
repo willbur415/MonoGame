@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using static Retyped.dom;
 
 namespace Microsoft.Xna.Framework
 {
     class WebGamePlatform : GamePlatform
     {
         private WebGameWindow _view;
-        private int _threadId;
+        private double _threadId;
 
         public WebGamePlatform(Game game)
             : base(game)
@@ -22,7 +23,7 @@ namespace Microsoft.Xna.Framework
         
         public override void Exit()
         {
-            Bridge.Html5.Window.ClearInterval(_threadId);
+            window.clearInterval(_threadId);
         }
 
         public override void RunLoop()
@@ -32,7 +33,7 @@ namespace Microsoft.Xna.Framework
 
         public override void StartRunLoop()
         {
-            _threadId = Bridge.Html5.Window.SetInterval(() =>
+            _threadId = window.setInterval((object[] args) =>
             {
                 // Process Events?
 

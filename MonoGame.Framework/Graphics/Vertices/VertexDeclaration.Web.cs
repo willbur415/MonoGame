@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // Apply the vertex attribute info
             foreach (var element in attrInfo.Elements)
             {
-                Web.GL.VertexAttribPointer(element.AttributeLocation,
+                gl.vertexAttribPointer(element.AttributeLocation,
                     element.NumberOfElements,
                     element.VertexAttribPointerType,
                     element.Normalized,

@@ -4,8 +4,9 @@
 
 using System;
 using System.Diagnostics;
-using Bridge.WebGL;
 using Bridge;
+using static Retyped.dom;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -63,17 +64,17 @@ namespace Microsoft.Xna.Framework.Graphics
                 case VertexElementFormat.Vector2:
                 case VertexElementFormat.Vector3:
                 case VertexElementFormat.Vector4:
-                    return Web.GL.FLOAT;
+                    return (int)gl.FLOAT;
 
                 case VertexElementFormat.Color:
                 case VertexElementFormat.Byte4:
-					return Web.GL.UNSIGNED_BYTE;
+					return (int)gl.UNSIGNED_BYTE;
 
                 case VertexElementFormat.Short2:
                 case VertexElementFormat.Short4:
                 case VertexElementFormat.NormalizedShort2:
                 case VertexElementFormat.NormalizedShort4:
-                    return Web.GL.SHORT;
+                    return (int)gl.SHORT;
             }
 
             throw new ArgumentException();
@@ -109,40 +110,40 @@ namespace Microsoft.Xna.Framework.Graphics
             out int glFormat,
             out int glType)
 		{
-			glInternalFormat = Web.GL.RGBA;
-			glFormat = Web.GL.RGBA;
-			glType = Web.GL.UNSIGNED_BYTE;
+			glInternalFormat = (int)gl.RGBA;
+			glFormat = (int)gl.RGBA;
+			glType = (int)gl.UNSIGNED_BYTE;
 
 		    var supportsSRgb = graphicsDevice.GraphicsCapabilities.SupportsSRgb;
 			
 			switch (format) {
 			case SurfaceFormat.Color:
-				glInternalFormat = Web.GL.RGBA;
-				glFormat = Web.GL.RGBA;
-				glType = Web.GL.UNSIGNED_BYTE;
+				glInternalFormat = (int)gl.RGBA;
+				glFormat = (int)gl.RGBA;
+				glType = (int)gl.UNSIGNED_BYTE;
 				break;
             case SurfaceFormat.ColorSRgb:
                 // TODO: WebGL 2 supports this, need to do some checks for this case.
                 goto case SurfaceFormat.Color;
 			case SurfaceFormat.Bgr565:
-				glInternalFormat =  Web.GL.RGB;
-				glFormat = Web.GL.RGB;
-				glType = Web.GL.UNSIGNED_SHORT_5_6_5;
+				glInternalFormat = (int)gl.RGB;
+				glFormat = (int)gl.RGB;
+				glType = (int)gl.UNSIGNED_SHORT_5_6_5;
 				break;
 			case SurfaceFormat.Bgra4444:
-				glInternalFormat = Web.GL.RGBA;
-				glFormat = Web.GL.RGBA;
-				glType = Web.GL.UNSIGNED_SHORT_4_4_4_4;
+				glInternalFormat = (int)gl.RGBA;
+				glFormat = (int)gl.RGBA;
+				glType = (int)gl.UNSIGNED_SHORT_4_4_4_4;
 				break;
 			case SurfaceFormat.Bgra5551:
-				glInternalFormat = Web.GL.RGBA;
-				glFormat = Web.GL.RGBA;
-				glType = Web.GL.UNSIGNED_SHORT_5_5_5_1;
+				glInternalFormat = (int)gl.RGBA;
+				glFormat = (int)gl.RGBA;
+				glType = (int)gl.UNSIGNED_SHORT_5_5_5_1;
 				break;
 			case SurfaceFormat.Alpha8:
-				glInternalFormat = Web.GL.LUMINANCE;
-				glFormat = Web.GL.LUMINANCE;
-				glType = Web.GL.UNSIGNED_BYTE;
+				glInternalFormat = (int)gl.LUMINANCE;
+				glFormat = (int)gl.LUMINANCE;
+				glType = (int)gl.UNSIGNED_BYTE;
 				break;
             default:
 				throw new NotSupportedException();
@@ -154,24 +155,24 @@ namespace Microsoft.Xna.Framework.Graphics
             switch (primitiveType)
             {
                 case PrimitiveType.LineList:
-                    return Web.GL.LINES;
+                    return (int)gl.LINES;
                 case PrimitiveType.LineStrip:
-                    return Web.GL.LINE_STRIP;
+                    return (int)gl.LINE_STRIP;
                 case PrimitiveType.TriangleList:
-                    return Web.GL.TRIANGLES;
+                    return (int)gl.TRIANGLES;
                 case PrimitiveType.TriangleStrip:
-                    return Web.GL.TRIANGLE_STRIP;
+                    return (int)gl.TRIANGLE_STRIP;
             }
 
             throw new ArgumentException();
         }
 
-		public static object GetBoundTexture2D()
+		public static WebGLTexture GetBoundTexture2D()
         {
-			var ret = Web.GL.GetParameter(Web.GL.TEXTURE_BINDING_2D);
+			var ret = gl.getParameter(gl.TEXTURE_BINDING_2D);
             GraphicsExtensions.LogGLError("GraphicsExtensions.GetBoundTexture2D() GL.GetInteger");
 
-            return ret;
+            return ret.As<WebGLTexture>();
         }
     }
 }

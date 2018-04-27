@@ -4,7 +4,7 @@
 
 using System;
 using Microsoft.Xna.Framework.Audio;
-using Bridge.Html5;
+using static Retyped.dom;
 
 namespace Microsoft.Xna.Framework.Media
 {
@@ -14,12 +14,16 @@ namespace Microsoft.Xna.Framework.Media
 
         private void PlatformInitialize(string fileName)
         {
-            _audio = new HTMLAudioElement(fileName);
-            _audio.Load();
+            _audio = new HTMLAudioElement();
+            _audio.src = fileName;
+            _audio.load();
 
-            _duration = TimeSpan.FromSeconds(_audio.Duration);
+            _duration = TimeSpan.FromSeconds(_audio.duration);
 
-            _audio.OnEnded += (e) => MediaPlayer.OnSongFinishedPlaying(null, null);
+            _audio.onended += (e) => {
+                MediaPlayer.OnSongFinishedPlaying(null, null);
+                return true;
+            };
         }
         
         internal void SetEventHandler(FinishedPlayingHandler handler) { }
@@ -32,38 +36,38 @@ namespace Microsoft.Xna.Framework.Media
         internal void Play(TimeSpan? startPosition)
         {
             if (startPosition.HasValue)
-                _audio.FastSeek(startPosition.Value.Seconds);
+                _audio.currentTime = startPosition.Value.Seconds;
 
-            _audio.Play();
+            _audio.play();
             _playCount++;
         }
 
         internal void Resume()
         {
-            _audio.Play();
+            _audio.play();
         }
 
         internal void Pause()
         {
-            _audio.Pause();
+            _audio.pause();
         }
 
         internal void Stop()
         {
-            _audio.FastSeek(0);
-            _audio.Pause();
+            _audio.currentTime = 0;
+            _audio.pause();
             _playCount = 0;
         }
 
         internal float Volume
         {
-            get => (float)_audio.Volume;
-            set => _audio.Volume = value;
+            get => (float)_audio.volume;
+            set => _audio.volume = value;
         }
 
         public TimeSpan Position
         {
-            get => TimeSpan.FromSeconds(_audio.CurrentTime);
+            get => TimeSpan.FromSeconds(_audio.currentTime);
         }
 
         private Album PlatformGetAlbum()

@@ -2,15 +2,16 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Bridge.WebGL;
+using static Retyped.dom;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     public abstract partial class Texture
     {
         internal WebGLTexture glTexture;
-        internal int glTarget;
-        internal int glTextureUnit = Web.GL.TEXTURE0;
+        internal double glTarget;
+        internal double glTextureUnit = gl.TEXTURE0;
         internal int glInternalFormat;
         internal int glFormat;
         internal int glType;

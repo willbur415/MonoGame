@@ -9,7 +9,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
-using Bridge.WebGL;
+using static Retyped.dom;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -72,13 +73,13 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (attrs[x] && !_enabledVertexAttributes.Contains(x))
                 {
                     _enabledVertexAttributes.Add(x);
-                    Web.GL.EnableVertexAttribArray(x);
+                    gl.enableVertexAttribArray(x);
                     GraphicsExtensions.CheckGLError();
                 }
                 else if (!attrs[x] && _enabledVertexAttributes.Contains(x))
                 {
                     _enabledVertexAttributes.Remove(x);
-                    Web.GL.DisableVertexAttribArray(x);
+                    gl.disableVertexAttribArray(x);
                     GraphicsExtensions.CheckGLError();
                 }
             }
@@ -88,19 +89,19 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             _programCache = new ShaderProgramCache(this);
 
-            MaxTextureSlots = (int)Web.GL.GetParameter(Web.GL.MAX_TEXTURE_IMAGE_UNITS);
+            MaxTextureSlots = (int)gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
             GraphicsExtensions.CheckGLError();
 
-            _maxTextureSize = (int)Web.GL.GetParameter(Web.GL.MAX_TEXTURE_SIZE);
+            _maxTextureSize = (int)gl.getParameter(gl.MAX_TEXTURE_SIZE);
             GraphicsExtensions.CheckGLError();
 
-            MaxVertexAttributes = (int)Web.GL.GetParameter(Web.GL.MAX_VERTEX_ATTRIBS);
+            MaxVertexAttributes = (int)gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
             GraphicsExtensions.CheckGLError();
 
             _maxVertexBufferSlots = MaxVertexAttributes;
             _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
 
-            Console.WriteLine(Web.GL.GetParameter(Web.GL.VERSION).ToString());
+            System.Console.WriteLine(gl.getParameter(gl.VERSION).ToString());
         }
 
         private void PlatformInitialize()
@@ -157,36 +158,39 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (color != _lastClearColor)
                 {
-                    Web.GL.ClearColor(color.X, color.Y, color.Z, color.W);
+                    gl.clearColor(color.X, color.Y, color.Z, color.W);
                     GraphicsExtensions.CheckGLError();
                     _lastClearColor = color;
                 }
 
-                bufferMask = bufferMask | Web.GL.COLOR_BUFFER_BIT;
+                bufferMask = bufferMask | (int)gl.COLOR_BUFFER_BIT;
+                ulong a = 0;
+                ulong b = 0;
+                ulong c = a | b;
             }
 			if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
             {
                 if (stencil != _lastClearStencil)
                 {
-				    Web.GL.ClearStencil(stencil);
+				    gl.clearStencil(stencil);
                     GraphicsExtensions.CheckGLError();
                     _lastClearStencil = stencil;
                 }
-                bufferMask = bufferMask | Web.GL.STENCIL_BUFFER_BIT;
+                bufferMask = bufferMask | (int)gl.STENCIL_BUFFER_BIT;
 			}
 
 			if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer) 
             {
                 if (depth != _lastClearDepth)
                 {
-                    Web.GL.ClearDepth(depth);
+                    gl.clearDepth(depth);
                     GraphicsExtensions.CheckGLError();
                     _lastClearDepth = depth;
                 }
-				bufferMask = bufferMask | Web.GL.DEPTH_BUFFER_BIT;
+				bufferMask = bufferMask | (int)gl.DEPTH_BUFFER_BIT;
 			}
 
-            Web.GL.Clear(bufferMask);
+            gl.clear(bufferMask);
             GraphicsExtensions.CheckGLError();
            		
             // Restore the previous render state.
@@ -226,12 +230,12 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSetViewport(ref Viewport value)
         {
             if (IsRenderTargetBound)
-                Web.GL.Viewport(value.X, value.Y, value.Width, value.Height);
+                gl.viewport(value.X, value.Y, value.Width, value.Height);
             else
-                Web.GL.Viewport(value.X, PresentationParameters.BackBufferHeight - value.Y - value.Height, value.Width, value.Height);
+                gl.viewport(value.X, PresentationParameters.BackBufferHeight - value.Y - value.Height, value.Width, value.Height);
             GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.Viewport");
 
-            Web.GL.DepthRange(value.MinDepth, value.MaxDepth);
+            gl.depthRange(value.MinDepth, value.MaxDepth);
             GraphicsExtensions.LogGLError("GraphicsDevice.Viewport_set() GL.DepthRange");
                 
             // In OpenGL we have to re-apply the special "posFixup"
@@ -263,7 +267,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (force || BlendFactor != _lastBlendState.BlendFactor)
             {
-                Web.GL.BlendColor(
+                gl.blendColor(
                     this.BlendFactor.R/255.0f,
                     this.BlendFactor.G/255.0f,
                     this.BlendFactor.B/255.0f,
@@ -294,9 +298,9 @@ namespace Microsoft.Xna.Framework.Graphics
             ApplyState(true);
 
             // Unbind current VBOs.
-            Web.GL.BindBuffer(Web.GL.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
             GraphicsExtensions.CheckGLError();
-            Web.GL.BindBuffer(Web.GL.ELEMENT_ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             GraphicsExtensions.CheckGLError();
             _indexBufferDirty = true;
 

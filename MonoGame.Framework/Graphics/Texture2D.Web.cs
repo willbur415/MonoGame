@@ -47,17 +47,9 @@ namespace Microsoft.Xna.Framework.Graphics
                         int hBlocks = (h + (blockHeight - 1)) / blockHeight;
                         imageSize = wBlocks * hBlocks * blockSize;
                     }
-                    // GL.CompressedTexImage2D(TextureTarget.Texture2D, level, glInternalFormat, w, h, 0, imageSize, IntPtr.Zero);
-                    // Web.GL.TexImage2D(Web.GL.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, new Bridge.Html5.Int8Array(0));
-                    // GraphicsExtensions.CheckGLError();
-                }
-                else
-                {
-                    // Web.GL.TexImage2D(Web.GL.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, new Bridge.Html5.Int8Array(0));
-                    // GraphicsExtensions.CheckGLError();
                 }
 
-                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, glFormat, glType, new ImageData(1, 1));
+                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, glFormat, glType, new ImageData(w, h));
                 GraphicsExtensions.CheckGLError();
 
                 if ((w == 1 && h == 1) || !mipmap)
@@ -93,27 +85,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
                 GraphicsExtensions.CheckGLError();
-                // Set mipmap levels
-                // WebGL 2
-                // Web.GL.TexParameteri(Web.GL.TEXTURE_BASE_LEVEL, Web.GL.texture_base, 0);
-                // GraphicsExtensions.CheckGLError();
-                // WebGL 2
-                /*if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
-                {
-                    if (_levelCount > 0)
-                    {
-                        GL.TexParameter(TextureTarget.Texture2D, SamplerState.TextureParameterNameTextureMaxLevel, _levelCount - 1);
-                    }
-                    else
-                    {
-                        GL.TexParameter(TextureTarget.Texture2D, SamplerState.TextureParameterNameTextureMaxLevel, 1000);
-                    }
-                    GraphicsExtensions.CheckGLError();
-                }*/
             }
         }
-
-        
 
         private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
@@ -142,18 +115,51 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
             {
-                throw new NotImplementedException();
-                /*ArrayBufferView arr = new Uint32Array(elementCount);
-
-                Web.GL.CompressedTexImage2D(Web.GL.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr);*/
+                if (LastTSize == 1)
+                {
+                    var arr = new Uint8Array(elementCount);
+                    for (int i = startIndex; i < elementCount; i++)
+                        arr[i] = Convert.ToByte(data[i]);
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr);
+                }
+                else if (LastTSize == 2)
+                {
+                    var arr = new Uint16Array(elementCount);
+                    for (int i = startIndex; i < elementCount; i++)
+                        arr[i] = Convert.ToByte(data[i]);
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr);
+                }
+                else if (LastTSize == 4)
+                {
+                    var arr = new Uint32Array(elementCount);
+                    for (int i = startIndex; i < elementCount; i++)
+                        arr[i] = Convert.ToByte(data[i]);
+                    gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr);
+                }
             }
             else
             {
-                Uint8Array arr = new Uint8Array(elementCount);
-                for (int i = startIndex; i < elementCount; i++)
-                    arr[i] = Convert.ToByte(data[i]);
-
-                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
+                if (LastTSize == 1)
+                {
+                    var arr = new Uint8Array(elementCount);
+                    for (int i = startIndex; i < elementCount; i++)
+                        arr[i] = Convert.ToByte(data[i]);
+                    gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
+                }
+                else if (LastTSize == 2)
+                {
+                    var arr = new Uint16Array(elementCount);
+                    for (int i = startIndex; i < elementCount; i++)
+                        arr[i] = Convert.ToByte(data[i]);
+                    gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
+                }
+                else if (LastTSize == 4)
+                {
+                    var arr = new Uint32Array(elementCount);
+                    for (int i = startIndex; i < elementCount; i++)
+                        arr[i] = Convert.ToByte(data[i]);
+                    gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
+                }
             }
             GraphicsExtensions.CheckGLError();
             
@@ -167,38 +173,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
         {
-            // var startBytes = startIndex * elementSizeInByte;
-            // var dataPtr = new IntPtr(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
-            // Store the current bound texture.
-            /* var prevTexture = GraphicsExtensions.GetBoundTexture2D();
-
-            if (prevTexture != glTexture)
-            {
-                Web.GL.BindTexture(Web.GL.TEXTURE_2D, glTexture);
-                GraphicsExtensions.CheckGLError();
-            }
-
-            GenerateGLTextureIfRequired();
-            Web.GL.PixelStorei(Web.GL.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
-
-            if (glFormat == (PixelFormat)GLPixelFormat.CompressedTextureFormats)
-            {
-                GL.CompressedTexSubImage2D(TextureTarget.Texture2D, level, rect.X, rect.Y, rect.Width, rect.Height,
-                    (PixelInternalFormat)glInternalFormat, elementCount * elementSizeInByte, dataPtr);
-            }
-            else
-            {
-                GL.TexSubImage2D(TextureTarget.Texture2D, level, rect.X, rect.Y,
-                    rect.Width, rect.Height, glFormat, glType, dataPtr);
-            }
-            GraphicsExtensions.CheckGLError();
-
-            // Restore the bound texture.
-            if (prevTexture != glTexture)
-            {
-                Web.GL.BindTexture(Web.GL.TEXTURE_2D, prevTexture);
-                GraphicsExtensions.CheckGLError();
-            }*/
             throw new NotImplementedException();
         }
 

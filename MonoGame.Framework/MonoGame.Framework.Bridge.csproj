@@ -364,6 +364,7 @@
     <Compile Include="Graphics\Effect\EnvironmentMapEffect.cs" />
     <Compile Include="Audio\InstancePlayLimitException.cs" />
     <Compile Include="Graphics\GraphicsExtensions.cs" />
+    <Compile Include="Graphics\GraphicsExtensions.Web.cs" />
     <Compile Include="Utilities\FileHelpers.cs" />
     <Compile Include="FrameworkResources.cs" />
     <Compile Include="Utilities\ReflectionHelpers.Web.cs" />
@@ -380,6 +381,11 @@
     <Compile Include="Input\KeyboardUtil.Web.cs" />
     <Compile Include="Graphics\GraphicsDevice.Web.FramebufferHelper.cs" />
     <Compile Include="Graphics\Shader\ShaderProgramCache.Web.cs" />
+    <Compile Include="Graphics\SpriteBatch.cs" />
+    <Compile Include="Graphics\SpriteBatcher.cs" />
+    <Compile Include="Graphics\SpriteBatchItem.cs" />
+    <Compile Include="Graphics\SpriteSortMode.cs" />
+    <Compile Include="Graphics\SpriteEffects.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Bridge">

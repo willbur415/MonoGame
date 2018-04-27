@@ -16,7 +16,8 @@ namespace TestWebGame
         MouseState prevstate;
         bool playing;
         KeyboardState prevkstate;
-        // SpriteBatch spriteBatch;
+        SpriteBatch spriteBatch;
+        Texture2D texBall;
         
         public Game1()
         {
@@ -44,7 +45,7 @@ namespace TestWebGame
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            // spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(GraphicsDevice);
 
             divdata = Bridge.Html5.Document.GetElementById("testoutput") as Bridge.Html5.HTMLDivElement;
 
@@ -52,6 +53,8 @@ namespace TestWebGame
             MediaPlayer.Play(song);
             MediaPlayer.Pause(); 
             MediaPlayer.Volume = 0.1f;
+
+            texBall = Content.Load<Texture2D>("hacker");
         }
 
         /// <summary>
@@ -108,7 +111,8 @@ namespace TestWebGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

@@ -56,7 +56,8 @@ namespace System
     {
         public static void BlockCopy(Array src, int srcOffset, Array dst, int dstOffset, int count)
         {
-            
+            for (int i = 0; i < count; i++)
+                dst[dstOffset + i] = src[srcOffset + i];
         }
     }
 

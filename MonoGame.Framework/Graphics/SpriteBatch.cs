@@ -165,7 +165,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("Draw was called, but Begin has not yet been called. Begin must be called successfully before you can call Draw.");
         }
 
-        void CheckValid(SpriteFont spriteFont, string text)
+        /*void CheckValid(SpriteFont spriteFont, string text)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException("spriteFont");
@@ -173,9 +173,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ArgumentNullException("text");
             if (!_beginCalled)
                 throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
-        }
+        }*/
 
-        void CheckValid(SpriteFont spriteFont, StringBuilder text)
+        /*void CheckValid(SpriteFont spriteFont, StringBuilder text)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException("spriteFont");
@@ -183,7 +183,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new ArgumentNullException("text");
             if (!_beginCalled)
                 throw new InvalidOperationException("DrawString was called, but Begin has not yet been called. Begin must be called successfully before you can call DrawString.");
-        }
+        }*/
 
         /// <summary>
         /// Submit a sprite for drawing in the current batch.
@@ -645,7 +645,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="text">The text which will be drawn.</param>
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="color">A color mask.</param>
-		public unsafe void DrawString (SpriteFont spriteFont, string text, Vector2 position, Color color)
+		/*public unsafe void DrawString (SpriteFont spriteFont, string text, Vector2 position, Color color)
 		{
             CheckValid(spriteFont, text);
             
@@ -714,7 +714,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// We need to flush if we're using Immediate sort mode.
 			FlushIfNeeded();
-		}
+		}*/
 
         /// <summary>
         /// Submit a text string of sprites for drawing in the current batch.
@@ -728,13 +728,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="scale">A scaling of this string.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
-		public void DrawString (
+		/*public void DrawString (
 			SpriteFont spriteFont, string text, Vector2 position, Color color,
             float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
 		{
 			var scaleVec = new Vector2(scale, scale);
             DrawString(spriteFont, text, position, color, rotation, origin, scaleVec, effects, layerDepth);
-		}
+		}*/
 
         /// <summary>
         /// Submit a text string of sprites for drawing in the current batch.
@@ -748,7 +748,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="scale">A scaling of this string.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
-		public unsafe void DrawString (
+		/*public unsafe void DrawString (
 			SpriteFont spriteFont, string text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
 		{
@@ -919,7 +919,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// We need to flush if we're using Immediate sort mode.
 			FlushIfNeeded();
-		}
+		}*/
 
         /// <summary>
         /// Submit a text string of sprites for drawing in the current batch.
@@ -928,7 +928,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="text">The text which will be drawn.</param>
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="color">A color mask.</param>
-		public unsafe void DrawString (SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color)
+		/*public unsafe void DrawString (SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color)
 		{
             CheckValid(spriteFont, text);
             
@@ -997,7 +997,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// We need to flush if we're using Immediate sort mode.
 			FlushIfNeeded();
-		}
+		}*/
 
         /// <summary>
         /// Submit a text string of sprites for drawing in the current batch.
@@ -1011,13 +1011,13 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="scale">A scaling of this string.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
-		public void DrawString (
+		/*public void DrawString (
 			SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
             float rotation, Vector2 origin, float scale, SpriteEffects effects, float layerDepth)
 		{
 			var scaleVec = new Vector2 (scale, scale);
             DrawString(spriteFont, text, position, color, rotation, origin, scaleVec, effects, layerDepth);
-		}
+		}*/
 
         /// <summary>
         /// Submit a text string of sprites for drawing in the current batch.
@@ -1031,7 +1031,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <param name="scale">A scaling of this string.</param>
         /// <param name="effects">Modificators for drawing. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
-		public unsafe void DrawString (
+		/*public unsafe void DrawString (
 			SpriteFont spriteFont, StringBuilder text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
 		{
@@ -1201,7 +1201,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// We need to flush if we're using Immediate sort mode.
 			FlushIfNeeded();
-		}
+		}*/
 
         /// <summary>
         /// Immediately releases the unmanaged resources used by this object.

@@ -24,6 +24,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 
         internal float TexelWidth { get; private set; }
         internal float TexelHeight { get; private set; }
+#if WEB
+        internal int LastTSize { get; private set; }
+#endif
 
         /// <summary>
         /// Gets the dimensions of the texture
@@ -395,10 +398,14 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
             }
+#if WEB
+            LastTSize = dataByteSize / elementCount;
+#else
             if (elementCount * tSize != dataByteSize)
                 throw new ArgumentException(string.Format("elementCount is not the right size, " +
                                             "elementCount * sizeof(T) is {0}, but data size is {1}.",
                                             elementCount * tSize, dataByteSize), "elementCount");
+#endif
         }
 	}
 }

@@ -12,12 +12,22 @@ namespace Microsoft.Xna.Framework.Graphics
     /// </summary>
     internal partial class EffectResource
     {
-        public static readonly EffectResource AlphaTestEffect = new EffectResource(AlphaTestEffectName);
-        public static readonly EffectResource BasicEffect = new EffectResource(BasicEffectName);
-        public static readonly EffectResource DualTextureEffect = new EffectResource(DualTextureEffectName);
-        public static readonly EffectResource EnvironmentMapEffect = new EffectResource(EnvironmentMapEffectName);
-        public static readonly EffectResource SkinnedEffect = new EffectResource(SkinnedEffectName);
-        public static readonly EffectResource SpriteEffect = new EffectResource(SpriteEffectName);
+        public static readonly EffectResource AlphaTestEffect;
+        public static readonly EffectResource BasicEffect;
+        public static readonly EffectResource DualTextureEffect;
+        public static readonly EffectResource EnvironmentMapEffect;
+        public static readonly EffectResource SkinnedEffect;
+        public static readonly EffectResource SpriteEffect;
+
+        static EffectResource()
+        {
+            AlphaTestEffect = new EffectResource(AlphaTestEffectName);
+            BasicEffect = new EffectResource(BasicEffectName);
+            DualTextureEffect = new EffectResource(DualTextureEffectName);
+            EnvironmentMapEffect = new EffectResource(EnvironmentMapEffectName);
+            SkinnedEffect = new EffectResource(SkinnedEffectName);
+            SpriteEffect = new EffectResource(SpriteEffectName);
+        }
 
         private readonly object _locker = new object();
         private readonly string _name;
@@ -32,7 +42,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             get
             {
-#if !WEB
                 if (_bytecode == null)
                 {
                     lock (_locker)
@@ -40,9 +49,12 @@ namespace Microsoft.Xna.Framework.Graphics
                         if (_bytecode != null)
                             return _bytecode;
 
+#if WEB
+                        var stream = File.OpenRead(_name);
+#else
                         var assembly = ReflectionHelpers.GetAssembly(typeof(EffectResource));
-
                         var stream = assembly.GetManifestResourceStream(_name);
+#endif
                         using (var ms = new MemoryStream())
                         {
                             stream.CopyTo(ms);
@@ -50,7 +62,6 @@ namespace Microsoft.Xna.Framework.Graphics
                         }
                     }
                 }
-#endif
 
                 return _bytecode;
             }

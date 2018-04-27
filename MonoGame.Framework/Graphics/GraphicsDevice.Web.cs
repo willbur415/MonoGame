@@ -62,7 +62,7 @@ namespace Microsoft.Xna.Framework.Graphics
             _maxVertexBufferSlots = MaxVertexAttributes;
             _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
 
-            // Console.WriteLine(Web.GL.GetParameter(Web.GL.VERSION).ToString());
+            Console.WriteLine(Web.GL.GetParameter(Web.GL.VERSION).ToString());
         }
 
         private void PlatformInitialize()
@@ -154,6 +154,10 @@ namespace Microsoft.Xna.Framework.Graphics
         }
 
         internal void DisposeShader(WebGLShader handle)
+        {
+        }
+
+        internal void DisposeTexture(WebGLTexture handle)
         {
         }
 

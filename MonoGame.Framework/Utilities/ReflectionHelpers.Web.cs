@@ -12,14 +12,18 @@ namespace Microsoft.Xna.Framework.Utilities
         /// </summary>
         internal static class SizeOf<T>
         {
+            private static int _size;
+
             static SizeOf()
             {
-                
+                if (typeof(T) == typeof(Color))
+                    _size = 4;
+                _size = 4;
             }
 
             static public int Get()
             {
-                return 0;
+                return _size;
             }
         }
 

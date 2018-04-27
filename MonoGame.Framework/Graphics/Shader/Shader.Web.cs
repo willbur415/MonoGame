@@ -13,7 +13,6 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         // The shader handle.
         private WebGLShader _shaderHandle;
-        private bool _shaderCreated;
 
         // We keep this around for recompiling on context lost and debugging.
         private string _glslCode;
@@ -33,7 +32,7 @@ namespace Microsoft.Xna.Framework.Graphics
         internal WebGLShader GetShaderHandle()
         {
             // If the shader has already been created then return it.
-            if (_shaderCreated)
+            if (Web.GL.IsShader(_shaderHandle))
                 return _shaderHandle;
 
             _shaderHandle = Web.GL.CreateShader(Stage == ShaderStage.Vertex ? Web.GL.VERTEX_SHADER : Web.GL.FRAGMENT_SHADER);
@@ -54,7 +53,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new InvalidOperationException("Shader Compilation Failed");
             }
 
-            _shaderCreated = true;
             return _shaderHandle;
         }
 
@@ -92,20 +90,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformGraphicsDeviceResetting()
         {
-            if (_shaderCreated)
-            {
+            if (Web.GL.IsShader(_shaderHandle))
                 GraphicsDevice.DisposeShader(_shaderHandle);
-                _shaderCreated = false;
-            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (!IsDisposed && _shaderCreated)
-            {
+            if (!IsDisposed && Web.GL.IsShader(_shaderHandle))
                 GraphicsDevice.DisposeShader(_shaderHandle);
-                _shaderCreated = false;
-            }
 
             base.Dispose(disposing);
         }

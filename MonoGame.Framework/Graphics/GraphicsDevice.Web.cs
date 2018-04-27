@@ -22,8 +22,8 @@ namespace Microsoft.Xna.Framework.Graphics
         static List<IntPtr> _disposeContexts = new List<IntPtr>();
         static object _disposeContextsLock = new object();
 
-        // private ShaderProgramCache _programCache;
-        // private ShaderProgram _shaderProgram = null;
+        private ShaderProgramCache _programCache;
+        private ShaderProgram _shaderProgram = null;
 
         static readonly float[] _posFixup = new float[4];
 
@@ -48,8 +48,46 @@ namespace Microsoft.Xna.Framework.Graphics
         private int _lastClearStencil = 0;
         private DepthStencilState clearDepthStencilState = new DepthStencilState { StencilEnable = true };
 
+        // Get a hashed value based on the currently bound shaders
+        // throws an exception if no shaders are bound
+        private int ShaderProgramHash
+        {
+            get
+            {
+                if (_vertexShader == null && _pixelShader == null)
+                    throw new InvalidOperationException("There is no shader bound!");
+                if (_vertexShader == null)
+                    return _pixelShader.HashKey;
+                if (_pixelShader == null)
+                    return _vertexShader.HashKey;
+                return _vertexShader.HashKey ^ _pixelShader.HashKey;
+            }
+        }
+
+
+        internal void SetVertexAttributeArray(bool[] attrs)
+        {
+            for (var x = 0; x < attrs.Length; x++)
+            {
+                if (attrs[x] && !_enabledVertexAttributes.Contains(x))
+                {
+                    _enabledVertexAttributes.Add(x);
+                    Web.GL.EnableVertexAttribArray(x);
+                    GraphicsExtensions.CheckGLError();
+                }
+                else if (!attrs[x] && _enabledVertexAttributes.Contains(x))
+                {
+                    _enabledVertexAttributes.Remove(x);
+                    Web.GL.DisableVertexAttribArray(x);
+                    GraphicsExtensions.CheckGLError();
+                }
+            }
+        }
+
         private void PlatformSetup()
         {
+            _programCache = new ShaderProgramCache(this);
+
             MaxTextureSlots = (int)Web.GL.GetParameter(Web.GL.MAX_TEXTURE_IMAGE_UNITS);
             GraphicsExtensions.CheckGLError();
 
@@ -71,6 +109,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Ensure the vertex attributes are reset
             _enabledVertexAttributes.Clear();
+
+            // Free all the cached shader programs. 
+            _programCache.Clear();
+            _shaderProgram = null;
+
+            framebufferHelper = FramebufferHelper.Create(this);
+
+            // Force resetting states
+            this.PlatformApplyBlend(true);
         }
 
         internal void OnPresentationChanged()
@@ -244,6 +291,26 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
+            ApplyState(true);
+
+            // Unbind current VBOs.
+            Web.GL.BindBuffer(Web.GL.ARRAY_BUFFER, null);
+            GraphicsExtensions.CheckGLError();
+            Web.GL.BindBuffer(Web.GL.ELEMENT_ARRAY_BUFFER, null);
+            GraphicsExtensions.CheckGLError();
+            _indexBufferDirty = true;
+
+            // Setup the vertex declaration to point at the VB data.
+            vertexDeclaration.GraphicsDevice = this;
+            /* vertexDeclaration.Apply(_vertexShader, 0, ShaderProgramHash);
+
+            //Draw
+            /*Web.GL.DrawElements(GraphicsExtensions.GetPrimitiveTypeGL(primitiveType),
+                                GetElementCountArray(primitiveType, primitiveCount),
+                                Web.GL.UNSIGNED_SHORT,
+                                (indexOffset * 2));
+
+            GraphicsExtensions.CheckGLError();*/
         }
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct

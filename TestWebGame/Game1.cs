@@ -112,6 +112,7 @@ namespace TestWebGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
+            spriteBatch.Draw(texBall, Vector2.Zero, Color.Black);
             spriteBatch.End();
 
             base.Draw(gameTime);

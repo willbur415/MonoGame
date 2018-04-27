@@ -11,6 +11,98 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     internal static partial class GraphicsExtensions
     {
+		public static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)
+        {
+            switch (elementFormat)
+            {
+                case VertexElementFormat.Single:
+                    return 1;
+
+                case VertexElementFormat.Vector2:
+                    return 2;
+
+                case VertexElementFormat.Vector3:
+                    return 3;
+
+                case VertexElementFormat.Vector4:
+                    return 4;
+
+                case VertexElementFormat.Color:
+                    return 4;
+
+                case VertexElementFormat.Byte4:
+                    return 4;
+
+                case VertexElementFormat.Short2:
+                    return 2;
+
+                case VertexElementFormat.Short4:
+                    return 4;
+
+                case VertexElementFormat.NormalizedShort2:
+                    return 2;
+
+                case VertexElementFormat.NormalizedShort4:
+                    return 4;
+
+                case VertexElementFormat.HalfVector2:
+                    return 2;
+
+                case VertexElementFormat.HalfVector4:
+                    return 4;
+            }
+
+            throw new ArgumentException();
+        }
+
+		public static int OpenGLVertexAttribPointerType(this VertexElementFormat elementFormat)
+        {
+            switch (elementFormat)
+            {
+                case VertexElementFormat.Single:
+                case VertexElementFormat.Vector2:
+                case VertexElementFormat.Vector3:
+                case VertexElementFormat.Vector4:
+                    return Web.GL.FLOAT;
+
+                case VertexElementFormat.Color:
+                case VertexElementFormat.Byte4:
+					return Web.GL.UNSIGNED_BYTE;
+
+                case VertexElementFormat.Short2:
+                case VertexElementFormat.Short4:
+                case VertexElementFormat.NormalizedShort2:
+                case VertexElementFormat.NormalizedShort4:
+                    return Web.GL.SHORT;
+            }
+
+            throw new ArgumentException();
+        }
+
+        public static bool OpenGLVertexAttribNormalized(this VertexElement element)
+        {
+            // TODO: This may or may not be the right behavor.  
+            //
+            // For instance the VertexElementFormat.Byte4 format is not supposed
+            // to be normalized, but this line makes it so.
+            //
+            // The question is in MS XNA are types normalized based on usage or
+            // normalized based to their format?
+            //
+            if (element.VertexElementUsage == VertexElementUsage.Color)
+                return true;
+
+            switch (element.VertexElementFormat)
+            {
+                case VertexElementFormat.NormalizedShort2:
+                case VertexElementFormat.NormalizedShort4:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         public static void GetGLFormat (this SurfaceFormat format,
             GraphicsDevice graphicsDevice,
             out int glInternalFormat,
@@ -57,11 +149,29 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public static WebGLTexture GetBoundTexture2D()
+        public static int GetPrimitiveTypeGL(PrimitiveType primitiveType)
         {
-			//WebGLTexture ret = Web.GL.GetParameter(Web.GL.TEXTURE_BINDING_2D).Cast<WebGLTexture>();
-            //GraphicsExtensions.LogGLError("GraphicsExtensions.GetBoundTexture2D() GL.GetInteger");
-			return null;
+            switch (primitiveType)
+            {
+                case PrimitiveType.LineList:
+                    return Web.GL.LINES;
+                case PrimitiveType.LineStrip:
+                    return Web.GL.LINE_STRIP;
+                case PrimitiveType.TriangleList:
+                    return Web.GL.TRIANGLES;
+                case PrimitiveType.TriangleStrip:
+                    return Web.GL.TRIANGLE_STRIP;
+            }
+
+            throw new ArgumentException();
+        }
+
+		public static object GetBoundTexture2D()
+        {
+			var ret = Web.GL.GetParameter(Web.GL.TEXTURE_BINDING_2D);
+            GraphicsExtensions.LogGLError("GraphicsExtensions.GetBoundTexture2D() GL.GetInteger");
+
+            return ret;
         }
     }
 }

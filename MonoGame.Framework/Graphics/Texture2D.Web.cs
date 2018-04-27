@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using Bridge.WebGL;
 using Bridge.Html5;
+using Bridge;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -158,7 +159,7 @@ namespace Microsoft.Xna.Framework.Graphics
             // Restore the bound texture.
             if (prevTexture != glTexture)
             {
-                Web.GL.BindTexture(Web.GL.TEXTURE_2D, prevTexture);
+                Script.InvokeMethod(Web.GL, "bindTexture", Web.GL.TEXTURE_2D, prevTexture);
                 GraphicsExtensions.CheckGLError();
             }
         }

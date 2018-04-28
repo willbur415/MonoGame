@@ -9,6 +9,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using static WebHelper;
 using static Retyped.dom;
+using static Retyped.es5;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -18,22 +19,84 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformConstruct(IndexElementSize indexElementSize, int indexCount)
         {
-            throw new NotImplementedException();
+            GenerateIfRequired();
         }
 
         private void PlatformGraphicsDeviceResetting()
         {
-            throw new NotImplementedException();
+            ibo = null;
+        }
+
+        /// <summary>
+        /// If the IBO does not exist, create it.
+        /// </summary>
+        void GenerateIfRequired()
+        {
+            if (ibo == null)
+            {
+                var sizeInBytes = IndexCount * (this.IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
+
+                ibo = gl.createBuffer();
+                GraphicsExtensions.CheckGLError();
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+                GraphicsExtensions.CheckGLError();
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, null, _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
+                GraphicsExtensions.CheckGLError();
+            }
         }
 
         private void PlatformGetData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount) where T : struct
         {
-            throw new NotImplementedException();
+            // Buffers are write-only on OpenGL ES 1.1 and 2.0.  See the GL_OES_mapbuffer extension for more information.
+            // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
+            throw new NotSupportedException("Index buffers are write-only on OpenGL ES platforms");
         }
 
         private void PlatformSetDataInternal<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
         {
-            throw new NotImplementedException();
+            BufferData(offsetInBytes, data, startIndex, elementCount, options);
+        }
+
+        private void BufferData<T>(int offsetInBytes, T[] data, int startIndex, int elementCount, SetDataOptions options) where T : struct
+        {
+            GenerateIfRequired();
+            
+            var elementSizeInByte = (IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
+            var bufferSize = IndexCount * elementSizeInByte;
+            
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+            GraphicsExtensions.CheckGLError();
+            
+            if (options == SetDataOptions.Discard)
+            {
+                // By assigning NULL data to the buffer this gives a hint
+                // to the device to discard the previous content.
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, null, _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
+                GraphicsExtensions.CheckGLError();
+            }
+            
+            if (elementSizeInByte == 2)
+            {
+                var arr = new Uint16Array(data.Length);
+                for (int i = 0; i < data.Length; i++)
+                    arr[i] = Convert.ToUInt16(data[i]);
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
+            }
+            else
+            {
+                var arr = new Uint32Array(data.Length);
+                for (int i = 0; i < data.Length; i++)
+                    arr[i] = Convert.ToUInt32(data[i]);
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
+            }
+            GraphicsExtensions.CheckGLError();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+                GraphicsDevice.DisposeBuffer(ibo);
+            base.Dispose(disposing);
         }
 	}
 }

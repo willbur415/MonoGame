@@ -126,14 +126,14 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     var arr = new Uint16Array(elementCount);
                     for (int i = startIndex; i < elementCount; i++)
-                        arr[i] = Convert.ToByte(data[i]);
+                        arr[i] = Convert.ToUInt16(data[i]);
                     gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr);
                 }
                 else if (LastTSize == 4)
                 {
                     var arr = new Uint32Array(elementCount);
                     for (int i = startIndex; i < elementCount; i++)
-                        arr[i] = Convert.ToByte(data[i]);
+                        arr[i] = Convert.ToUInt32(data[i]);
                     gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr);
                 }
             }
@@ -150,14 +150,14 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     var arr = new Uint16Array(elementCount);
                     for (int i = startIndex; i < elementCount; i++)
-                        arr[i] = Convert.ToByte(data[i]);
+                        arr[i] = Convert.ToUInt16(data[i]);
                     gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
                 }
                 else if (LastTSize == 4)
                 {
                     var arr = new Uint32Array(elementCount);
                     for (int i = startIndex; i < elementCount; i++)
-                        arr[i] = Convert.ToByte(data[i]);
+                        arr[i] = Convert.ToUInt32(data[i]);
                     gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
                 }
             }

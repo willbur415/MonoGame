@@ -84,9 +84,8 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 var loc = gl.getUniformLocation(program, sampler.name);
                 GraphicsExtensions.CheckGLError();
-
-                // TODO: Enable this a bit later
-                // gl.uniform1f(loc, sampler.textureSlot);
+                
+                gl.uniform1f(loc, sampler.textureSlot);
                 GraphicsExtensions.CheckGLError();
             }
         }

@@ -54,7 +54,7 @@ namespace TestWebGame
             MediaPlayer.Pause(); 
             MediaPlayer.Volume = 0.1f;
 
-            texBall = Content.Load<Texture2D>("hacker");
+            // texBall = Content.Load<Texture2D>("hacker");
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace TestWebGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(texBall, Vector2.Zero, Color.Black);
+            // spriteBatch.Draw(texBall, Vector2.Zero, Color.Black);
             spriteBatch.End();
 
             base.Draw(gameTime);

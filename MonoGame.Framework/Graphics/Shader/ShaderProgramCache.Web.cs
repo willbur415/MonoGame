@@ -98,10 +98,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
             pixelShader.ApplySamplerTextureUnits(program);
 
-            var linked = (int)gl.getProgramParameter(program, gl.LINK_STATUS);
+            var linked = (bool)gl.getProgramParameter(program, gl.LINK_STATUS);
             GraphicsExtensions.LogGLError("VertexShaderCache.Link(), GL.GetProgram");
 
-            if (linked == 0)
+            if (!linked)
             {
                 var log = gl.getProgramInfoLog(program);
                 gl.detachShader(program, vertexShader.GetShaderHandle());

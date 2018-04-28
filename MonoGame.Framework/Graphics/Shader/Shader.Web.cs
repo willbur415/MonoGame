@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using static Retyped.dom;
+using static Retyped.es5;
 using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -42,9 +43,9 @@ namespace Microsoft.Xna.Framework.Graphics
             GraphicsExtensions.CheckGLError();
             gl.compileShader(_shaderHandle);
             GraphicsExtensions.CheckGLError();
-            var compiled = (int)gl.getShaderParameter(_shaderHandle, gl.COMPILE_STATUS);
+            var compiled = (bool)gl.getShaderParameter(_shaderHandle, gl.COMPILE_STATUS);
             GraphicsExtensions.CheckGLError();
-            if (compiled != 1)
+            if (!compiled)
             {
                 var log = gl.getShaderInfoLog(_shaderHandle);
                 Debug.WriteLine(log);
@@ -83,8 +84,9 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 var loc = gl.getUniformLocation(program, sampler.name);
                 GraphicsExtensions.CheckGLError();
-                
-                gl.uniform1f(loc, sampler.textureSlot);
+
+                // TODO: Enable this a bit later
+                // gl.uniform1f(loc, sampler.textureSlot);
                 GraphicsExtensions.CheckGLError();
             }
         }

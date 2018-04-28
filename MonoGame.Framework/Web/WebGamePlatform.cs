@@ -14,6 +14,7 @@ namespace Microsoft.Xna.Framework
     {
         private WebGameWindow _view;
         private double _threadId;
+        private bool _error;
 
         public WebGamePlatform(Game game)
             : base(game)
@@ -35,9 +36,15 @@ namespace Microsoft.Xna.Framework
         {
             _threadId = window.setInterval((object[] args) =>
             {
-                // Process Events?
+                if (_error)
+                {
+                    Exit();
+                    return;
+                }
 
+                _error = true;
                 Game.Tick();
+                _error = false;
             }, 20);
         }
 

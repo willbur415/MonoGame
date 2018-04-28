@@ -16,8 +16,79 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class GraphicsDevice
     {
-        // List<ResourceHandle> _disposeThisFrame = new List<ResourceHandle>();
-        // List<ResourceHandle> _disposeNextFrame = new List<ResourceHandle>();
+        enum ResourceType
+        {
+            Texture,
+            Buffer,
+            Shader,
+            Program,
+            Query,
+            Framebuffer
+        }
+
+        struct ResourceHandle
+        {
+            public ResourceType type;
+            public object handle;
+
+            public static ResourceHandle Texture(object handle)
+            {
+                return new ResourceHandle() { type = ResourceType.Texture, handle = handle };
+            }
+
+            public static ResourceHandle Buffer(object handle)
+            {
+                return new ResourceHandle() { type = ResourceType.Buffer, handle = handle };
+            }
+
+            public static ResourceHandle Shader(object handle)
+            {
+                return new ResourceHandle() { type = ResourceType.Shader, handle = handle };
+            }
+
+            public static ResourceHandle Program(object handle)
+            {
+                return new ResourceHandle() { type = ResourceType.Program, handle = handle };
+            }
+
+            public static ResourceHandle Query(object handle)
+            {
+                return new ResourceHandle() { type = ResourceType.Query, handle = handle };
+            }
+
+            public static ResourceHandle Framebuffer(object handle)
+            {
+                return new ResourceHandle() { type = ResourceType.Framebuffer, handle = handle };
+            }
+
+            public void Free()
+            {
+                switch (type)
+                {
+                    case ResourceType.Texture:
+                        gl.deleteTexture(handle.As<WebGLTexture>());
+                        break;
+                    case ResourceType.Buffer:
+                        gl.deleteBuffer(handle.As<WebGLBuffer>());
+                        break;
+                    case ResourceType.Shader:
+                        if (gl.isShader(handle.As<WebGLShader>()))
+                            gl.deleteShader(handle.As<WebGLShader>());
+                        break;
+                    case ResourceType.Program:
+                        if (gl.isProgram(handle.As<WebGLProgram>()))
+                            gl.deleteProgram(handle.As<WebGLProgram>());
+                        break;
+                    case ResourceType.Framebuffer:
+                        gl.deleteFramebuffer(handle.As<WebGLFramebuffer>());
+                        break;
+                }
+                GraphicsExtensions.CheckGLError();
+            }
+        }
+
+        List<ResourceHandle> _disposeThisFrame = new List<ResourceHandle>();
+        List<ResourceHandle> _disposeNextFrame = new List<ResourceHandle>();
         object _disposeActionsLock = new object();
 
         static List<IntPtr> _disposeContexts = new List<IntPtr>();
@@ -28,14 +99,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
         static readonly float[] _posFixup = new float[4];
 
-        // private static BufferBindingInfo[] _bufferBindingInfos;
+        private static BufferBindingInfo[] _bufferBindingInfos;
         private static bool[] _newEnabledVertexAttributes;
         internal static readonly List<int> _enabledVertexAttributes = new List<int>();
         internal static bool _attribsDirty;
 
         internal FramebufferHelper framebufferHelper;
 
-        internal int glFramebuffer = 0;
+        internal WebGLFramebuffer glFramebuffer = null;
         internal int MaxVertexAttributes;
         internal int _maxTextureSize = 0;
 
@@ -64,7 +135,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 return _vertexShader.HashKey ^ _pixelShader.HashKey;
             }
         }
-
 
         internal void SetVertexAttributeArray(bool[] attrs)
         {
@@ -119,11 +189,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Force resetting states
             this.PlatformApplyBlend(true);
-        }
+            this.DepthStencilState.PlatformApplyState(this, true);
+            this.RasterizerState.PlatformApplyState(this, true);
 
-        internal void OnPresentationChanged()
-        {
-            ApplyRenderTargets(null);
+            _bufferBindingInfos = new BufferBindingInfo[_maxVertexBufferSlots];
+            for (int i = 0; i < _bufferBindingInfos.Length; i++)
+                _bufferBindingInfos[i] = new BufferBindingInfo(null, 0, 0, -1);
         }
 
         public void PlatformClear(ClearOptions options, Vector4 color, float depth, int stencil)
@@ -164,9 +235,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
 
                 bufferMask = bufferMask | (int)gl.COLOR_BUFFER_BIT;
-                ulong a = 0;
-                ulong b = 0;
-                ulong c = a | b;
             }
 			if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
             {
@@ -201,30 +269,79 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDispose()
         {
-
-        }
-
-        internal void DisposeShader(WebGLShader handle)
-        {
+            _programCache.Dispose();
         }
 
         internal void DisposeTexture(WebGLTexture handle)
         {
+            if (!_isDisposed)
+            {
+                lock (_disposeActionsLock)
+                {
+                    _disposeNextFrame.Add(ResourceHandle.Texture(handle));
+                }
+            }
+        }
+
+        internal void DisposeBuffer(WebGLBuffer handle)
+        {
+            if (!_isDisposed)
+            {
+                lock (_disposeActionsLock)
+                {
+                    _disposeNextFrame.Add(ResourceHandle.Buffer(handle));
+                }
+            }
+        }
+
+        internal void DisposeShader(WebGLShader handle)
+        {
+            if (!_isDisposed)
+            {
+                lock (_disposeActionsLock)
+                {
+                    _disposeNextFrame.Add(ResourceHandle.Shader(handle));
+                }
+            }
         }
 
         internal void DisposeProgram(WebGLProgram handle)
         {
-            /*if (!_isDisposed)
+            if (!_isDisposed)
             {
                 lock (_disposeActionsLock)
                 {
                     _disposeNextFrame.Add(ResourceHandle.Program(handle));
                 }
-            }*/
+            }
+        }
+
+        internal void DisposeFramebuffer(WebGLFramebuffer handle)
+        {
+            if (!_isDisposed)
+            {
+                lock (_disposeActionsLock)
+                {
+                    _disposeNextFrame.Add(ResourceHandle.Framebuffer(handle));
+                }
+            }
         }
 
         public void PlatformPresent()
         {
+            // Dispose of any GL resources that were disposed in another thread
+            int count = _disposeThisFrame.Count;
+            for (int i = 0; i < count; ++i)
+                _disposeThisFrame[i].Free();
+            _disposeThisFrame.Clear();
+
+            lock (_disposeActionsLock)
+            {
+                // Swap lists so resources added during this draw will be released after the next draw
+                var temp = _disposeThisFrame;
+                _disposeThisFrame = _disposeNextFrame;
+                _disposeNextFrame = temp;
+            }
         }
 
         private void PlatformSetViewport(ref Viewport value)
@@ -245,7 +362,64 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformApplyDefaultRenderTarget()
         {
+            this.framebufferHelper.BindFramebuffer(this.glFramebuffer);
+
+            // Reset the raster state because we flip vertices
+            // when rendering offscreen and hence the cull direction.
+            _rasterizerStateDirty = true;
+
+            // Textures will need to be rebound to render correctly in the new render target.
+            Textures.Dirty();
         }
+
+        private class RenderTargetBindingArrayComparer : IEqualityComparer<RenderTargetBinding[]>
+        {
+            public bool Equals(RenderTargetBinding[] first, RenderTargetBinding[] second)
+            {
+                if (object.ReferenceEquals(first, second))
+                    return true;
+
+                if (first == null || second == null)
+                    return false;
+
+                if (first.Length != second.Length)
+                    return false;
+
+                for (var i = 0; i < first.Length; ++i)
+                {
+                    if ((first[i].RenderTarget != second[i].RenderTarget) || (first[i].ArraySlice != second[i].ArraySlice))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public int GetHashCode(RenderTargetBinding[] array)
+            {
+                if (array != null)
+                {
+                    unchecked
+                    {
+                        int hash = 17;
+                        foreach (var item in array)
+                        {
+                            if (item.RenderTarget != null)
+                                hash = hash * 23 + item.RenderTarget.GetHashCode();
+                            hash = hash * 23 + item.ArraySlice.GetHashCode();
+                        }
+                        return hash;
+                    }
+                }
+                return 0;
+            }
+        }
+
+        // FBO cache, we create 1 FBO per RenderTargetBinding combination
+        private Dictionary<RenderTargetBinding[], int> glFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
+        // FBO cache used to resolve MSAA rendertargets, we create 1 FBO per RenderTargetBinding combination
+        private Dictionary<RenderTargetBinding[], int> glResolveFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
 
         internal void PlatformResolveRenderTargets()
         {
@@ -255,6 +429,90 @@ namespace Microsoft.Xna.Framework.Graphics
         private IRenderTarget PlatformApplyRenderTargets()
         {
             return null;
+        }
+        
+        
+        internal void OnPresentationChanged()
+        {
+            ApplyRenderTargets(null);
+        }
+
+        // Holds information for caching
+        private class BufferBindingInfo
+        {
+            public VertexDeclaration.VertexDeclarationAttributeInfo AttributeInfo;
+            public int VertexOffset;
+            public int InstanceFrequency;
+            public int Vbo;
+
+            public BufferBindingInfo(VertexDeclaration.VertexDeclarationAttributeInfo attributeInfo, int vertexOffset, int instanceFrequency, int vbo)
+            {
+                AttributeInfo = attributeInfo;
+                VertexOffset = vertexOffset;
+                InstanceFrequency = instanceFrequency;
+                Vbo = vbo;
+            }
+        }
+
+        private void ActivateShaderProgram()
+        {
+            // Lookup the shader program.
+            var shaderProgram = _programCache.GetProgram(VertexShader, PixelShader);
+            if (shaderProgram.Program == null)
+                return;
+            // Set the new program if it has changed.
+            if (_shaderProgram != shaderProgram)
+            {
+                gl.useProgram(shaderProgram.Program);
+                GraphicsExtensions.CheckGLError();
+                _shaderProgram = shaderProgram;
+            }
+
+            var posFixupLoc = shaderProgram.GetUniformLocation("posFixup");
+            if (posFixupLoc == null)
+                return;
+
+            // Apply vertex shader fix:
+            // The following two lines are appended to the end of vertex shaders
+            // to account for rendering differences between OpenGL and DirectX:
+            //
+            // gl_Position.y = gl_Position.y * posFixup.y;
+            // gl_Position.xy += posFixup.zw * gl_Position.ww;
+            //
+            // (the following paraphrased from wine, wined3d/state.c and wined3d/glsl_shader.c)
+            //
+            // - We need to flip along the y-axis in case of offscreen rendering.
+            // - D3D coordinates refer to pixel centers while GL coordinates refer
+            //   to pixel corners.
+            // - D3D has a top-left filling convention. We need to maintain this
+            //   even after the y-flip mentioned above.
+            // In order to handle the last two points, we translate by
+            // (63.0 / 128.0) / VPw and (63.0 / 128.0) / VPh. This is equivalent to
+            // translating slightly less than half a pixel. We want the difference to
+            // be large enough that it doesn't get lost due to rounding inside the
+            // driver, but small enough to prevent it from interfering with any
+            // anti-aliasing.
+            //
+            // OpenGL coordinates specify the center of the pixel while d3d coords specify
+            // the corner. The offsets are stored in z and w in posFixup. posFixup.y contains
+            // 1.0 or -1.0 to turn the rendering upside down for offscreen rendering. PosFixup.x
+            // contains 1.0 to allow a mad.
+
+            _posFixup[0] = 1.0f;
+            _posFixup[1] = 1.0f;
+            _posFixup[2] = (63.0f/64.0f)/Viewport.Width;
+            _posFixup[3] = -(63.0f/64.0f)/Viewport.Height;
+
+            //If we have a render target bound (rendering offscreen)
+            if (IsRenderTargetBound)
+            {
+                //flip vertically
+                _posFixup[1] *= -1.0f;
+                _posFixup[3] *= -1.0f;
+            }
+
+            gl.uniform4f(posFixupLoc, _posFixup[0], _posFixup[1], _posFixup[2], _posFixup[3]);
+            GraphicsExtensions.CheckGLError();
         }
 		
         internal void PlatformBeginApplyState()
@@ -279,6 +537,63 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal void PlatformApplyState(bool applyShaders)
         {
+            if ( _scissorRectangleDirty )
+	        {
+                var scissorRect = _scissorRectangle;
+                if (!IsRenderTargetBound)
+                    scissorRect.Y = PresentationParameters.BackBufferHeight - (scissorRect.Y + scissorRect.Height);
+                gl.scissor(scissorRect.X, scissorRect.Y, scissorRect.Width, scissorRect.Height);
+                GraphicsExtensions.CheckGLError();
+	            _scissorRectangleDirty = false;
+	        }
+
+            // If we're not applying shaders then early out now.
+            if (!applyShaders)
+                return;
+
+            if (_indexBufferDirty)
+            {
+                if (_indexBuffer != null)
+                {
+                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _indexBuffer.ibo);
+                    GraphicsExtensions.CheckGLError();
+                }
+                _indexBufferDirty = false;
+            }
+
+            if (_vertexShader == null)
+                throw new InvalidOperationException("A vertex shader must be set!");
+            if (_pixelShader == null)
+                throw new InvalidOperationException("A pixel shader must be set!");
+
+            if (_vertexShaderDirty || _pixelShaderDirty)
+            {
+                ActivateShaderProgram();
+
+                if (_vertexShaderDirty)
+                {
+                    unchecked
+                    {
+                        _graphicsMetrics._vertexShaderCount++;
+                    }
+                }
+
+                if (_pixelShaderDirty)
+                {
+                    unchecked
+                    {
+                        _graphicsMetrics._pixelShaderCount++;
+                    }
+                }
+
+                _vertexShaderDirty = _pixelShaderDirty = false;
+            }
+
+            _vertexConstantBuffers.SetConstantBuffers(this, _shaderProgram);
+            _pixelConstantBuffers.SetConstantBuffers(this, _shaderProgram);
+
+            Textures.SetTextures(this);
+            SamplerStates.PlatformSetSamplers(this);
         }
 
         private void PlatformDrawIndexedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount)
@@ -306,7 +621,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             // Setup the vertex declaration to point at the VB data.
             vertexDeclaration.GraphicsDevice = this;
-            /* vertexDeclaration.Apply(_vertexShader, 0, ShaderProgramHash);
+            // vertexDeclaration.Apply(_vertexShader, vertexDeclaration.VertexStride * vertexOffset, ShaderProgramHash);
 
             //Draw
             /*Web.GL.DrawElements(GraphicsExtensions.GetPrimitiveTypeGL(primitiveType),

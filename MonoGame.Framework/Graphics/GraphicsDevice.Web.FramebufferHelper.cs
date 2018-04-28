@@ -9,6 +9,8 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security;
+using static WebHelper;
+using static Retyped.dom;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -52,82 +54,70 @@ namespace Microsoft.Xna.Framework.Graphics
                 this.SupportsInvalidateFramebuffer = true;
             }
 
-            /*internal virtual void GenRenderbuffer(out int renderbuffer)
+            internal virtual void GenRenderbuffer(out WebGLRenderbuffer renderbuffer)
             {
-                GL.GenRenderbuffers(1, out renderbuffer);
+                renderbuffer = gl.createRenderbuffer();
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void BindRenderbuffer(int renderbuffer)
+            internal virtual void BindRenderbuffer(WebGLRenderbuffer renderbuffer)
             {
-                GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, renderbuffer);
+                gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void DeleteRenderbuffer(int renderbuffer)
+            internal virtual void DeleteRenderbuffer(WebGLRenderbuffer renderbuffer)
             {
-                GL.DeleteRenderbuffers(1, ref renderbuffer);
+                gl.deleteRenderbuffer(renderbuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
             internal virtual void RenderbufferStorageMultisample(int samples, int internalFormat, int width, int height)
             {
-                if (samples > 0 && GL.RenderbufferStorageMultisample != null)
-                    GL.RenderbufferStorageMultisample(RenderbufferTarget.RenderbufferExt, samples, (RenderbufferStorage)internalFormat, width, height);
-                else
-                    GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, (RenderbufferStorage)internalFormat, width, height);
+                gl.renderbufferStorage(gl.RENDERBUFFER, internalFormat, width, height);
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void GenFramebuffer(out int framebuffer)
+            internal virtual void GenFramebuffer(out WebGLFramebuffer framebuffer)
             {
-                GL.GenFramebuffers(1, out framebuffer);
+                framebuffer = gl.createFramebuffer();
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void BindFramebuffer(int framebuffer)
+            internal virtual void BindFramebuffer(WebGLFramebuffer framebuffer)
             {
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
             internal virtual void BindReadFramebuffer(int readFramebuffer)
             {
-                GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, readFramebuffer);
-                GraphicsExtensions.CheckGLError();
+                // Requires WEBGL 2
+                throw new NotImplementedException();
             }
-
-            static readonly FramebufferAttachment[] FramebufferAttachements = {
-                FramebufferAttachment.ColorAttachment0,
-                FramebufferAttachment.DepthAttachment,
-                FramebufferAttachment.StencilAttachment,
-            };
 
             internal virtual void InvalidateDrawFramebuffer()
             {
-                Debug.Assert(this.SupportsInvalidateFramebuffer);
-                GL.InvalidateFramebuffer(FramebufferTarget.Framebuffer, 3, FramebufferAttachements);
+                throw new NotImplementedException();
             }
 
             internal virtual void InvalidateReadFramebuffer()
             {
-                Debug.Assert(this.SupportsInvalidateFramebuffer);
-                GL.InvalidateFramebuffer(FramebufferTarget.Framebuffer, 3, FramebufferAttachements);
+                throw new NotImplementedException();
             }
 
             internal virtual void DeleteFramebuffer(int framebuffer)
             {
-                GL.DeleteFramebuffers(1, ref framebuffer);
-                GraphicsExtensions.CheckGLError();
+                throw new NotImplementedException();
             }
 
-            internal virtual void FramebufferTexture2D(int attachement, int target, int texture, int level = 0, int samples = 0)
+            internal virtual void FramebufferTexture2D(int attachement, int target, WebGLTexture texture, int level = 0, int samples = 0)
             {
-                GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, (FramebufferAttachment)attachement, (TextureTarget)target, texture, level);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, attachement, target, texture, level);
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void FramebufferRenderbuffer(int attachement, int renderbuffer, int level = 0)
+            /*internal virtual void FramebufferRenderbuffer(int attachement, int renderbuffer, int level = 0)
             {
                 GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, (FramebufferAttachment)attachement, RenderbufferTarget.Renderbuffer, renderbuffer);
                 GraphicsExtensions.CheckGLError();

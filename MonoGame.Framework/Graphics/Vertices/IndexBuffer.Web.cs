@@ -7,11 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
+using static WebHelper;
+using static Retyped.dom;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class IndexBuffer
     {
+		internal WebGLBuffer ibo;
+
         private void PlatformConstruct(IndexElementSize indexElementSize, int indexCount)
         {
             throw new NotImplementedException();

@@ -103,6 +103,117 @@ namespace Microsoft.Xna.Framework.Graphics
                     return false;
             }
         }
+		
+		public static double GetBlendEquationMode (this BlendFunction function)
+		{
+			switch (function)
+            {
+                case BlendFunction.Add:
+                    return gl.FUNC_ADD;
+                case BlendFunction.ReverseSubtract:
+                    return gl.FUNC_REVERSE_SUBTRACT;
+                case BlendFunction.Subtract:
+                    return gl.FUNC_SUBTRACT;
+
+                default:
+                    throw new ArgumentException();
+			}
+		}
+
+		public static double GetBlendFactorSrc (this Blend blend)
+		{
+			switch (blend)
+            {
+                case Blend.BlendFactor:
+                    return gl.CONSTANT_COLOR;
+                case Blend.DestinationAlpha:
+                    return gl.DST_ALPHA;
+                case Blend.DestinationColor:
+                    return gl.DST_COLOR;
+                case Blend.InverseBlendFactor:
+                    return gl.ONE_MINUS_CONSTANT_COLOR;
+                case Blend.InverseDestinationAlpha:
+                    return gl.ONE_MINUS_DST_ALPHA;
+                case Blend.InverseDestinationColor:
+                    return gl.ONE_MINUS_DST_COLOR;
+                case Blend.InverseSourceAlpha:
+                    return gl.ONE_MINUS_SRC_ALPHA;
+                case Blend.InverseSourceColor:
+                    return gl.ONE_MINUS_SRC_COLOR;
+                case Blend.One:
+                    return gl.ONE;
+                case Blend.SourceAlpha:
+                    return gl.SRC_ALPHA;
+                case Blend.SourceAlphaSaturation:
+                    return gl.SRC_ALPHA_SATURATE;
+                case Blend.SourceColor:
+                    return gl.SRC_COLOR;
+                case Blend.Zero:
+                    return gl.ZERO;
+                default:
+                    throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
+            }
+
+		}
+
+		public static double GetBlendFactorDest (this Blend blend)
+		{
+			switch (blend)
+            {
+                case Blend.BlendFactor:
+                    return gl.CONSTANT_COLOR;
+                case Blend.DestinationAlpha:
+                    return gl.DST_ALPHA;
+                case Blend.DestinationColor:
+                    return gl.DST_COLOR;
+                case Blend.InverseBlendFactor:
+                    return gl.ONE_MINUS_CONSTANT_COLOR;
+                case Blend.InverseDestinationAlpha:
+                    return gl.ONE_MINUS_DST_ALPHA;
+                case Blend.InverseDestinationColor:
+                    return gl.ONE_MINUS_DST_COLOR;
+                case Blend.InverseSourceAlpha:
+                    return gl.ONE_MINUS_SRC_ALPHA;
+                case Blend.InverseSourceColor:
+                    return gl.ONE_MINUS_SRC_COLOR;
+                case Blend.One:
+                    return gl.ONE;
+                case Blend.SourceAlpha:
+                    return gl.SRC_ALPHA;
+                case Blend.SourceAlphaSaturation:
+                    return gl.SRC_ALPHA_SATURATE;
+                case Blend.SourceColor:
+                    return gl.SRC_COLOR;
+                case Blend.Zero:
+                    return gl.ZERO;
+                default:
+				    throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
+			}
+		}
+
+        public static double GetDepthFunction(this CompareFunction compare)
+        {
+            switch (compare)
+            {
+                default:
+                case CompareFunction.Always:
+                    return gl.ALWAYS;
+                case CompareFunction.Equal:
+                    return gl.EQUAL;
+                case CompareFunction.Greater:
+                    return gl.GREATER;
+                case CompareFunction.GreaterEqual:
+                    return gl.GEQUAL;
+                case CompareFunction.Less:
+                    return gl.LESS;
+                case CompareFunction.LessEqual:
+                    return gl.LEQUAL;
+                case CompareFunction.Never:
+                    return gl.NEVER;
+                case CompareFunction.NotEqual:
+                    return gl.NOTEQUAL;
+            }
+        }
 
         public static void GetGLFormat (this SurfaceFormat format,
             GraphicsDevice graphicsDevice,

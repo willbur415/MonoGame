@@ -113,7 +113,6 @@ namespace Microsoft.Xna.Framework.Graphics
             return new ShaderProgram(program);
         }
 
-
         public void Dispose()
         {
             Dispose(true);

@@ -98,5 +98,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
         TextureTarget GetFramebufferTarget(RenderTargetBinding renderTargetBinding);
 #endif
+
+#if WEB
+        Retyped.dom.WebGLTexture GLTexture { get; }
+        double GLTarget { get; }
+        int GLColorBuffer { get; set; }
+        int GLDepthBuffer { get; set; }
+        int GLStencilBuffer { get; set; }
+        int MultiSampleCount { get; }
+        int LevelCount { get; }
+
+        double GetFramebufferTarget(RenderTargetBinding renderTargetBinding);
+#endif
     }
 }

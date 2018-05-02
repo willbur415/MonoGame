@@ -13,6 +13,8 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {
+        public bool IsLoaded { get; set; }
+
         private void PlatformConstruct(int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
             this.glTarget = gl.TEXTURE_2D;
@@ -176,6 +178,36 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new NotImplementedException();
         }
 
+        private void PlatformSetData(HTMLImageElement image)
+        {
+            var prevTexture = GraphicsExtensions.GetBoundTexture2D();
+            if (prevTexture != glTexture)
+            {
+                gl.bindTexture(gl.TEXTURE_2D, glTexture);
+                GraphicsExtensions.CheckGLError();
+            }
+
+            // Load up the image
+            gl.bindTexture(gl.TEXTURE_2D, glTexture);
+            GraphicsExtensions.CheckGLError();
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            GraphicsExtensions.CheckGLError();
+
+            // Set the size
+            width = (int)image.width;
+            height = (int)image.height;
+            
+            // Restore the bound texture.
+            if (prevTexture != glTexture)
+            {
+                gl.bindTexture(gl.TEXTURE_2D, prevTexture);
+                GraphicsExtensions.CheckGLError();
+            }
+
+            IsLoaded = true;
+        }
+
         private void PlatformGetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
         {
             throw new NotImplementedException();
@@ -184,6 +216,20 @@ namespace Microsoft.Xna.Framework.Graphics
         private static Texture2D PlatformFromStream(GraphicsDevice graphicsDevice, Stream stream)
         {
             throw new NotImplementedException();
+        }
+
+        public static Texture2D FromURL(GraphicsDevice graphicsDevice, string url)
+        {
+            var texture = new Texture2D(graphicsDevice, 1, 1);
+            var image = new HTMLImageElement();
+            image.onload += (e) =>
+            {
+                texture.PlatformSetData(image);
+                return true;
+            };
+            image.src = url;
+
+            return texture;
         }
 
         private void PlatformSaveAsJpeg(Stream stream, int width, int height)

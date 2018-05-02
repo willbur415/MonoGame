@@ -86,6 +86,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             PlatformGraphicsDeviceResetting();
             base.GraphicsDeviceResetting();
-        }        
-	}
+        }
+    }
 }

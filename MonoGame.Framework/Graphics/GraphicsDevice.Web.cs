@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
 using static Retyped.dom;
 using static WebHelper;
+using static Retyped.es5;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -421,6 +422,15 @@ namespace Microsoft.Xna.Framework.Graphics
         // FBO cache used to resolve MSAA rendertargets, we create 1 FBO per RenderTargetBinding combination
         private Dictionary<RenderTargetBinding[], int> glResolveFramebuffers = new Dictionary<RenderTargetBinding[], int>(new RenderTargetBindingArrayComparer());
 
+        internal void PlatformCreateRenderTarget(IRenderTarget renderTarget, int width, int height, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
+        {
+            
+        }
+
+        internal void PlatformDeleteRenderTarget(IRenderTarget renderTarget)
+        {
+        }
+
         internal void PlatformResolveRenderTargets()
         {
             // Resolving MSAA render targets should be done here.
@@ -598,46 +608,58 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDrawIndexedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount)
         {
+            throw new NotImplementedException();
         }
 
         private void PlatformDrawUserPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, VertexDeclaration vertexDeclaration, int vertexCount) where T : struct
         {
+            throw new NotImplementedException();
         }
 
         private void PlatformDrawPrimitives(PrimitiveType primitiveType, int vertexStart, int vertexCount)
         {
+            throw new NotImplementedException();
         }
+
+        private WebGLBuffer _tmpVertexBuffer, _tmpIndexBuffer;
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
             ApplyState(true);
 
-            // Unbind current VBOs.
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            GraphicsExtensions.CheckGLError();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-            GraphicsExtensions.CheckGLError();
+            // pin the buffers
+            if (_tmpVertexBuffer == null)
+                _tmpVertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, _tmpVertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Uint32Array(vertexData.As<ArrayBufferLike>()), gl.STATIC_DRAW);
+
+            if (_tmpIndexBuffer == null)
+                _tmpIndexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _tmpIndexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData.As<ArrayBufferLike>()), gl.STATIC_DRAW);
             _indexBufferDirty = true;
 
             // Setup the vertex declaration to point at the VB data.
             vertexDeclaration.GraphicsDevice = this;
-            // vertexDeclaration.Apply(_vertexShader, vertexDeclaration.VertexStride * vertexOffset, ShaderProgramHash);
+            vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
 
             //Draw
-            /*Web.GL.DrawElements(GraphicsExtensions.GetPrimitiveTypeGL(primitiveType),
+            gl.drawElements(GraphicsExtensions.GetPrimitiveTypeGL(primitiveType),
                                 GetElementCountArray(primitiveType, primitiveCount),
-                                Web.GL.UNSIGNED_SHORT,
-                                (indexOffset * 2));
+                                gl.UNSIGNED_SHORT,
+                                indexOffset);
 
-            GraphicsExtensions.CheckGLError();*/
+            GraphicsExtensions.CheckGLError();
         }
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
+            throw new NotImplementedException();
         }
 
         private void PlatformDrawInstancedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
         {
+            throw new NotImplementedException();
         }
 
         private void PlatformGetBackBufferData<T>(Rectangle? rect, T[] data, int startIndex, int count) where T : struct

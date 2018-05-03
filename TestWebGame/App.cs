@@ -1,37 +1,42 @@
 ﻿using Bridge;
-using Bridge.Html5;
 using System;
 using System.IO;
+using static Retyped.dom;
+using Console = System.Console;
+using Microsoft.Xna.Framework;
 
 namespace TestWebGame
 {
     public class App
     {
-		private static Game1 game;
+		private static Game game;
 		
         public static void Main()
 		{
 			var canvas = new HTMLCanvasElement();
-			canvas.Width = 800;
-			canvas.Height = 480;
-			canvas.Id = "monogamecanvas";
+			canvas.width = 800;
+			canvas.height = 480;
+			canvas.id = "monogamecanvas";
 
-            var divdata = new Bridge.Html5.HTMLDivElement();
-			divdata.Id = "testoutput";
+            var divdata = new HTMLDivElement();
+			divdata.id = "testoutput";
 
             var button = new HTMLButtonElement();
-            button.InnerHTML = "Run Game";
+            button.innerHTML = "Run Game";
 
-            button.OnClick = (ev) =>
+			document.body.appendChild(canvas);
+            document.body.appendChild(button);
+			document.body.appendChild(divdata);
+
+            button.onclick = (ev) =>
             {
 				Console.WriteLine("Bridge.NET sanity test :)");
-				game = new Game1();
+				// game = new Game1();
+				game = new PrimitivesSample.PrimitivesSampleGame();
 				game.Run();
-			};
 
-			Document.Body.AppendChild(canvas);
-            Document.Body.AppendChild(button);
-			Document.Body.AppendChild(divdata);
+				return true;
+			};
         }
     }
 }

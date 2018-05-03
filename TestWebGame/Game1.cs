@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using static Retyped.dom;
+using Console = System.Console;
 
 namespace TestWebGame
 {
@@ -10,7 +12,7 @@ namespace TestWebGame
     /// </summary>
     public class Game1 : Game
     {
-        Bridge.Html5.HTMLDivElement divdata;
+        HTMLDivElement divdata;
         GraphicsDeviceManager graphics;
         Song song;
         MouseState prevstate;
@@ -47,7 +49,7 @@ namespace TestWebGame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            divdata = Bridge.Html5.Document.GetElementById("testoutput") as Bridge.Html5.HTMLDivElement;
+            divdata = document.getElementById("testoutput") as HTMLDivElement;
 
             song = Content.Load<Song>("awake");
             MediaPlayer.Play(song);
@@ -96,7 +98,7 @@ namespace TestWebGame
                 playing = !playing;
             }
 
-            divdata.InnerHTML = "Left: " + state.LeftButton + "<br>Right: " + state.RightButton + "<br>Mouse pos: " + state.Position + "<br>A: " + kstate.IsKeyDown(Keys.A) + "<br>Caps: " + kstate.CapsLock;
+            divdata.innerHTML = "Left: " + state.LeftButton + "<br>Right: " + state.RightButton + "<br>Mouse pos: " + state.Position + "<br>A: " + kstate.IsKeyDown(Keys.A) + "<br>Caps: " + kstate.CapsLock;
 
             prevstate = state;
             prevkstate = kstate;

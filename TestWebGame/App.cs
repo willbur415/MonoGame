@@ -31,8 +31,8 @@ namespace TestWebGame
             button.onclick = (ev) =>
             {
 				Console.WriteLine("Bridge.NET sanity test :)");
-				// game = new Game1();
-				game = new PrimitivesSample.PrimitivesSampleGame();
+				game = new Game1();
+				// game = new PrimitivesSample.PrimitivesSampleGame();
 				game.Run();
 
 				return true;

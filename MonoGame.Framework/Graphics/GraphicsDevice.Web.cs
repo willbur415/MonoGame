@@ -627,7 +627,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             ApplyState(true);
 
-            var tmparray = new Float32Array(vertexData.Length);
+            var tmparray = new Float32Array(vertexData.Length * 10);
             int pos = 0;
 
             foreach(var vertexItem in vertexData)
@@ -650,13 +650,13 @@ namespace Microsoft.Xna.Framework.Graphics
             // pin the buffers
             if (_tmpVertexBuffer == null)
                 _tmpVertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, _tmpVertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, tmparray, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _tmpVertexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, tmparray, gl.STATIC_DRAW);
 
             if (_tmpIndexBuffer == null)
                 _tmpIndexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _tmpIndexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData.As<ArrayBufferLike>()), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, _tmpIndexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Uint16Array(indexData.As<ArrayBufferLike>()), gl.STATIC_DRAW);
 
             _indexBufferDirty = true;
 

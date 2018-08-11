@@ -20,10 +20,7 @@ namespace Microsoft.Xna.Framework.Media
 
             _duration = TimeSpan.FromSeconds(_audio.duration);
 
-            _audio.onended += (e) => {
-                MediaPlayer.OnSongFinishedPlaying(null, null);
-                return true;
-            };
+            _audio.onended += (e) => MediaPlayer.OnSongFinishedPlaying(null, null);
         }
         
         internal void SetEventHandler(FinishedPlayingHandler handler) { }

@@ -35,8 +35,8 @@ namespace Microsoft.Xna.Framework
             Keyboard.SetKeys(_keys);
 
             _canvas = document.getElementById("monogamecanvas") as HTMLCanvasElement;
-            _canvas.width = GraphicsDeviceManager.DefaultBackBufferWidth;
-            _canvas.height = GraphicsDeviceManager.DefaultBackBufferHeight;
+            _canvas.width = (uint)GraphicsDeviceManager.DefaultBackBufferWidth;
+            _canvas.height = (uint)GraphicsDeviceManager.DefaultBackBufferHeight;
             _canvas.tabIndex = 1000;
 
             // Disable selection
@@ -61,11 +61,7 @@ namespace Microsoft.Xna.Framework
                 throw new Exception("Failed to get WebGL context :|");
 
             // Block context menu on the canvas element
-            _canvas.oncontextmenu += (e) => {
-                e.preventDefault();
-
-                return true;
-            };
+            _canvas.oncontextmenu += (e) => e.preventDefault();
 
             // Connect events
             _canvas.onmousemove += (e) => Canvas_MouseMove(e);
@@ -113,13 +109,13 @@ namespace Microsoft.Xna.Framework
             
             if (_isFullscreen)
             {
-                _canvas.width = document.documentElement.clientWidth;
-                _canvas.height = document.documentElement.clientHeight;
+                _canvas.width = (uint)document.documentElement.clientWidth;
+                _canvas.height = (uint)document.documentElement.clientHeight;
             }
             else
             {
-                _canvas.width = GraphicsDeviceManager.DefaultBackBufferWidth;
-                _canvas.height = GraphicsDeviceManager.DefaultBackBufferHeight;
+                _canvas.width = (uint)GraphicsDeviceManager.DefaultBackBufferWidth;
+                _canvas.height = (uint)GraphicsDeviceManager.DefaultBackBufferHeight;
             }
 
             _game.graphicsDeviceManager.IsFullScreen = _isFullscreen;
@@ -228,8 +224,8 @@ namespace Microsoft.Xna.Framework
 
             if (!_isFullscreen && !_willBeFullScreen)
             {
-                _canvas.width = clientWidth;
-                _canvas.height = clientHeight;
+                _canvas.width = (uint)clientWidth;
+                _canvas.height = (uint)clientHeight;
             }
 
             _isFullscreen = _willBeFullScreen;

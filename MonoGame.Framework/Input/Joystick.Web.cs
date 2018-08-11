@@ -3,84 +3,70 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using JSIL;
+using static Retyped.dom;
+using static Retyped.gamepad;
 
 namespace Microsoft.Xna.Framework.Input
 {
     static partial class Joystick
     {
-        private const bool PlatformIsSupported = true;
-
-        internal static bool TrackEvents = false;
-
+        public static bool PlatformIsSupported => true;
+        
         private static JoystickCapabilities PlatformGetCapabilities(int index)
         {
-            bool connected = false;
-            string id = "";
-            int axiscount = 0;
-            int buttoncount = 0;
-
-            var navigator = Builtins.Global["navigator"];
-            var gamepads = navigator.getGamepads ? navigator.getGamepads() : navigator.webkitGetGamepads();
-
-            if (gamepads.length > index)
+            var gamepads = navigator.getGamepads();
+            if (gamepads.Length <= index || gamepads[index] == null)
             {
-                if (gamepads[index])
+                return new JoystickCapabilities
                 {
-                    connected = true;
-                    id = gamepads[index].id;
-                    axiscount = gamepads[index].axes.length;
-                    buttoncount = gamepads[index].buttons.length;
-                }
+                    IsConnected = false,
+                    Identifier = "",
+                    IsGamepad = false,
+                    AxisCount = 0,
+                    ButtonCount = 0,
+                    HatCount = 0
+                };
             }
 
-            return new JoystickCapabilities()
+            var gamepad = gamepads[index];
+            return new JoystickCapabilities
             {
-                IsConnected = connected,
-                Identifier = id,
-                AxisCount = axiscount,
-                ButtonCount = buttoncount,
+                IsConnected = false,
+                Identifier = gamepad.id,
+                IsGamepad = gamepad.mapping == GamepadMappingType.standard,
+                AxisCount = gamepad.axes.Length,
+                ButtonCount = gamepad.buttons.Length,
                 HatCount = 0
             };
         }
 
         private static JoystickState PlatformGetState(int index)
         {
-            var connected = false;
-            var axes = new int[0];
-            var buttons = new ButtonState[0];
-
-            var navigator = Builtins.Global["navigator"];
-            var gamepads = navigator.getGamepads ? navigator.getGamepads() : navigator.webkitGetGamepads();
-
-            if (gamepads.length > index)
+            var gamepads = navigator.getGamepads();
+            if (gamepads.Length <= index || gamepads[index] == null)
             {
-                if (gamepads[index])
+                return new JoystickState
                 {
-                    connected = true;
-
-                    var axescount = gamepads[index].axes.length;
-                    axes = new int[gamepads[index].axes.length];
-
-                    for (int i = 0; i < axescount; i++)
-                        axes[i] = gamepads[index].axes[i];
-
-                    var buttoncount = gamepads[index].buttons.length;
-                    buttons = new ButtonState[buttoncount];
-
-                    for (int i = 0; i < buttoncount; i++)
-                    {
-                        if (gamepads[index].buttons[i].pressed)
-                            buttons[i] = ButtonState.Pressed;
-                        else
-                            buttons[i] = ButtonState.Released;
-                    }
-                }
+                    IsConnected = false,
+                    Axes = new int[0],
+                    Buttons = new ButtonState[0],
+                    Hats = new JoystickHat[0]
+                };
             }
 
-            return new JoystickState()
+            var gamepad = gamepads[index];
+
+            var buttons = new ButtonState[gamepad.buttons.Length];
+            for (int i = 0; i < buttons.Length; i++)
+                buttons[i] = gamepad.buttons[i].pressed ? ButtonState.Pressed : ButtonState.Released;
+
+            var axes = new int[gamepad.axes.Length];
+            for (int i = 0; i < axes.Length; i++)
+                axes[i] = (int)(gamepad.axes[i] < 0 ? (gamepad.axes[i] * 32768) : (gamepad.axes[i] * 32767));
+
+            return new JoystickState
             {
-                IsConnected = connected,
+                IsConnected = gamepad.connected,
                 Axes = axes,
                 Buttons = buttons,
                 Hats = new JoystickHat[0]

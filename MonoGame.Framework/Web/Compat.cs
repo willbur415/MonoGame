@@ -113,19 +113,6 @@ namespace System.IO
     }
 }
 
-namespace System.Runtime.Serialization
-{
-    class DataContract : Attribute
-    {
-        
-    }
-
-    class DataMember : Attribute
-    {
-        public string Name { get; set; }
-    }
-}
-
 namespace System.Collections.Concurrent
 {
     class ConcurrentQueue<T> : Queue<T>

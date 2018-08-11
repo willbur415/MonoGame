@@ -34,8 +34,6 @@ namespace TestWebGame
 				game = new Game1();
 				// game = new PrimitivesSample.PrimitivesSampleGame();
 				game.Run();
-
-				return true;
 			};
         }
     }

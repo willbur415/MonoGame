@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
                 GraphicsExtensions.CheckGLError();
-                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, null, _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(0), _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -71,24 +71,14 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 // By assigning NULL data to the buffer this gives a hint
                 // to the device to discard the previous content.
-                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, null, _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(0), _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
                 GraphicsExtensions.CheckGLError();
             }
             
             if (elementSizeInByte == 2)
-            {
-                var arr = new Uint16Array(data.Length);
-                for (int i = 0; i < data.Length; i++)
-                    arr[i] = Convert.ToUInt16(data[i]);
-                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
-            }
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, data.As<Uint16Array>());
             else
-            {
-                var arr = new Uint32Array(data.Length);
-                for (int i = 0; i < data.Length; i++)
-                    arr[i] = Convert.ToUInt32(data[i]);
-                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
-            }
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, data.As<Uint32Array>());
             GraphicsExtensions.CheckGLError();
         }
 

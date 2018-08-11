@@ -374,12 +374,17 @@
     <Compile Include="Graphics\SpriteBatchItem.cs" />
     <Compile Include="Graphics\SpriteSortMode.cs" />
     <Compile Include="Graphics\SpriteEffects.cs" />
+    <Compile Include="Input\Joystick.Web.cs" />
+    <Compile Include="Input\GamePad.Web.cs" />
+    <Compile Include="Input\GamePad.cs" />
+    <Compile Include="Input\Joystick.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bridge" Version="17.0.0" />
-    <PackageReference Include="Retyped.dom" Version="2.8.6685" />
-    <PackageReference Include="Retyped.webgl-ext" Version="0.1.6685" />
+    <PackageReference Include="Retyped.dom" Version="2.8.6733" />
+    <PackageReference Include="Retyped.gamepad" Version="0.1.6733" />
+    <PackageReference Include="Bridge" Version="17.2.0" />
+    <PackageReference Include="Retyped.webgl-ext" Version="0.1.6733" />
   </ItemGroup>
 
 </Project>

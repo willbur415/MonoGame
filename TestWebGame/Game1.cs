@@ -2,8 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using static Retyped.dom;
-using Console = System.Console;
 
 namespace TestWebGame
 {
@@ -12,7 +10,7 @@ namespace TestWebGame
     /// </summary>
     public class Game1 : Game
     {
-        HTMLDivElement divdata;
+        Retyped.dom.HTMLDivElement divdata;
         GraphicsDeviceManager graphics;
         Song song;
         MouseState prevstate;
@@ -49,7 +47,7 @@ namespace TestWebGame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            divdata = document.getElementById("testoutput") as HTMLDivElement;
+            divdata = Retyped.dom.document.getElementById("testoutput") as Retyped.dom.HTMLDivElement;
 
             song = Content.Load<Song>("awake");
             MediaPlayer.Play(song);
@@ -81,6 +79,8 @@ namespace TestWebGame
 
             var state = Mouse.GetState();
             var kstate = Keyboard.GetState();
+            var jstate = Joystick.GetState(0);
+            var gstate = GamePad.GetState(0);
 
             if (prevstate.RightButton == ButtonState.Released && state.RightButton == ButtonState.Pressed)
             {
@@ -115,7 +115,7 @@ namespace TestWebGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
+            // spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);

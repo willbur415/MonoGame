@@ -9,7 +9,7 @@ namespace Microsoft.Xna.Framework.Content
         public static ConstructorInfo GetDefaultConstructor(this Type type)
         {
 #if WEB
-            return type.getcons
+            return type.GetConstructor(null);
 #elif NET45
             var typeInfo = type.GetTypeInfo();
             var ctor = typeInfo.DeclaredConstructors.FirstOrDefault(c => !c.IsStatic && c.GetParameters().Length == 0);

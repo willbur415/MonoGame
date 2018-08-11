@@ -621,56 +621,11 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new NotImplementedException();
         }
 
-        private WebGLBuffer _tmpVertexBuffer, _tmpIndexBuffer;
-
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            ApplyState(true);
+            // Help Me!
 
-            var tmparray = new Float32Array(vertexData.Length * 10);
-            int pos = 0;
-
-            foreach(var vertexItem in vertexData)
-            {
-                if (vertexItem is VertexPositionColorTexture)
-                {
-                    var item = vertexItem.As<VertexPositionColorTexture>();
-                    tmparray[pos] = item.Position.X; pos++;
-                    tmparray[pos] = item.Position.Y; pos++;
-                    tmparray[pos] = item.Position.Z; pos++;
-                    tmparray[pos] = item.Color.R; pos++;
-                    tmparray[pos] = item.Color.G; pos++;
-                    tmparray[pos] = item.Color.B; pos++;
-                    tmparray[pos] = item.Color.A; pos++;
-                    tmparray[pos] = item.TextureCoordinate.X; pos++;
-                    tmparray[pos] = item.TextureCoordinate.Y; pos++;
-                }
-            }
-
-            // pin the buffers
-            if (_tmpVertexBuffer == null)
-                _tmpVertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _tmpVertexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, tmparray, gl.STATIC_DRAW);
-
-            if (_tmpIndexBuffer == null)
-                _tmpIndexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, _tmpIndexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Uint16Array(indexData.As<ArrayBufferLike>()), gl.STATIC_DRAW);
-
-            _indexBufferDirty = true;
-
-            // Setup the vertex declaration to point at the VB data.
-            vertexDeclaration.GraphicsDevice = this;
-            vertexDeclaration.Apply(_vertexShader, vertexDeclaration.VertexStride * vertexOffset, ShaderProgramHash);
-
-            //Draw
-            gl.drawElements(GraphicsExtensions.GetPrimitiveTypeGL(primitiveType),
-                                GetElementCountArray(primitiveType, primitiveCount),
-                                gl.UNSIGNED_SHORT,
-                                indexOffset * 2);
-
-            GraphicsExtensions.CheckGLError();
+            throw new NotImplementedException();
         }
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
@@ -18,6 +19,8 @@ namespace TestWebGame
         KeyboardState prevkstate;
         SpriteBatch spriteBatch;
         Texture2D texBall;
+        SoundEffect _seffect;
+        SoundEffectInstance _sinstance;
         
         public Game1()
         {
@@ -56,6 +59,8 @@ namespace TestWebGame
 
             // texBall = Content.Load<Texture2D>("hacker");
             texBall = Texture2D.FromURL(GraphicsDevice, "Content/hacker.png");
+
+            _seffect = SoundEffect.FromURL("awake.ogg");
         }
 
         /// <summary>
@@ -97,6 +102,24 @@ namespace TestWebGame
 
                 playing = !playing;
             }
+
+            if (prevkstate.IsKeyUp(Keys.S) && kstate.IsKeyDown(Keys.S))
+            {
+                // DO NOTE THAT IT TAKES A MOMENT FOR THE SOUND EFFECT TO LOAD
+                // THIS WILL CRASH IF CALLED TO EARLY
+                if (_sinstance == null)
+                {
+                    _sinstance = _seffect.CreateInstance();
+                    _sinstance.Volume = 0.1f;
+                }
+                _sinstance.Play();
+            }
+
+            if (prevkstate.IsKeyUp(Keys.D) && kstate.IsKeyDown(Keys.D))
+                _sinstance.Pause();
+
+            if (prevkstate.IsKeyUp(Keys.F) && kstate.IsKeyDown(Keys.F))
+                _sinstance.Resume();
 
             divdata.innerHTML = "Left: " + state.LeftButton + "<br>Right: " + state.RightButton + "<br>Mouse pos: " + state.Position + "<br>A: " + kstate.IsKeyDown(Keys.A) + "<br>Caps: " + kstate.CapsLock;
 

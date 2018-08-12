@@ -493,6 +493,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public void Clear(Color color)
         {
+            GraphicsExtensions.CheckGLError();
             var options = ClearOptions.Target;
             options |= ClearOptions.DepthBuffer;
             options |= ClearOptions.Stencil;

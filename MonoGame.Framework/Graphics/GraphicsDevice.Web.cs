@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
+using System.Linq;
 using static Retyped.dom;
 using static WebHelper;
 using static Retyped.es5;
@@ -613,7 +614,29 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDrawUserPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, VertexDeclaration vertexDeclaration, int vertexCount) where T : struct
         {
-            throw new NotImplementedException();
+            ApplyState(true);
+
+            var vertexArrayBuffer = ConvertVertices(vertexData, vertexOffset, vertexCount, vertexDeclaration);
+
+            var buffer = gl.createBuffer();
+            GraphicsExtensions.CheckGLError();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            GraphicsExtensions.CheckGLError();
+            gl.bufferData(gl.ARRAY_BUFFER, vertexArrayBuffer, gl.STATIC_DRAW);
+            GraphicsExtensions.CheckGLError();
+
+            var mode = (uint) GraphicsExtensions.GetPrimitiveTypeGL(primitiveType);
+            vertexDeclaration.GraphicsDevice = this;
+            vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
+
+            GraphicsExtensions.CheckGLError();
+            gl.drawArrays(mode, 0, vertexCount);
+            GraphicsExtensions.CheckGLError();
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            GraphicsExtensions.CheckGLError();
+            gl.deleteBuffer(buffer);
+            GraphicsExtensions.CheckGLError();
         }
 
         private void PlatformDrawPrimitives(PrimitiveType primitiveType, int vertexStart, int vertexCount)
@@ -623,9 +646,42 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            // Help Me!
+            ApplyState(true);
 
-            throw new NotImplementedException();
+            var count = GetElementCountArray(primitiveType, primitiveCount);
+
+            var vertexArrayBuffer = ConvertVertices(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            var uintIndexData = new Uint16Array((uint) count);//indexData.As<Uint16Array>();
+            for (var i = 0; i < uintIndexData.length; i++)
+                uintIndexData[(uint) i] = (ushort) indexData[indexOffset + i];
+
+            var vertexBuffer = gl.createBuffer();
+            var indexBuffer = gl.createBuffer();
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            GraphicsExtensions.CheckGLError();
+            gl.bufferData(gl.ARRAY_BUFFER, vertexArrayBuffer, gl.STATIC_DRAW);
+            GraphicsExtensions.CheckGLError();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            GraphicsExtensions.CheckGLError();
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, uintIndexData, gl.STATIC_DRAW);
+            GraphicsExtensions.CheckGLError();
+
+            _vertexBuffersDirty = true;
+            _indexBufferDirty = true;
+
+            var mode = (uint) GraphicsExtensions.GetPrimitiveTypeGL(primitiveType);
+            vertexDeclaration.GraphicsDevice = this;
+            vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
+
+            GraphicsExtensions.CheckGLError();
+            gl.drawElements(mode, count, gl.UNSIGNED_SHORT, 0);
+            GraphicsExtensions.CheckGLError();
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+            gl.deleteBuffer(vertexBuffer);
+            gl.deleteBuffer(indexBuffer);
         }
 
         private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
@@ -652,6 +708,100 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             presentationParameters.MultiSampleCount = 4;
             quality = 0;
+        }
+
+        private ArrayBuffer ConvertVertices<T>(T[] vertices, int startVertex, int numVertices, VertexDeclaration decl)
+        {
+            var result =  new ArrayBuffer(numVertices * decl.VertexStride);
+            var props = object.GetOwnPropertyNames(vertices[0]).Where(p => p[0] != '$').ToArray();
+            var propertyIndex = 0;
+            foreach (var el in decl.InternalVertexElements)
+            {
+                var prop = props[propertyIndex++];
+                CopyVertexElement(vertices, startVertex, numVertices, result, prop, el.Offset, el.VertexElementFormat, decl.VertexStride);
+            }
+
+            return result;
+        }
+
+        private void CopyVertexElement<T>(T[] vertices, int startVertex, int numVertices, ArrayBuffer buf, string property, int offset, VertexElementFormat format, int stride)
+        {
+            // Note that this implementation assumes vertex element format matches the actual struct implementation
+            // E.g. Vector4 element must map to a Vector4 field
+            // TODO: This could be made more robust by trying to guess how many bytes each property is
+            // E.g. if we have Short4 format and 2 fields, assume both are 32-bit instead of 4 16-bit fields
+            switch (format)
+            {
+                case VertexElementFormat.Byte4:
+                    // assumes struct with 4 byte fields
+                    var props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var byte4 = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var byteView = new Uint8Array(buf, (uint) startIndex);
+                        byteView[0] = (byte) byte4[props[0]];
+                        byteView[1] = (byte) byte4[props[1]];
+                        byteView[2] = (byte) byte4[props[2]];
+                        byteView[3] = (byte) byte4[props[3]];
+                    }
+                    break;
+                case VertexElementFormat.Color:
+                    // assumes struct field with uint field
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var color = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var uintView = new Uint32Array(buf, (uint) startIndex);
+                        uintView[0] = (uint) color[props[0]];
+                    }
+                    break;
+                case VertexElementFormat.HalfVector2:
+                case VertexElementFormat.HalfVector4:
+                    // TODO
+                    throw new NotImplementedException();
+                case VertexElementFormat.NormalizedShort2:
+                case VertexElementFormat.Short2:
+                case VertexElementFormat.NormalizedShort4:
+                case VertexElementFormat.Short4:
+                    // assumes struct field with n short fields
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var shorts = vertices[startVertex + i][property];
+                        var startIndex = offset = i * stride;
+                        var shortView = new Int16Array(buf, (uint) startIndex);
+                        for (var ci = 0; ci < props.Length; ci++)
+                            shortView[(uint) ci] = (short) shorts[props[ci]];
+                    }
+                    break;
+                case VertexElementFormat.Single:
+                    // assumes direct float field
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var floatVal = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var floatView = new Float32Array(buf, (uint) startIndex);
+                        floatView[0] = (float) floatVal;
+                    }
+                    break;
+                case VertexElementFormat.Vector2:
+                case VertexElementFormat.Vector3:
+                case VertexElementFormat.Vector4:
+                    // assumes struct field with n float fields
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var startIndex = offset + i * stride;
+                        var floatView = new Float32Array(buf, (uint) startIndex);
+                        var vec = vertices[startVertex + i][property];
+                        for (var ci = 0; ci < props.Length; ci++)
+                            floatView[(uint) ci] = (float) vec[props[ci]];
+                    }
+                    break;
+            }
         }
     }
 }

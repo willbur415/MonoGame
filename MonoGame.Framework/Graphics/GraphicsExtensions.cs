@@ -903,7 +903,7 @@ namespace Microsoft.Xna.Framework.Graphics
             var error = gl.getError();
 
             if (error != gl.NO_ERROR)
-                throw new MonoGameGLException("GL.GetError() returned " + error.ToString());
+                throw new MonoGameGLException("GL.GetError() returned " + error);
         }
 #elif OPENGL
 

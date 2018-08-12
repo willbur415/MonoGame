@@ -21,6 +21,7 @@ namespace TestWebGame
         Texture2D texBall;
         SoundEffect _seffect;
         SoundEffectInstance _sinstance;
+        Effect effect;
         
         public Game1()
         {
@@ -49,6 +50,9 @@ namespace TestWebGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            //effect = Content.Load<Effect>("effect");
+
+            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
             divdata = Retyped.dom.document.getElementById("testoutput") as Retyped.dom.HTMLDivElement;
 
@@ -129,17 +133,34 @@ namespace TestWebGame
             base.Update(gameTime);
         }
 
+        int frame = 0;
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            if (++frame < 3)
+                System.Console.WriteLine("Frame: " + frame);
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
-            // spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
-            spriteBatch.End();
+            var vertices = new VertexPositionColor[]
+            {
+                new VertexPositionColor(new Vector3(-1, -1, 0), Color.Red),
+                new VertexPositionColor(new Vector3(1, -1, 0), Color.Green),
+                new VertexPositionColor(new Vector3(0, 1, 0), Color.Blue),
+            };
+            var indices = new short[] { 0, 1, 2 };
+
+            //effect.CurrentTechnique.Passes[0].Apply();
+            //GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 1, VertexPositionColor.VertexDeclaration);
+            //GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, 3, indices, 0, 1, VertexPositionColor.VertexDeclaration);
+
+            /*spriteBatch.Begin();
+            spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
+            spriteBatch.End();*/
 
             base.Draw(gameTime);
         }

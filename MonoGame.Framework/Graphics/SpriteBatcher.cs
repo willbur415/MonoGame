@@ -121,9 +121,9 @@ namespace Microsoft.Xna.Framework.Graphics
                 _index[indexpos + 0] = (short)(i * 4 + 0);
                 _index[indexpos + 1] = (short)(i * 4 + 1);
                 _index[indexpos + 2] = (short)(i * 4 + 2);
-                _index[indexpos + 3] = (short)(i * 4 + 3);
-                _index[indexpos + 4] = (short)(i * 4 + 4);
-                _index[indexpos + 5] = (short)(i * 4 + 5);
+                _index[indexpos + 3] = (short)(i * 4 + 1);
+                _index[indexpos + 4] = (short)(i * 4 + 3);
+                _index[indexpos + 5] = (short)(i * 4 + 2);
             }
 #else
             fixed (short* indexFixedPtr = newIndex)

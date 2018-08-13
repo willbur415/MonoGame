@@ -158,9 +158,9 @@ namespace TestWebGame
             //GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 1, VertexPositionColor.VertexDeclaration);
             //GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, 3, indices, 0, 1, VertexPositionColor.VertexDeclaration);
 
-            /*spriteBatch.Begin();
+            spriteBatch.Begin();
             spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
-            spriteBatch.End();*/
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

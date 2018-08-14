@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Xna;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -44,19 +45,25 @@ namespace Microsoft.Xna.Framework.Audio
             throw new NotSupportedException("Unsupported sound format!");
         }
 
-        public static SoundEffect FromURL(string url)
+        public static async Task<SoundEffect> FromURL(string url)
         {
             var ret = new SoundEffect();
+            var loaded = false;
             var request = new XMLHttpRequest();
+
             request.open("GET", url, true);
             request.responseType = XMLHttpRequestResponseType.arraybuffer;
 
             request.onload += (a) => {
                 SoundEffectInstance.Context.decodeAudioData(request.response.As<ArrayBuffer>(), (buffer) => {
                     ret._buffer = buffer;
+                    loaded = true;
                 });
             };
             request.send();
+
+            while (!loaded)
+                await Task.Delay(10);
 
             return ret;
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,6 +23,7 @@ namespace TestWebGame
         SoundEffect _seffect;
         SoundEffectInstance _sinstance;
         Effect effect;
+        bool loading = true;
         
         public Game1()
         {
@@ -56,15 +58,20 @@ namespace TestWebGame
 
             divdata = Retyped.dom.document.getElementById("testoutput") as Retyped.dom.HTMLDivElement;
 
-            song = Content.Load<Song>("awake");
-            MediaPlayer.Play(song);
-            MediaPlayer.Pause(); 
             MediaPlayer.Volume = 0.1f;
 
-            // texBall = Content.Load<Texture2D>("hacker");
-            texBall = Texture2D.FromURL(GraphicsDevice, "Content/hacker.png");
+            LoadContentAsync();
+        }
 
-            _seffect = SoundEffect.FromURL("awake.ogg");
+        public async void LoadContentAsync()
+        {
+            song = await Song.FromURL("Content/awake.ogg");
+            texBall = await Texture2D.FromURL(GraphicsDevice, "Content/hacker.png");
+            _seffect = await SoundEffect.FromURL("Content/horse.ogg");
+            _sinstance = _seffect.CreateInstance();
+            _sinstance.Volume = 0.1f;
+
+            loading = false;
         }
 
         /// <summary>
@@ -83,6 +90,9 @@ namespace TestWebGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            if (loading)
+                return;
+
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -108,16 +118,7 @@ namespace TestWebGame
             }
 
             if (prevkstate.IsKeyUp(Keys.S) && kstate.IsKeyDown(Keys.S))
-            {
-                // DO NOTE THAT IT TAKES A MOMENT FOR THE SOUND EFFECT TO LOAD
-                // THIS WILL CRASH IF CALLED TO EARLY
-                if (_sinstance == null)
-                {
-                    _sinstance = _seffect.CreateInstance();
-                    _sinstance.Volume = 0.1f;
-                }
                 _sinstance.Play();
-            }
 
             if (prevkstate.IsKeyUp(Keys.D) && kstate.IsKeyDown(Keys.D))
                 _sinstance.Pause();
@@ -141,8 +142,11 @@ namespace TestWebGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (++frame < 3)
-                System.Console.WriteLine("Frame: " + frame);
+            if (loading)
+            {
+                GraphicsDevice.Clear(Color.YellowGreen);
+                return;
+            }
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 

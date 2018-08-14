@@ -52,7 +52,7 @@ namespace TestWebGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            //effect = Content.Load<Effect>("effect");
+            effect = Content.Load<Effect>("effect");
 
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
@@ -158,13 +158,13 @@ namespace TestWebGame
             };
             var indices = new short[] { 0, 1, 2 };
 
-            //effect.CurrentTechnique.Passes[0].Apply();
-            //GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 1, VertexPositionColor.VertexDeclaration);
-            //GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, 3, indices, 0, 1, VertexPositionColor.VertexDeclaration);
+            effect.CurrentTechnique.Passes[0].Apply();
+            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 1, VertexPositionColor.VertexDeclaration);
+            GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, 3, indices, 0, 1, VertexPositionColor.VertexDeclaration);
 
-            spriteBatch.Begin();
+            /*spriteBatch.Begin();
             spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
-            spriteBatch.End();
+            spriteBatch.End();*/
 
             base.Draw(gameTime);
         }

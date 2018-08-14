@@ -172,8 +172,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
             _maxVertexBufferSlots = MaxVertexAttributes;
             _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
-
-            System.Console.WriteLine(gl.getParameter(gl.VERSION).ToString());
         }
 
         private void PlatformInitialize()

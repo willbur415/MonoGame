@@ -78,15 +78,15 @@ namespace Microsoft.Xna.Framework.Graphics
             if (elementSizeInByte == 2)
             {
                 var arr = new Uint16Array((uint)elementCount);
-                for (int i = startIndex; i < startIndex + elementCount; i++)
-                    Bridge.Script.Write("arr[i - startIndex] = data[i];");
+                for (uint i = 0; i < elementCount; i++)
+                    arr[i] = data[i + startIndex].As<ushort>();
                 gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
             }
             else
             {
                 var arr = new Uint32Array((uint)elementCount);
-                for (int i = startIndex; i < startIndex + elementCount; i++)
-                    Bridge.Script.Write("arr[i - startIndex] = data[i];");
+                for (uint i = 0; i < elementCount; i++)
+                    arr[i] = data[i + startIndex].As<uint>();
                 gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
             }
             GraphicsExtensions.CheckGLError();

@@ -119,22 +119,22 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (LastTSize == 1)
                 {
                     var arr2 = new Uint8Array((uint)elementCount);
-                    for (int i = startIndex; i < startIndex + elementCount; i++)
-                        Bridge.Script.Write("arr2[i - startIndex] = data[i];");
+                    for (uint i = 0; i < elementCount; i++)
+                        arr2[i] = data[i + startIndex].As<byte>();
                     gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr2);
                 }
                 else if (LastTSize == 2)
                 {
                     var arr2 = new Uint16Array((uint)elementCount);
-                    for (int i = startIndex; i < startIndex + elementCount; i++)
-                        Bridge.Script.Write("arr2[i - startIndex] = data[i];");
+                    for (uint i = 0; i < elementCount; i++)
+                        arr2[i] = data[i + startIndex].As<ushort>();
                     gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr2);
                 }
                 else if (LastTSize == 4)
                 {
                     var arr2 = new Uint32Array((uint)elementCount);
-                    for (int i = startIndex; i < startIndex + elementCount; i++)
-                        Bridge.Script.Write("arr2[i - startIndex] = data[i];");
+                    for (uint i = 0; i < elementCount; i++)
+                        arr2[i] = data[i + startIndex].As<uint>();
                     gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr2);
                 }
             }
@@ -143,22 +143,22 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (LastTSize == 1)
                 {
                     var arr = new Uint8Array((uint)elementCount);
-                    for (int i = startIndex; i < startIndex + elementCount; i++)
-                        Bridge.Script.Write("arr[i - startIndex] = data[i];");
+                    for (uint i = 0; i < elementCount; i++)
+                        arr[i] = data[i + startIndex].As<byte>();
                     gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
                 }
                 else if (LastTSize == 2)
                 {
                     var arr = new Uint16Array((uint)elementCount);
-                    for (int i = startIndex; i < startIndex + elementCount; i++)
-                        Bridge.Script.Write("arr[i - startIndex] = data[i];");
+                    for (uint i = 0; i < elementCount; i++)
+                        arr[i] = data[i + startIndex].As<ushort>();
                     gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
                 }
                 else if (LastTSize == 4)
                 {
                     var arr = new Uint32Array((uint)elementCount);
-                    for (int i = startIndex; i < startIndex + elementCount; i++)
-                        Bridge.Script.Write("arr[i - startIndex] = data[i];");
+                    for (uint i = 0; i < elementCount; i++)
+                        arr[i] = data[i + startIndex].As<uint>();
                     gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
                 }
             }

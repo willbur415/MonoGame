@@ -4,6 +4,7 @@
 
 using System;
 using static WebHelper;
+using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -36,7 +37,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 var tex = _textures[i];
 
-                gl.activeTexture(gl.TEXTURE0 + i);
+                gl.activeTexture(glc.TEXTURE0 + i);
                 GraphicsExtensions.CheckGLError();
 
                 // Clear the previous binding if the 

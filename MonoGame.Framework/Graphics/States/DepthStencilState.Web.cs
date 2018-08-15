@@ -4,6 +4,7 @@
 
 using System;
 using static WebHelper;
+using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -15,13 +16,13 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (!DepthBufferEnable)
                 {
-                    gl.disable(gl.DEPTH_TEST);
+                    gl.disable(glc.DEPTH_TEST);
                     GraphicsExtensions.CheckGLError();
                 }
                 else
                 {
                     // enable Depth Buffer
-                    gl.enable(gl.DEPTH_TEST);
+                    gl.enable(glc.DEPTH_TEST);
                     GraphicsExtensions.CheckGLError();
                 }
                 device._lastDepthStencilState.DepthBufferEnable = this.DepthBufferEnable;
@@ -45,13 +46,13 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (!StencilEnable)
                 {
-                    gl.disable(gl.STENCIL_TEST);
+                    gl.disable(glc.STENCIL_TEST);
                     GraphicsExtensions.CheckGLError();
                 }
                 else
                 {
                     // enable Stencil
-                    gl.enable(gl.STENCIL_TEST);
+                    gl.enable(glc.STENCIL_TEST);
                     GraphicsExtensions.CheckGLError();
                 }
                 device._lastDepthStencilState.StencilEnable = this.StencilEnable;
@@ -60,10 +61,10 @@ namespace Microsoft.Xna.Framework.Graphics
             // set function
             if (this.TwoSidedStencilMode)
             {
-                var cullFaceModeFront = gl.FRONT;
-                var cullFaceModeBack = gl.BACK;
-                var stencilFaceFront = gl.FRONT;
-                var stencilFaceBack = gl.BACK;
+                var cullFaceModeFront = glc.FRONT;
+                var cullFaceModeBack = glc.BACK;
+                var stencilFaceFront = glc.FRONT;
+                var stencilFaceBack = glc.BACK;
 
                 if (force ||
 					this.TwoSidedStencilMode != device._lastDepthStencilState.TwoSidedStencilMode ||
@@ -170,23 +171,23 @@ namespace Microsoft.Xna.Framework.Graphics
             switch (function)
             {
                 case CompareFunction.Always: 
-                    return gl.ALWAYS;
+                    return glc.ALWAYS;
                 case CompareFunction.Equal:
-                    return gl.EQUAL;
+                    return glc.EQUAL;
                 case CompareFunction.Greater:
-                    return gl.GREATER;
+                    return glc.GREATER;
                 case CompareFunction.GreaterEqual:
-                    return gl.GEQUAL;
+                    return glc.GEQUAL;
                 case CompareFunction.Less:
-                    return gl.LESS;
+                    return glc.LESS;
                 case CompareFunction.LessEqual:
-                    return gl.LEQUAL;
+                    return glc.LEQUAL;
                 case CompareFunction.Never:
-                    return gl.NEVER;
+                    return glc.NEVER;
                 case CompareFunction.NotEqual:
-                    return gl.NOTEQUAL;
+                    return glc.NOTEQUAL;
                 default:
-                    return gl.ALWAYS;
+                    return glc.ALWAYS;
             }
         }
 
@@ -195,23 +196,23 @@ namespace Microsoft.Xna.Framework.Graphics
             switch (operation)
             {
                 case StencilOperation.Keep:
-                    return gl.KEEP;
+                    return glc.KEEP;
                 case StencilOperation.Decrement:
-                    return gl.DECR_WRAP;
+                    return glc.DECR_WRAP;
                 case StencilOperation.DecrementSaturation:
-                    return gl.DECR;
+                    return glc.DECR;
                 case StencilOperation.IncrementSaturation:
-                    return gl.INCR;
+                    return glc.INCR;
                 case StencilOperation.Increment:
-                    return gl.INCR_WRAP;
+                    return glc.INCR_WRAP;
                 case StencilOperation.Invert:
-                    return gl.INVERT;
+                    return glc.INVERT;
                 case StencilOperation.Replace:
-                    return gl.REPLACE;
+                    return glc.REPLACE;
                 case StencilOperation.Zero:
-                    return gl.ZERO;
+                    return glc.ZERO;
                 default:
-                    return gl.KEEP;
+                    return glc.KEEP;
             }
         }
     }

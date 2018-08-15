@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using static WebHelper;
+using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -19,9 +20,9 @@ namespace Microsoft.Xna.Framework.Graphics
             if (force || blendEnabled != device._lastBlendEnable)
             {
                 if (blendEnabled)
-                    gl.enable(gl.BLEND);
+                    gl.enable(glc.BLEND);
                 else
-                    gl.disable(gl.BLEND);
+                    gl.disable(glc.BLEND);
                 GraphicsExtensions.CheckGLError();
                 device._lastBlendEnable = blendEnabled;
             }

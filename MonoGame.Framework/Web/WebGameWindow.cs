@@ -14,7 +14,7 @@ using IntPtr = Microsoft.Xna.Framework.IntPtr;
 
 static class WebHelper
 {
-    public static WebGLRenderingContext gl;
+    public static Retyped.webgl2.WebGL2RenderingContext gl;
 }
 
 namespace Microsoft.Xna.Framework
@@ -45,12 +45,12 @@ namespace Microsoft.Xna.Framework
             _canvas.style.msUserSelect = "none";
 
             // TODO: Move "GL context" creation outside the game window
-            var possiblecontexts = new[] { "webgl", "experimental-webgl", "webkit-3d", "moz-webgl" };
+            var possiblecontexts = new[] { "webgl2", "experimental-webgl2" };
             foreach(var context in possiblecontexts)
             {
                 try
                 {
-                    WebHelper.gl = _canvas.getContext(context).As<Retyped.dom.WebGLRenderingContext>();
+                    WebHelper.gl = _canvas.getContext(context).As<Retyped.webgl2.WebGL2RenderingContext>();
                     if (WebHelper.gl != null)
                         break;
                 }

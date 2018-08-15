@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static WebHelper;
+using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -71,7 +72,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             SupportsVertexTextures = false; // For now, until we implement vertex textures in OpenGL.
 
-            _maxMultiSampleCount = (int)gl.getParameter(gl.SAMPLES);
+            _maxMultiSampleCount = (int)gl.getParameter(glc.SAMPLES);
 
             SupportsInstancing = false;
         }

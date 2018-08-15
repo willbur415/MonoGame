@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using static WebHelper;
 using static Retyped.dom;
+using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -62,7 +63,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void BindRenderbuffer(WebGLRenderbuffer renderbuffer)
             {
-                gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+                gl.bindRenderbuffer(glc.RENDERBUFFER, renderbuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
@@ -74,7 +75,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void RenderbufferStorageMultisample(int samples, int internalFormat, int width, int height)
             {
-                gl.renderbufferStorage(gl.RENDERBUFFER, internalFormat, width, height);
+                gl.renderbufferStorage(glc.RENDERBUFFER, internalFormat, width, height);
                 GraphicsExtensions.CheckGLError();
             }
 
@@ -86,7 +87,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void BindFramebuffer(WebGLFramebuffer framebuffer)
             {
-                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+                gl.bindFramebuffer(glc.FRAMEBUFFER, framebuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
@@ -113,7 +114,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void FramebufferTexture2D(int attachement, int target, WebGLTexture texture, int level = 0, int samples = 0)
             {
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, attachement, target, texture, level);
+                gl.framebufferTexture2D(glc.FRAMEBUFFER, attachement, target, texture, level);
                 GraphicsExtensions.CheckGLError();
             }
 

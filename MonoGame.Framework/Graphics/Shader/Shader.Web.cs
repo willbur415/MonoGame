@@ -8,6 +8,7 @@ using System.Diagnostics;
 using static Retyped.dom;
 using static Retyped.es5;
 using static WebHelper;
+using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -37,13 +38,13 @@ namespace Microsoft.Xna.Framework.Graphics
             if (gl.isShader(_shaderHandle))
                 return _shaderHandle;
 
-            _shaderHandle = gl.createShader(Stage == ShaderStage.Vertex ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER);
+            _shaderHandle = gl.createShader(Stage == ShaderStage.Vertex ? glc.VERTEX_SHADER : glc.FRAGMENT_SHADER);
             GraphicsExtensions.CheckGLError();
             gl.shaderSource(_shaderHandle, _glslCode);
             GraphicsExtensions.CheckGLError();
             gl.compileShader(_shaderHandle);
             GraphicsExtensions.CheckGLError();
-            var compiled = (bool)gl.getShaderParameter(_shaderHandle, gl.COMPILE_STATUS);
+            var compiled = (bool)gl.getShaderParameter(_shaderHandle, glc.COMPILE_STATUS);
             GraphicsExtensions.CheckGLError();
             if (!compiled)
             {

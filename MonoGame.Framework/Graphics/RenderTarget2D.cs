@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using Retyped;
+using static Retyped.dom;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -15,8 +17,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public RenderTargetUsage RenderTargetUsage { get; private set; }
 		
 		public bool IsContentLost { get { return false; } }
-		
-		public event EventHandler<EventArgs> ContentLost;
+
+        public event EventHandler<EventArgs> ContentLost;
 		
         private bool SuppressEventHandlerWarningsUntilEventsAreProperlyImplemented()
         {

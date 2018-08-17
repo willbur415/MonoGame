@@ -73,7 +73,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void RenderbufferStorageMultisample(int samples, int internalFormat, int width, int height)
+            internal virtual void RenderbufferStorageMultisample(double samples, double internalFormat, double width, double height)
             {
                 gl.renderbufferStorage(glc.RENDERBUFFER, internalFormat, width, height);
                 GraphicsExtensions.CheckGLError();
@@ -91,59 +91,67 @@ namespace Microsoft.Xna.Framework.Graphics
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void BindReadFramebuffer(int readFramebuffer)
+            internal virtual void BindReadFramebuffer(WebGLFramebuffer readFramebuffer)
             {
-                // Requires WEBGL 2
-                throw new NotImplementedException();
+                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, readFramebuffer);
+                GraphicsExtensions.CheckGLError();
             }
+
+            static readonly double[] FramebufferAttachements = {
+                glc.COLOR_ATTACHMENT0,
+                glc.DEPTH_ATTACHMENT,
+                glc.STENCIL_ATTACHMENT,
+            };
 
             internal virtual void InvalidateDrawFramebuffer()
             {
-                throw new NotImplementedException();
+                Debug.Assert(this.SupportsInvalidateFramebuffer);
+                gl.invalidateFramebuffer(glc.FRAMEBUFFER, FramebufferAttachements);
             }
 
             internal virtual void InvalidateReadFramebuffer()
             {
-                throw new NotImplementedException();
+                Debug.Assert(this.SupportsInvalidateFramebuffer);
+                gl.invalidateFramebuffer(glc.FRAMEBUFFER, FramebufferAttachements);
             }
 
-            internal virtual void DeleteFramebuffer(int framebuffer)
+            internal virtual void DeleteFramebuffer(WebGLFramebuffer framebuffer)
             {
-                throw new NotImplementedException();
+                gl.deleteFramebuffer(framebuffer);
+                GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void FramebufferTexture2D(int attachement, int target, WebGLTexture texture, int level = 0, int samples = 0)
+            internal virtual void FramebufferTexture2D(double attachement, double target, WebGLTexture texture, double level = 0, double samples = 0)
             {
                 gl.framebufferTexture2D(glc.FRAMEBUFFER, attachement, target, texture, level);
                 GraphicsExtensions.CheckGLError();
             }
 
-            /*internal virtual void FramebufferRenderbuffer(int attachement, int renderbuffer, int level = 0)
+            internal virtual void FramebufferRenderbuffer(double attachement, WebGLRenderbuffer renderbuffer, double level = 0)
             {
-                GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, (FramebufferAttachment)attachement, RenderbufferTarget.Renderbuffer, renderbuffer);
+                gl.framebufferRenderbuffer(glc.FRAMEBUFFER, attachement, glc.RENDERBUFFER, renderbuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
-            internal virtual void GenerateMipmap(int target)
+            internal virtual void GenerateMipmap(double target)
             {
-                GL.GenerateMipmap((GenerateMipmapTarget)target);
-                GraphicsExtensions.CheckGLError();
-
-            }
-
-            internal virtual void BlitFramebuffer(int iColorAttachment, int width, int height)
-            {
-
-                GL.ReadBuffer(ReadBufferMode.ColorAttachment0 + iColorAttachment);
-                GraphicsExtensions.CheckGLError();
-                GL.DrawBuffer(DrawBufferMode.ColorAttachment0 + iColorAttachment);
-                GraphicsExtensions.CheckGLError();
-                GL.BlitFramebuffer(0, 0, width, height, 0, 0, width, height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+                gl.generateMipmap(target);
                 GraphicsExtensions.CheckGLError();
 
             }
 
-            internal virtual void CheckFramebufferStatus()
+            internal virtual void BlitFramebuffer(double iColorAttachment, double width, double height)
+            {
+                gl.readBuffer(glc.COLOR_ATTACHMENT0 + iColorAttachment);
+                GraphicsExtensions.CheckGLError();
+                gl.drawBuffers(new[] { glc.COLOR_ATTACHMENT0 + iColorAttachment });
+                GraphicsExtensions.CheckGLError();
+                gl.blitFramebuffer(0, 0, width, height, 0, 0, width, height, glc.COLOR_BUFFER_BIT, glc.NEAREST);
+                GraphicsExtensions.CheckGLError();
+
+            }
+
+            /*internal virtual void CheckFramebufferStatus()
             {
                 var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
                 if (status != FramebufferErrorCode.FramebufferComplete)

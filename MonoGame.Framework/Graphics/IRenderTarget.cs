@@ -44,6 +44,10 @@ using SharpDX.Direct3D11;
 using MonoGame.OpenGL;
 #endif
 
+#if WEB
+using static Retyped.dom;
+#endif
+
 namespace Microsoft.Xna.Framework.Graphics
 {
     /// <summary>
@@ -102,9 +106,9 @@ namespace Microsoft.Xna.Framework.Graphics
 #if WEB
         Retyped.dom.WebGLTexture GLTexture { get; }
         double GLTarget { get; }
-        int GLColorBuffer { get; set; }
-        int GLDepthBuffer { get; set; }
-        int GLStencilBuffer { get; set; }
+        WebGLRenderbuffer GLColorBuffer { get; set; }
+        WebGLRenderbuffer GLDepthBuffer { get; set; }
+        WebGLRenderbuffer GLStencilBuffer { get; set; }
         int MultiSampleCount { get; }
         int LevelCount { get; }
 

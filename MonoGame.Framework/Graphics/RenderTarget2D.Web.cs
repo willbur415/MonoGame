@@ -21,9 +21,9 @@ namespace Microsoft.Xna.Framework.Graphics
             get { return glTarget; }
         }
 
-        int IRenderTarget.GLColorBuffer { get; set; }
-        int IRenderTarget.GLDepthBuffer { get; set; }
-        int IRenderTarget.GLStencilBuffer { get; set; }
+        WebGLRenderbuffer IRenderTarget.GLColorBuffer { get; set; }
+        WebGLRenderbuffer IRenderTarget.GLDepthBuffer { get; set; }
+        WebGLRenderbuffer IRenderTarget.GLStencilBuffer { get; set; }
 
         double IRenderTarget.GetFramebufferTarget(RenderTargetBinding renderTargetBinding)
         {

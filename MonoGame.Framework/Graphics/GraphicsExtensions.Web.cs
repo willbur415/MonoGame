@@ -235,8 +235,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				glType = (int)glc.UNSIGNED_BYTE;
 				break;
             case SurfaceFormat.ColorSRgb:
-                // TODO: WebGL 2 supports this, need to do some checks for this case.
-                goto case SurfaceFormat.Color;
+                glInternalFormat = (int)gl.SRGB;
+                glFormat = (int)glc.RGBA;
+                glType = (int)glc.UNSIGNED_BYTE;
+				break;
 			case SurfaceFormat.Bgr565:
 				glInternalFormat = (int)glc.RGB;
 				glFormat = (int)glc.RGB;

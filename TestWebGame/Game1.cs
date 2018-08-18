@@ -24,6 +24,7 @@ namespace TestWebGame
         SoundEffectInstance _sinstance;
         Effect effect;
         bool loading = true;
+        SpriteFont font;
         
         public Game1()
         {
@@ -60,13 +61,15 @@ namespace TestWebGame
 
             MediaPlayer.Volume = 0.1f;
 
+            font = Content.Load<SpriteFont>("font2");
+
             LoadContentAsync();
         }
 
         public async void LoadContentAsync()
         {
             song = await Song.FromURL("Content/awake.ogg");
-            texBall = await Texture2D.FromURL(GraphicsDevice, "Content/hacker.png");
+            texBall = await Texture2D.FromURL(GraphicsDevice, "Content/Hacker.png");
             _seffect = await SoundEffect.FromURL("Content/horse.ogg");
             _sinstance = _seffect.CreateInstance();
             _sinstance.Volume = 0.1f;
@@ -118,7 +121,10 @@ namespace TestWebGame
             }
 
             if (prevkstate.IsKeyUp(Keys.S) && kstate.IsKeyDown(Keys.S))
+            {
+                _sinstance.Stop();
                 _sinstance.Play();
+            }
 
             if (prevkstate.IsKeyUp(Keys.D) && kstate.IsKeyDown(Keys.D))
                 _sinstance.Pause();
@@ -164,6 +170,7 @@ namespace TestWebGame
 */
             spriteBatch.Begin();
             spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
+            spriteBatch.DrawString(font, "Well spritefonts are working as well...", Vector2.Zero, Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);

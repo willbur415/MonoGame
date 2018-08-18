@@ -93,7 +93,7 @@ namespace Microsoft.Xna.Framework.Content
                 var hVector3ListReader = new ListReader<Vector3>();
                 var hStringListReader = new ListReader<StringReader>();
                 var hIntListReader = new ListReader<Int32>();
-                // var hSpriteFontReader = new SpriteFontReader();
+                var hSpriteFontReader = new SpriteFontReader();
                 var hTexture2DReader = new Texture2DReader();
                 var hCharReader = new CharReader();
                 var hRectangleReader = new RectangleReader();

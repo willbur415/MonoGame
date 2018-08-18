@@ -198,7 +198,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			return size;
 		}
 
-		internal unsafe void MeasureString(ref CharacterSource text, out Vector2 size)
+		internal void MeasureString(ref CharacterSource text, out Vector2 size)
 		{
 			if (text.Length == 0)
             {
@@ -212,7 +212,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
 
-            fixed (Glyph* pGlyphs = Glyphs)
             for (var i = 0; i < text.Length; ++i)
             {
                 var c = text[i];
@@ -232,69 +231,66 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 var currentGlyphIndex = GetGlyphIndexOrDefault(c);
                 Debug.Assert(currentGlyphIndex >= 0 && currentGlyphIndex < Glyphs.Length, "currentGlyphIndex was outside the bounds of the array.");
-                var pCurrentGlyph = pGlyphs + currentGlyphIndex;
+                var pCurrentGlyph = Glyphs[currentGlyphIndex];
 
                 // The first character on a line might have a negative left side bearing.
                 // In this scenario, SpriteBatch/SpriteFont normally offset the text to the right,
                 //  so that text does not hang off the left side of its rectangle.
                 if (firstGlyphOfLine) {
-                    offset.X = Math.Max(pCurrentGlyph->LeftSideBearing, 0);
+                    offset.X = Math.Max(pCurrentGlyph.LeftSideBearing, 0);
                     firstGlyphOfLine = false;
                 } else {
-                    offset.X += Spacing + pCurrentGlyph->LeftSideBearing;
+                    offset.X += Spacing + pCurrentGlyph.LeftSideBearing;
                 }
 
-                offset.X += pCurrentGlyph->Width;
+                offset.X += pCurrentGlyph.Width;
 
-                var proposedWidth = offset.X + Math.Max(pCurrentGlyph->RightSideBearing, 0);
+                var proposedWidth = offset.X + Math.Max(pCurrentGlyph.RightSideBearing, 0);
                 if (proposedWidth > width)
                     width = proposedWidth;
 
-                offset.X += pCurrentGlyph->RightSideBearing;
+                offset.X += pCurrentGlyph.RightSideBearing;
 
-                if (pCurrentGlyph->Cropping.Height > finalLineHeight)
-                    finalLineHeight = pCurrentGlyph->Cropping.Height;
+                if (pCurrentGlyph.Cropping.Height > finalLineHeight)
+                    finalLineHeight = pCurrentGlyph.Cropping.Height;
             }
 
             size.X = width;
             size.Y = offset.Y + finalLineHeight;
 		}
         
-        internal unsafe bool TryGetGlyphIndex(char c, out int index)
+        internal bool TryGetGlyphIndex(char c, out int index)
         {
-            fixed (CharacterRegion* pRegions = _regions)
+            // Get region Index 
+            int regionIdx = -1;
+            var l = 0;
+            var r = _regions.Length - 1;
+            while (l <= r)
             {
-                // Get region Index 
-                int regionIdx = -1;
-                var l = 0;
-                var r = _regions.Length - 1;
-                while (l <= r)
+                var m = (l + r) >> 1;                    
+                Debug.Assert(m >= 0 && m < _regions.Length, "Index was outside the bounds of the array.");
+                if (_regions[m].End < c)
                 {
-                    var m = (l + r) >> 1;                    
-                    Debug.Assert(m >= 0 && m < _regions.Length, "Index was outside the bounds of the array.");
-                    if (pRegions[m].End < c)
-                    {
-                        l = m + 1;
-                    }
-                    else if (pRegions[m].Start > c)
-                    {
-                        r = m - 1;
-                    }
-                    else
-                    {
-                        regionIdx = m;
-                        break;
-                    }
+                    l = m + 1;
                 }
-
-                if (regionIdx == -1)
+                else if (_regions[m].Start > c)
                 {
-                    index = -1;
-                    return false;
+                    r = m - 1;
                 }
-
-                index = pRegions[regionIdx].StartIndex + (c - pRegions[regionIdx].Start);
+                else
+                {
+                    regionIdx = m;
+                    break;
+                }
             }
+
+            if (regionIdx == -1)
+            {
+                index = -1;
+                return false;
+            }
+
+            index = _regions[regionIdx].StartIndex + (c - _regions[regionIdx].Start);
 
             return true;
         }

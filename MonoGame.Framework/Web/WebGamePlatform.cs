@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using static Retyped.dom;
@@ -34,18 +35,13 @@ namespace Microsoft.Xna.Framework
 
         public override void StartRunLoop()
         {
-            _threadId = window.setInterval((object[] args) =>
-            {
-                if (_error)
-                {
-                    Exit();
-                    return;
-                }
+            window.requestAnimationFrame(AnimationFrame);
+        }
 
-                _error = true;
-                Game.Tick();
-                _error = false;
-            }, 20);
+        public void AnimationFrame(double timestamp)
+        {
+            Game.Tick();
+            window.requestAnimationFrame(AnimationFrame);
         }
 
         public override bool BeforeUpdate(GameTime gameTime)

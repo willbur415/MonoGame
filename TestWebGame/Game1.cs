@@ -141,6 +141,8 @@ namespace TestWebGame
         }
 
         int frame = 0;
+        int frameCounter = 0;
+        int _lastTime = 0;
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -156,6 +158,17 @@ namespace TestWebGame
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            if (gameTime.TotalGameTime.Seconds > _lastTime)
+            {
+                _lastTime = gameTime.TotalGameTime.Seconds;
+                frame = frameCounter;
+                frameCounter = 0;
+            }
+            else
+            {
+                frameCounter++;
+            }
+
             var vertices = new VertexPositionColor[]
             {
                 new VertexPositionColor(new Vector3(-1, -1, 0), Color.Red),
@@ -170,7 +183,7 @@ namespace TestWebGame
 */
             spriteBatch.Begin();
             spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
-            spriteBatch.DrawString(font, "Well spritefonts are working as well...", Vector2.Zero, Color.White);
+            spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -8,7 +8,11 @@ namespace Microsoft.Xna.Framework.Graphics
 {
     internal partial class ConstantBuffer : GraphicsResource
     {
+#if WEB
+        private object[] _buffer;
+#else
         private readonly byte[] _buffer;
+#endif
 
         private readonly int[] _parameters;
 
@@ -34,7 +38,11 @@ namespace Microsoft.Xna.Framework.Graphics
             _offsets = cloneSource._offsets;
 
             // Clone the mutable types.
+#if WEB
+            _buffer = (object[])cloneSource._buffer.Clone();
+#else
             _buffer = (byte[])cloneSource._buffer.Clone();
+#endif
             PlatformInitialize();
         }
 
@@ -46,7 +54,11 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             GraphicsDevice = device;
 
+#if WEB
+            _buffer = new object[sizeInBytes];
+#else
             _buffer = new byte[sizeInBytes];
+#endif
 
             _parameters = parameterIndexes;
             _offsets = parameterOffsets;

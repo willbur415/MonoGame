@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			SupportsDepth24 = false;
 			SupportsPackedDepthStencil = exts.Contains("WEBGL_depth_texture");
 			SupportsDepthNonLinear = false;
-            SupportsTextureMaxLevel = false;
+            SupportsTextureMaxLevel = true;
 
             // Texture compression
             SupportsS3tc = exts.Contains("WEBGL_compressed_texture_s3tc");

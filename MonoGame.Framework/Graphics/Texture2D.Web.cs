@@ -92,8 +92,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetData<T>(int level, T[] data, int startIndex, int elementCount) where T : struct
         {
-            // Console.WriteLine(LastTSize);
-
             int w, h;
             GetSizeForLevel(Width, Height, level, out w, out h);
 
@@ -186,10 +184,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 gl.bindTexture(glc.TEXTURE_2D, glTexture);
                 GraphicsExtensions.CheckGLError();
             }
-
-            // Load up the image
-            gl.bindTexture(glc.TEXTURE_2D, glTexture);
-            GraphicsExtensions.CheckGLError();
 
             gl.texImage2D(glc.TEXTURE_2D, 0, glc.RGBA, glc.RGBA, glc.UNSIGNED_BYTE, image.As<Retyped.webgl2.ImageBitmap>());
             GraphicsExtensions.CheckGLError();

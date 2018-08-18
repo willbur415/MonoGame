@@ -134,6 +134,40 @@ namespace Microsoft.Xna.Framework.Graphics
             GraphicsExtensions.CheckGLError();
             gl.texParameteri(target, glc.TEXTURE_WRAP_T, (int)GetWrapMode(AddressV));
             GraphicsExtensions.CheckGLError();
+
+            // LOD bias is not supported by glTexParameter in OpenGL ES 2.0
+            gl.texParameterf(target, gl.MAX_TEXTURE_LOD_BIAS, MipMapLevelOfDetailBias);
+            GraphicsExtensions.CheckGLError();
+
+            // Comparison samplers are not supported in OpenGL ES 2.0 (without an extension, anyway)
+            switch (FilterMode)
+            {
+                case TextureFilterMode.Comparison:
+                    gl.texParameteri(target, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
+                    GraphicsExtensions.CheckGLError();
+                    gl.texParameteri(target, gl.TEXTURE_COMPARE_MODE, ComparisonFunction.GetDepthFunction());
+                    GraphicsExtensions.CheckGLError();
+                    break;
+                case TextureFilterMode.Default:
+                    gl.texParameteri(target, gl.TEXTURE_COMPARE_MODE, glc.NONE);
+                    GraphicsExtensions.CheckGLError();
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid filter mode!");
+            }
+
+            if (GraphicsDevice.GraphicsCapabilities.SupportsTextureMaxLevel)
+            {
+                if (this.MaxMipLevel > 0)
+                {
+                    gl.texParameteri(glc.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, this.MaxMipLevel);
+                }
+                else
+                {
+                    gl.texParameteri(glc.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 1000);
+                }
+                GraphicsExtensions.CheckGLError();
+            }
         }
 
         private double GetWrapMode(TextureAddressMode textureAddressMode)

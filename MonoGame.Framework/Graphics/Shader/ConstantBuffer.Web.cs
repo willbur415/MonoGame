@@ -67,18 +67,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (!_dirty)
                 return;
 
-            // TODO: Use Web.GL.Uniform4fv(_location, _buffer);
-
             // TODO: We need to know the type of buffer float/int/bool
             // and cast this correctly... else it doesn't work as i guess
             // GL is checking the type of the uniform.
-            
-            gl.uniform4f(_location, 
-                BitConverter.ToSingle(_buffer, 0),
-                BitConverter.ToSingle(_buffer, 4),
-                BitConverter.ToSingle(_buffer, 8),
-                BitConverter.ToSingle(_buffer, 12)
-            );
+
+            gl.uniform4fv(_location, _buffer.As<double[]>());
             
             GraphicsExtensions.CheckGLError();
 

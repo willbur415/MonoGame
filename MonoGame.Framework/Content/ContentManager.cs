@@ -14,6 +14,9 @@ using System.Globalization;
 #if !WINDOWS_UAP
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
+using System.Threading.Tasks;
+using static Retyped.dom;
+using static Retyped.es5;
 #endif
 
 #if WEB
@@ -234,6 +237,17 @@ namespace Microsoft.Xna.Framework.Content
             return Load<T>(assetName);
         }
 
+        public virtual async Task<T> LoadAsync<T>(string assetName)
+        {
+            // Load asset in the background beforehand
+            // does not speed up loading, but makes it so
+            // browser does not freeze when it tries to load it
+            var assetPath = Path.Combine(RootDirectory, assetName) + ".xnb";
+            await PreloadPath(assetPath);
+
+            return Load<T>(assetName);
+        }
+
         public virtual T Load<T>(string assetName)
         {
             if (string.IsNullOrEmpty(assetName))
@@ -315,6 +329,23 @@ namespace Microsoft.Xna.Framework.Content
                 throw new ContentLoadException("Opening stream error.", exception);
             }
             return stream;
+        }
+
+        internal async Task PreloadPath(string assetPath)
+        {
+            var loaded = false;
+            var request = new XMLHttpRequest();
+
+            request.open("GET", assetPath, true);
+            request.responseType = XMLHttpRequestResponseType.arraybuffer;
+
+            request.onload += (a) => {
+                loaded = true;
+            };
+            request.send();
+
+            while (!loaded)
+                await Task.Delay(10);
         }
 
         protected T ReadAsset<T>(string assetName, Action<IDisposable> recordDisposableObject)
@@ -524,7 +555,7 @@ namespace Microsoft.Xna.Framework.Content
 
         internal byte[] GetScratchBuffer(int size)
         {            
-            size = Math.Max(size, 1024 * 1024);
+            size = System.Math.Max(size, 1024 * 1024);
             if (scratchBuffer == null || scratchBuffer.Length < size)
                 scratchBuffer = new byte[size];
             return scratchBuffer;

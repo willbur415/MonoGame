@@ -49,11 +49,11 @@ namespace TestWebGame
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
-        protected override void LoadContent()
+        protected override async void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            effect = Content.Load<Effect>("effect");
+            effect = await Content.LoadAsync<Effect>("effect");
 
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
@@ -61,7 +61,7 @@ namespace TestWebGame
 
             MediaPlayer.Volume = 0.1f;
 
-            font = Content.Load<SpriteFont>("font2");
+            font = await Content.LoadAsync<SpriteFont>("font2");
 
             LoadContentAsync();
         }

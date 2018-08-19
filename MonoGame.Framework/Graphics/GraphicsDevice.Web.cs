@@ -602,7 +602,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
                     var attachement = glc.COLOR_ATTACHMENT0 + i;
 
-                    this.framebufferHelper.FramebufferRenderbuffer(attachement, renderTarget.GLColorBuffer, 0);
+                    this.framebufferHelper.FramebufferTexture2D(attachement, (int)renderTarget.GetFramebufferTarget(renderTargetBinding), renderTarget.GLTexture, 0, renderTarget.MultiSampleCount);
                 }
 
                 this.glFramebuffers.Add((RenderTargetBinding[])_currentRenderTargetBindings.Clone(), glFramebuffer);

@@ -25,6 +25,7 @@ namespace TestWebGame
         Effect effect;
         bool loading = true;
         SpriteFont font;
+        RenderTarget2D target;
         
         public Game1()
         {
@@ -62,6 +63,8 @@ namespace TestWebGame
             MediaPlayer.Volume = 0.1f;
 
             font = await Content.LoadAsync<SpriteFont>("font2");
+
+            target = new RenderTarget2D(GraphicsDevice, 640, 480);
 
             LoadContentAsync();
         }
@@ -156,8 +159,6 @@ namespace TestWebGame
                 return;
             }
 
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
             if (gameTime.TotalGameTime.Seconds > _lastTime)
             {
                 _lastTime = gameTime.TotalGameTime.Seconds;
@@ -169,21 +170,16 @@ namespace TestWebGame
                 frameCounter++;
             }
 
-            var vertices = new VertexPositionColor[]
-            {
-                new VertexPositionColor(new Vector3(-1, -1, 0), Color.Red),
-                new VertexPositionColor(new Vector3(1, -1, 0), Color.Green),
-                new VertexPositionColor(new Vector3(0, 1, 0), Color.Blue),
-            };
-            var indices = new short[] { 0, 1, 2 };
-/*
-            effect.CurrentTechnique.Passes[0].Apply();
-            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 1, VertexPositionColor.VertexDeclaration);
-            GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, vertices, 0, 3, indices, 0, 1, VertexPositionColor.VertexDeclaration);
-*/
+            GraphicsDevice.SetRenderTarget(target);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
             spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
             spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
+            spriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null);
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(target, new Rectangle(0, 0, 640, 480), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);

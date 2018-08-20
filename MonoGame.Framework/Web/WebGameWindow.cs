@@ -118,6 +118,10 @@ namespace Microsoft.Xna.Framework
                 _canvas.height = (uint)GraphicsDeviceManager.DefaultBackBufferHeight;
             }
 
+            _game.GraphicsDevice.PresentationParameters.BackBufferWidth = (int)_canvas.width;
+            _game.GraphicsDevice.PresentationParameters.BackBufferHeight = (int)_canvas.height;
+            _game.GraphicsDevice.Viewport = new Graphics.Viewport(0, 0, (int)_canvas.width, (int)_canvas.height);
+
             _game.graphicsDeviceManager.IsFullScreen = _isFullscreen;
         }
 

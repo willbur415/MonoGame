@@ -14,8 +14,7 @@ namespace Microsoft.Xna.Framework
     class WebGamePlatform : GamePlatform
     {
         private WebGameWindow _view;
-        private double _threadId;
-        private bool _error;
+        private bool _exit;
 
         public WebGamePlatform(Game game)
             : base(game)
@@ -25,7 +24,7 @@ namespace Microsoft.Xna.Framework
         
         public override void Exit()
         {
-            window.clearInterval(_threadId);
+            _exit = true;
         }
 
         public override void RunLoop()
@@ -41,7 +40,9 @@ namespace Microsoft.Xna.Framework
         public void AnimationFrame(double timestamp)
         {
             Game.Tick();
-            window.requestAnimationFrame(AnimationFrame);
+
+            if (!_exit)
+                window.requestAnimationFrame(AnimationFrame);
         }
 
         public override bool BeforeUpdate(GameTime gameTime)

@@ -86,7 +86,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 // EffectParameter stores all values in arrays by default.             
                 if (data is Array)
                 {
-                    _buffer = new object[(data as Array).Length];
                     Buffer.BlockCopy(data as Array, 0, _buffer, offset, elementSize);
                 }
                 else
@@ -104,7 +103,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 int len = rows * columns * elementSize;
                 if (_buffer.Length - offset > len)
                 len = _buffer.Length - offset;
-                _buffer = new object[(data as Array).Length];
                 Buffer.BlockCopy(data as Array, 0, _buffer, offset, rows*columns*elementSize);
             } else
             {
@@ -113,7 +111,6 @@ namespace Microsoft.Xna.Framework.Graphics
                 var stride = (columns*elementSize);
                 for (var y = 0; y < rows; y++)
                 {
-                    _buffer = new object[(data as Array).Length];
                     Buffer.BlockCopy(source, stride*y, _buffer, offset + (rowSize*y), columns*elementSize);
                 }
             }

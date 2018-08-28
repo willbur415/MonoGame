@@ -173,7 +173,7 @@ namespace TestWebGame
             GraphicsDevice.SetRenderTarget(target);
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
-            spriteBatch.Draw(texBall, Vector2.Zero, Color.White);
+            spriteBatch.Draw(texBall, new Rectangle(0, 0, 100, 100), new Rectangle(50, 50, 100, 100), Color.White);
             spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
             spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);

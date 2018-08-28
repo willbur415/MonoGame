@@ -187,10 +187,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
             gl.texImage2D(glc.TEXTURE_2D, 0, glc.RGBA, glc.RGBA, glc.UNSIGNED_BYTE, image.As<Retyped.webgl2.ImageBitmap>());
             GraphicsExtensions.CheckGLError();
-
-            // Set the size
-            width = (int)image.width;
-            height = (int)image.height;
             
             // Restore the bound texture.
             if (prevTexture != glTexture)
@@ -212,19 +208,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public static async Task<Texture2D> FromURL(GraphicsDevice graphicsDevice, string url)
         {
-            var ret = new Texture2D(graphicsDevice, 1, 1);
             var loaded = false;
             var image = new HTMLImageElement();
 
             image.onload += (e) => 
             {
-                ret.PlatformSetData(image);
                 loaded = true;
             };
             image.src = url;
 
             while (!loaded)
                 await Task.Delay(10);
+
+            var ret = new Texture2D(graphicsDevice, (int)image.width, (int)image.height);
+            ret.PlatformSetData(image);
 
             return ret;
         }

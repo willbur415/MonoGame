@@ -899,6 +899,7 @@ namespace Microsoft.Xna.Framework.Graphics
             var result =  new ArrayBuffer(numVertices * decl.VertexStride);
             var props = object.GetOwnPropertyNames(vertices[0]).Where(p => p[0] != '$').ToArray();
             var propertyIndex = 0;
+
             foreach (var el in decl.InternalVertexElements)
             {
                 var prop = props[propertyIndex++];
@@ -954,7 +955,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     for (var i = 0; i < numVertices; i++)
                     {
                         var shorts = vertices[startVertex + i][property];
-                        var startIndex = offset = i * stride;
+                        var startIndex = offset + i * stride;
                         var shortView = new Int16Array(buf, (uint) startIndex);
                         for (var ci = 0; ci < props.Length; ci++)
                             shortView[(uint) ci] = (short) shorts[props[ci]];
@@ -984,6 +985,7 @@ namespace Microsoft.Xna.Framework.Graphics
                         for (var ci = 0; ci < props.Length; ci++)
                             floatView[(uint) ci] = (float) vec[props[ci]];
                     }
+
                     break;
             }
         }

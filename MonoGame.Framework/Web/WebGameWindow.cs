@@ -46,7 +46,7 @@ namespace Microsoft.Xna.Framework
 
             // TODO: Move "GL context" creation outside the game window
             var possiblecontexts = new[] { "webgl2", "experimental-webgl2" };
-            /*foreach(var context in possiblecontexts)
+            foreach(var context in possiblecontexts)
             {
                 try
                 {
@@ -55,9 +55,7 @@ namespace Microsoft.Xna.Framework
                         break;
                 }
                 catch { }
-            }*/
-
-            WebHelper.gl = null;
+            }
 
             if (WebHelper.gl == null)
             {

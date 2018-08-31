@@ -195,6 +195,8 @@ namespace Microsoft.Xna.Framework
 
         private bool Canvas_KeyDown(KeyboardEvent e)
         {
+            e.preventDefault();
+
             var xnaKey = KeyboardUtil.ToXna((int)e.keyCode, (int)e.location);
 
             if (!_keys.Contains(xnaKey))

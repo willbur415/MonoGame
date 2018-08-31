@@ -46,7 +46,7 @@ namespace Microsoft.Xna.Framework
 
             // TODO: Move "GL context" creation outside the game window
             var possiblecontexts = new[] { "webgl2", "experimental-webgl2" };
-            foreach(var context in possiblecontexts)
+            /*foreach(var context in possiblecontexts)
             {
                 try
                 {
@@ -55,10 +55,22 @@ namespace Microsoft.Xna.Framework
                         break;
                 }
                 catch { }
-            }
+            }*/
+
+            WebHelper.gl = null;
 
             if (WebHelper.gl == null)
+            {
+                var d2d = _canvas.getContext("2d").As<CanvasRenderingContext2D>();
+                d2d.fillStyle = "#6495ED";
+                d2d.fillRect(0, 0, _canvas.width, _canvas.height);
+                d2d.fillStyle = "#000000";
+                d2d.font = "30px Arial";
+                d2d.textAlign = "center";
+                d2d.fillText("This device does not support WebGL 2  :(", _canvas.width / 2, _canvas.height / 2);
+
                 throw new Exception("Failed to get WebGL context :|");
+            }
 
             // Block context menu on the canvas element
             _canvas.oncontextmenu += (e) => e.preventDefault();

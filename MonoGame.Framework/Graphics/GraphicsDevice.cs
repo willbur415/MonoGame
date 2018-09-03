@@ -1172,6 +1172,24 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
+        internal void DrawUserIndexedPrimitives(PrimitiveType primitiveType, Retyped.es5.ArrayBuffer vertexData, int vertexOffset, int numVertices, Retyped.es5.Uint16Array indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
+        
+        {
+            // These parameter checks are a duplicate of the checks in the int[] overload of DrawUserIndexedPrimitives.
+            // Inlined here for efficiency.
+
+            if (primitiveCount <= 0)
+                throw new ArgumentOutOfRangeException("primitiveCount");
+
+            PlatformDrawUserIndexedPrimitives(primitiveType, vertexData, vertexOffset, numVertices, indexData, indexOffset, primitiveCount, vertexDeclaration);
+
+            unchecked
+            {
+                _graphicsMetrics._drawCount++;
+                _graphicsMetrics._primitiveCount +=  primitiveCount;
+            }
+        }
+
         /// <summary>
         /// Draw primitives of the specified type by indexing into the given array of vertices with 32-bit indices.
         /// </summary>

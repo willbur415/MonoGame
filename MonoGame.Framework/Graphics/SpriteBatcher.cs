@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using static Retyped.es5;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -50,9 +51,11 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Vertex index array. The values in this array never change.
         /// </summary>
-        private short[] _index;
+        private Uint16Array _index;
 
-        private VertexPositionColorTexture[] _vertexArray;
+        private ArrayBuffer _vertexArray;
+        private Float32Array _vertexArrayF;
+        private Uint32Array _vertexArrayC;
 
         public SpriteBatcher(GraphicsDevice device)
         {
@@ -83,7 +86,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 for (int i = oldSize; i < newSize; i++)
                     _batchItemList[i] = new SpriteBatchItem();
 
-                EnsureArrayCapacity(Math.Min(newSize, MaxBatchSize));
+                EnsureArrayCapacity(System.Math.Min(newSize, MaxBatchSize));
             }
             var item = _batchItemList[_batchItemCount++];
             return item;
@@ -100,62 +103,33 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
         {
             int neededCapacity = 6 * numBatchItems;
-            if (_index != null && neededCapacity <= _index.Length)
+            if (_index != null && neededCapacity <= _index.byteLength / 2)
             {
                 // Short circuit out of here because we have enough capacity.
                 return;
             }
-            short[] newIndex = new short[6 * numBatchItems];
-            int start = 0;
+
+            var count = 6 * numBatchItems;
+            var start = 0;
+
             if (_index != null)
+                start = (int)(_index.byteLength / 6);
+
+            _index = new Uint16Array(count.As<uint>());
+            uint indexpos = 0;
+            for (var i = start; i < numBatchItems; i++, indexpos += 6)
             {
-                _index.CopyTo(newIndex, 0);
-                start = _index.Length / 6;
+                _index[indexpos + 0] = (i * 4 + 0).As<ushort>();
+                _index[indexpos + 1] = (i * 4 + 1).As<ushort>();
+                _index[indexpos + 2] = (i * 4 + 2).As<ushort>();
+                _index[indexpos + 3] = (i * 4 + 1).As<ushort>();
+                _index[indexpos + 4] = (i * 4 + 3).As<ushort>();
+                _index[indexpos + 5] = (i * 4 + 2).As<ushort>();
             }
 
-#if WEB
-            _index = new short[newIndex.Length];
-            var indexpos = 0;
-            for (int i = start; i < numBatchItems; i++, indexpos += 6)
-            {
-                _index[indexpos + 0] = (short)(i * 4 + 0);
-                _index[indexpos + 1] = (short)(i * 4 + 1);
-                _index[indexpos + 2] = (short)(i * 4 + 2);
-                _index[indexpos + 3] = (short)(i * 4 + 1);
-                _index[indexpos + 4] = (short)(i * 4 + 3);
-                _index[indexpos + 5] = (short)(i * 4 + 2);
-            }
-#else
-            fixed (short* indexFixedPtr = newIndex)
-            {
-                var indexPtr = indexFixedPtr + (start * 6);
-                for (var i = start; i < numBatchItems; i++, indexPtr += 6)
-                {
-                    /*
-                     *  TL    TR
-                     *   0----1 0,1,2,3 = index offsets for vertex indices
-                     *   |   /| TL,TR,BL,BR are vertex references in SpriteBatchItem.
-                     *   |  / |
-                     *   | /  |
-                     *   |/   |
-                     *   2----3
-                     *  BL    BR
-                     */
-                    // Triangle 1
-                    *(indexPtr + 0) = (short)(i * 4);
-                    *(indexPtr + 1) = (short)(i * 4 + 1);
-                    *(indexPtr + 2) = (short)(i * 4 + 2);
-                    // Triangle 2
-                    *(indexPtr + 3) = (short)(i * 4 + 1);
-                    *(indexPtr + 4) = (short)(i * 4 + 3);
-                    *(indexPtr + 5) = (short)(i * 4 + 2);
-                }
-            }
-
-            _index = newIndex;
-#endif
-
-            _vertexArray = new VertexPositionColorTexture[4 * numBatchItems];
+            _vertexArray = new ArrayBuffer(4 * numBatchItems * 6);
+            _vertexArrayF = new Float32Array(_vertexArray);
+            _vertexArrayC = new Uint32Array(_vertexArray);
         }
 
         /// <summary>
@@ -212,7 +186,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
 
 #if WEB
-                var vertexArrayPos = 0;
+                uint vertexArrayPos = 0;
                 // Draw the batches
                 for (int i = 0; i < numBatchesToProcess; i++, batchIndex++, index += 4, vertexArrayPos += 4)
                 {
@@ -230,10 +204,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
 
                     // store the SpriteBatchItem data in our vertexArray
-                    _vertexArray[vertexArrayPos + 0] = item.vertexTL;
-                    _vertexArray[vertexArrayPos + 1] = item.vertexTR;
-                    _vertexArray[vertexArrayPos + 2] = item.vertexBL;
-                    _vertexArray[vertexArrayPos + 3] = item.vertexBR;
+                    SetItem(vertexArrayPos + 0, item.vertexTL);
+                    SetItem(vertexArrayPos + 1, item.vertexTR);
+                    SetItem(vertexArrayPos + 2, item.vertexBL);
+                    SetItem(vertexArrayPos + 3, item.vertexBR);
 
                     // Release the texture.
                     item.Texture = null;
@@ -281,6 +255,17 @@ namespace Microsoft.Xna.Framework.Graphics
             // return items to the pool.  
             _batchItemCount = 0;
 		}
+
+        private void SetItem(uint pos, VertexPositionColorTexture item)
+        {
+            pos *= 6;
+            _vertexArrayF[pos + 0] = item.Position.X;
+            _vertexArrayF[pos + 1] = item.Position.Y;
+            _vertexArrayF[pos + 2] = item.Position.Z;
+            _vertexArrayC[pos + 3] = item.Color.PackedValue;
+            _vertexArrayF[pos + 4] = item.TextureCoordinate.X;
+            _vertexArrayF[pos + 5] = item.TextureCoordinate.Y;
+        }
 
         /// <summary>
         /// Sends the triangle list to the graphics device. Here is where the actual drawing starts.

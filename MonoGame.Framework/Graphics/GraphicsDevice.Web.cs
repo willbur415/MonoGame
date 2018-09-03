@@ -798,7 +798,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDrawUserPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, VertexDeclaration vertexDeclaration, int vertexCount) where T : struct
         {
-            ApplyState(true);
+            /*ApplyState(true);
 
             var vertexArrayBuffer = ConvertVertices(vertexData, vertexOffset, vertexCount, vertexDeclaration);
 
@@ -820,7 +820,7 @@ namespace Microsoft.Xna.Framework.Graphics
             gl.bindBuffer(glc.ARRAY_BUFFER, null);
             GraphicsExtensions.CheckGLError();
             gl.deleteBuffer(buffer);
-            GraphicsExtensions.CheckGLError();
+            GraphicsExtensions.CheckGLError();*/
         }
 
         private void PlatformDrawPrimitives(PrimitiveType primitiveType, int vertexStart, int vertexCount)
@@ -835,9 +835,9 @@ namespace Microsoft.Xna.Framework.Graphics
             var count = GetElementCountArray(primitiveType, primitiveCount);
 
             var vertexArrayBuffer = ConvertVertices(vertexData, vertexOffset, numVertices, vertexDeclaration);
-            var uintIndexData = new Uint16Array((uint) count);//indexData.As<Uint16Array>();
-            for (var i = 0; i < uintIndexData.length; i++)
-                uintIndexData[(uint) i] = (ushort) indexData[indexOffset + i];
+            var uintIndexData = new Uint16Array(count.As<uint>());//indexData.As<Uint16Array>();
+            for (uint i = 0; i < uintIndexData.length; i++)
+                uintIndexData[i] = indexData[indexOffset + i].As<ushort>();
 
             var vertexBuffer = gl.createBuffer();
             var indexBuffer = gl.createBuffer();
@@ -849,6 +849,41 @@ namespace Microsoft.Xna.Framework.Graphics
             gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, indexBuffer);
             GraphicsExtensions.CheckGLError();
             gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, uintIndexData, glc.STATIC_DRAW);
+            GraphicsExtensions.CheckGLError();
+
+            _vertexBuffersDirty = true;
+            _indexBufferDirty = true;
+
+            var mode = (uint) GraphicsExtensions.GetPrimitiveTypeGL(primitiveType);
+            vertexDeclaration.GraphicsDevice = this;
+            vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
+
+            GraphicsExtensions.CheckGLError();
+            gl.drawElements(mode, count, glc.UNSIGNED_SHORT, 0);
+            GraphicsExtensions.CheckGLError();
+
+            gl.bindBuffer(glc.ARRAY_BUFFER, null);
+            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, null);
+            gl.deleteBuffer(vertexBuffer);
+            gl.deleteBuffer(indexBuffer);
+        }
+
+        private void PlatformDrawUserIndexedPrimitives(PrimitiveType primitiveType, ArrayBuffer vertexData, int vertexOffset, int numVertices, Uint16Array indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
+        {
+            ApplyState(true);
+
+            var count = GetElementCountArray(primitiveType, primitiveCount);
+
+            var vertexBuffer = gl.createBuffer();
+            var indexBuffer = gl.createBuffer();
+
+            gl.bindBuffer(glc.ARRAY_BUFFER, vertexBuffer);
+            GraphicsExtensions.CheckGLError();
+            gl.bufferData(glc.ARRAY_BUFFER, vertexData, glc.STATIC_DRAW);
+            GraphicsExtensions.CheckGLError();
+            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            GraphicsExtensions.CheckGLError();
+            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, indexData, glc.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
 
             _vertexBuffersDirty = true;
@@ -897,13 +932,35 @@ namespace Microsoft.Xna.Framework.Graphics
         private ArrayBuffer ConvertVertices<T>(T[] vertices, int startVertex, int numVertices, VertexDeclaration decl)
         {
             var result =  new ArrayBuffer(numVertices * decl.VertexStride);
-            var props = object.GetOwnPropertyNames(vertices[0]).Where(p => p[0] != '$').ToArray();
-            var propertyIndex = 0;
+            var fa = new Float32Array(result);
+            var fi = new Uint32Array(result);
+            uint pos = 0;
 
-            foreach (var el in decl.InternalVertexElements)
+            if (vertices[0] is VertexPositionColorTexture) // hardcoding types gives us a bit of performance
             {
-                var prop = props[propertyIndex++];
-                CopyVertexElement(vertices, startVertex, numVertices, result, prop, el.Offset, el.VertexElementFormat, decl.VertexStride);
+                var tmp = vertices.As<VertexPositionColorTexture[]>();
+                for (uint i = 0; i < numVertices; i++)
+                {
+                    fa[pos + 0] = tmp[i].Position.X;
+                    fa[pos + 1] = tmp[i].Position.Y;
+                    fa[pos + 2] = tmp[i].Position.Z;
+                    fi[pos + 3] = tmp[i].Color.PackedValue;
+                    fa[pos + 4] = tmp[i].TextureCoordinate.X;
+                    fa[pos + 5] = tmp[i].TextureCoordinate.Y;
+
+                    pos += 6;
+                }
+            }
+            else
+            {
+                var props = object.GetOwnPropertyNames(vertices[0]).Where(p => p[0] != '$').ToArray();
+                var propertyIndex = 0;
+
+                foreach (var el in decl.InternalVertexElements)
+                {
+                    var prop = props[propertyIndex++];
+                    CopyVertexElement(vertices, startVertex, numVertices, result, prop, el.Offset, el.VertexElementFormat, decl.VertexStride);
+                }
             }
 
             return result;

@@ -35,8 +35,6 @@ namespace Microsoft.Xna.Framework
             Keyboard.SetKeys(_keys);
 
             _canvas = document.getElementById("monogamecanvas") as HTMLCanvasElement;
-            _canvas.width = (uint)GraphicsDeviceManager.DefaultBackBufferWidth;
-            _canvas.height = (uint)GraphicsDeviceManager.DefaultBackBufferHeight;
             _canvas.tabIndex = 1000;
 
             // Disable selection

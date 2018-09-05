@@ -82,9 +82,13 @@ namespace Microsoft.Xna.Framework.Graphics
                 var oldSize = _batchItemList.Length;
                 var newSize = oldSize + oldSize / 2; // grow by x1.5
                 newSize = (newSize + 63) & (~63); // grow in chunks of 64.
-                Array.Resize(ref _batchItemList, newSize);
+
+                var tmp = new SpriteBatchItem[newSize];
+                for (int i = 0; i < oldSize; i++)
+                    tmp[i] = _batchItemList[i];
                 for (int i = oldSize; i < newSize; i++)
-                    _batchItemList[i] = new SpriteBatchItem();
+                    tmp[i] = new SpriteBatchItem();
+                _batchItemList = tmp;
 
                 EnsureArrayCapacity(System.Math.Min(newSize, MaxBatchSize));
             }
@@ -109,25 +113,42 @@ namespace Microsoft.Xna.Framework.Graphics
                 return;
             }
 
-            var count = 6 * numBatchItems;
-            var start = 0;
-
+            var newIndex = new Uint16Array(6 * numBatchItems.As<uint>());
+            uint start = 0;
             if (_index != null)
-                start = (int)(_index.byteLength / 6);
-
-            _index = new Uint16Array(count.As<uint>());
-            uint indexpos = 0;
-            for (var i = start; i < numBatchItems; i++, indexpos += 6)
             {
-                _index[indexpos + 0] = (i * 4 + 0).As<ushort>();
-                _index[indexpos + 1] = (i * 4 + 1).As<ushort>();
-                _index[indexpos + 2] = (i * 4 + 2).As<ushort>();
-                _index[indexpos + 3] = (i * 4 + 1).As<ushort>();
-                _index[indexpos + 4] = (i * 4 + 3).As<ushort>();
-                _index[indexpos + 5] = (i * 4 + 2).As<ushort>();
+                for (uint i = 0; i < _index.byteLength / 2; i++)
+                    newIndex[i] = _index[i];
+
+                start = _index.byteLength / 2 / 6;
             }
 
-            _vertexArray = new ArrayBuffer(4 * numBatchItems * 6);
+            var indexPtr = (start * 6);
+            for (var i = start; i < numBatchItems; i++, indexPtr += 6)
+            {
+                /*
+                    *  TL    TR
+                    *   0----1 0,1,2,3 = index offsets for vertex indices
+                    *   |   /| TL,TR,BL,BR are vertex references in SpriteBatchItem.
+                    *   |  / |
+                    *   | /  |
+                    *   |/   |
+                    *   2----3
+                    *  BL    BR
+                    */
+                // Triangle 1
+                newIndex[indexPtr + 0] = (i * 4 + 0).As<ushort>();
+                newIndex[indexPtr + 1] = (i * 4 + 1).As<ushort>();
+                newIndex[indexPtr + 2] = (i * 4 + 2).As<ushort>();
+
+                newIndex[indexPtr + 3] = (i * 4 + 1).As<ushort>();
+                newIndex[indexPtr + 4] = (i * 4 + 3).As<ushort>();
+                newIndex[indexPtr + 5] = (i * 4 + 2).As<ushort>();
+            }
+            
+            _index = newIndex;
+
+            _vertexArray = new ArrayBuffer(4 * numBatchItems * 6 * 4);
             _vertexArrayF = new Float32Array(_vertexArray);
             _vertexArrayC = new Uint32Array(_vertexArray);
         }

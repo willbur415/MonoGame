@@ -1172,7 +1172,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        internal void DrawUserIndexedPrimitives(PrimitiveType primitiveType, Retyped.es5.ArrayBuffer vertexData, int vertexOffset, int numVertices, Retyped.es5.Uint16Array indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
+        internal void DrawUserIndexedPrimitives(PrimitiveType primitiveType, Retyped.es5.ArrayBuffer vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
         
         {
             // These parameter checks are a duplicate of the checks in the int[] overload of DrawUserIndexedPrimitives.

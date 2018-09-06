@@ -51,7 +51,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Vertex index array. The values in this array never change.
         /// </summary>
-        private Uint16Array _index;
+        private short[] _index;
 
         private ArrayBuffer _vertexArray;
         private Float32Array _vertexArrayF;
@@ -103,20 +103,18 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
         {
             int neededCapacity = 6 * numBatchItems;
-            if (_index != null && neededCapacity <= _index.byteLength / 2)
+            if (_index != null && neededCapacity <= _index.Length)
             {
                 // Short circuit out of here because we have enough capacity.
                 return;
             }
 
-            var newIndex = new Uint16Array(6 * numBatchItems.As<uint>());
-            uint start = 0;
+            var newIndex = new short[6 * numBatchItems];
+            int start = 0;
             if (_index != null)
             {
-                for (uint i = 0; i < _index.byteLength / 2; i++)
-                    newIndex[i] = _index[i];
-
-                start = _index.byteLength / 2 / 6;
+                _index.CopyTo(newIndex, 0);
+                start = _index.Length / 6;
             }
 
             var indexPtr = (start * 6);
@@ -133,13 +131,13 @@ namespace Microsoft.Xna.Framework.Graphics
                     *  BL    BR
                     */
                 // Triangle 1
-                newIndex[indexPtr + 0] = (i * 4 + 0).As<ushort>();
-                newIndex[indexPtr + 1] = (i * 4 + 1).As<ushort>();
-                newIndex[indexPtr + 2] = (i * 4 + 2).As<ushort>();
+                newIndex[indexPtr + 0] = (i * 4 + 0).As<short>();
+                newIndex[indexPtr + 1] = (i * 4 + 1).As<short>();
+                newIndex[indexPtr + 2] = (i * 4 + 2).As<short>();
 
-                newIndex[indexPtr + 3] = (i * 4 + 1).As<ushort>();
-                newIndex[indexPtr + 4] = (i * 4 + 3).As<ushort>();
-                newIndex[indexPtr + 5] = (i * 4 + 2).As<ushort>();
+                newIndex[indexPtr + 3] = (i * 4 + 1).As<short>();
+                newIndex[indexPtr + 4] = (i * 4 + 3).As<short>();
+                newIndex[indexPtr + 5] = (i * 4 + 2).As<short>();
             }
             
             _index = newIndex;

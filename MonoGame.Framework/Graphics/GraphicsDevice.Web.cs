@@ -868,7 +868,7 @@ namespace Microsoft.Xna.Framework.Graphics
             gl.deleteBuffer(indexBuffer);
         }
 
-        private void PlatformDrawUserIndexedPrimitives(PrimitiveType primitiveType, ArrayBuffer vertexData, int vertexOffset, int numVertices, Uint16Array indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
+        private void PlatformDrawUserIndexedPrimitives(PrimitiveType primitiveType, ArrayBuffer vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration)
         {
             ApplyState(true);
 
@@ -883,7 +883,7 @@ namespace Microsoft.Xna.Framework.Graphics
             GraphicsExtensions.CheckGLError();
             gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, indexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, indexData, glc.STATIC_DRAW);
+            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, indexData.As<ArrayBuffer>(), glc.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
 
             _vertexBuffersDirty = true;

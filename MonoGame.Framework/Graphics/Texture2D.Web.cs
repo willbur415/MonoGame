@@ -113,54 +113,12 @@ namespace Microsoft.Xna.Framework.Graphics
             GenerateGLTextureIfRequired();
             gl.pixelStorei(glc.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
 
+            var subarr = new Uint8Array(data.As<ArrayBuffer>(), startIndex.As<uint>(), elementCount.As<uint>());
             if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
-            {
-                if (LastTSize == 1)
-                {
-                    var arr2 = new Uint8Array((uint)elementCount);
-                    for (uint i = 0; i < elementCount; i++)
-                        arr2[i] = data[i + startIndex].As<byte>();
-                    gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr2);
-                }
-                else if (LastTSize == 2)
-                {
-                    var arr2 = new Uint16Array((uint)elementCount);
-                    for (uint i = 0; i < elementCount; i++)
-                        arr2[i] = data[i + startIndex].As<ushort>();
-                    gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr2);
-                }
-                else if (LastTSize == 4)
-                {
-                    var arr2 = new Uint32Array((uint)elementCount);
-                    for (uint i = 0; i < elementCount; i++)
-                        arr2[i] = data[i + startIndex].As<uint>();
-                    gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, arr2);
-                }
-            }
+                gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, subarr);
             else
-            {
-                if (LastTSize == 1)
-                {
-                    var arr = new Uint8Array((uint)elementCount);
-                    for (uint i = 0; i < elementCount; i++)
-                        arr[i] = data[i + startIndex].As<byte>();
-                    gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
-                }
-                else if (LastTSize == 2)
-                {
-                    var arr = new Uint16Array((uint)elementCount);
-                    for (uint i = 0; i < elementCount; i++)
-                        arr[i] = data[i + startIndex].As<ushort>();
-                    gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
-                }
-                else if (LastTSize == 4)
-                {
-                    var arr = new Uint32Array((uint)elementCount);
-                    for (uint i = 0; i < elementCount; i++)
-                        arr[i] = data[i + startIndex].As<uint>();
-                    gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arr.As<ArrayBufferView>());
-                }
-            }
+                gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, subarr.As<ArrayBufferView>());
+
             GraphicsExtensions.CheckGLError();
             
             // Restore the bound texture.

@@ -73,9 +73,7 @@ namespace TestWebGame
         {
             song = await Song.FromURL("Content/awake.ogg");
             texBall = await Texture2D.FromURL(GraphicsDevice, "Content/Hacker.png");
-            _seffect = await SoundEffect.FromURL("Content/horse.ogg");
-            _sinstance = _seffect.CreateInstance();
-            _sinstance.Volume = 0.1f;
+            _seffect = Content.Load<SoundEffect>("horsey");
 
             loading = false;
         }
@@ -124,16 +122,7 @@ namespace TestWebGame
             }
 
             if (prevkstate.IsKeyUp(Keys.S) && kstate.IsKeyDown(Keys.S))
-            {
-                _sinstance.Stop();
-                _sinstance.Play();
-            }
-
-            if (prevkstate.IsKeyUp(Keys.D) && kstate.IsKeyDown(Keys.D))
-                _sinstance.Pause();
-
-            if (prevkstate.IsKeyUp(Keys.F) && kstate.IsKeyDown(Keys.F))
-                _sinstance.Resume();
+                _seffect.Play();
 
             divdata.innerHTML = "Left: " + state.LeftButton + "<br>Right: " + state.RightButton + "<br>Mouse pos: " + state.Position + "<br>A: " + kstate.IsKeyDown(Keys.A) + "<br>Caps: " + kstate.CapsLock;
 
@@ -170,17 +159,17 @@ namespace TestWebGame
                 frameCounter++;
             }
 
-            GraphicsDevice.SetRenderTarget(target);
+            //GraphicsDevice.SetRenderTarget(target);
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
             spriteBatch.Draw(texBall, new Rectangle(0, 0, 100, 100), new Rectangle(50, 50, 100, 100), Color.White);
             spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
             spriteBatch.End();
-            GraphicsDevice.SetRenderTarget(null);
+            //GraphicsDevice.SetRenderTarget(null);
 
-            spriteBatch.Begin();
+            /*spriteBatch.Begin();
             spriteBatch.Draw(target, new Rectangle(0, 0, 640, 480), Color.White);
-            spriteBatch.End();
+            spriteBatch.End();*/
 
             base.Draw(gameTime);
         }

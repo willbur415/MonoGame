@@ -80,15 +80,11 @@ namespace Microsoft.Xna.Framework.Graphics
             if (_batchItemCount >= _batchItemList.Length)
             {
                 var oldSize = _batchItemList.Length;
-                var newSize = oldSize + oldSize / 2; // grow by x1.5
+                var newSize = oldSize + oldSize/2; // grow by x1.5
                 newSize = (newSize + 63) & (~63); // grow in chunks of 64.
-
-                var tmp = new SpriteBatchItem[newSize];
-                for (int i = 0; i < oldSize; i++)
-                    tmp[i] = _batchItemList[i];
-                for (int i = oldSize; i < newSize; i++)
-                    tmp[i] = new SpriteBatchItem();
-                _batchItemList = tmp;
+                Array.Resize(ref _batchItemList, newSize);
+                for(int i=oldSize; i<newSize; i++)
+                    _batchItemList[i]=new SpriteBatchItem();
 
                 EnsureArrayCapacity(System.Math.Min(newSize, MaxBatchSize));
             }

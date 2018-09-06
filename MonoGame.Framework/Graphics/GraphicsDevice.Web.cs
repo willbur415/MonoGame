@@ -798,7 +798,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformDrawUserPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, VertexDeclaration vertexDeclaration, int vertexCount) where T : struct
         {
-            /*ApplyState(true);
+            ApplyState(true);
 
             var vertexArrayBuffer = ConvertVertices(vertexData, vertexOffset, vertexCount, vertexDeclaration);
 
@@ -820,7 +820,7 @@ namespace Microsoft.Xna.Framework.Graphics
             gl.bindBuffer(glc.ARRAY_BUFFER, null);
             GraphicsExtensions.CheckGLError();
             gl.deleteBuffer(buffer);
-            GraphicsExtensions.CheckGLError();*/
+            GraphicsExtensions.CheckGLError();
         }
 
         private void PlatformDrawPrimitives(PrimitiveType primitiveType, int vertexStart, int vertexCount)

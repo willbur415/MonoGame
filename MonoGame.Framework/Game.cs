@@ -431,6 +431,7 @@ namespace Microsoft.Xna.Framework
             _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
             _previousTicks = currentTicks;
 
+#if !WEB
             // If we're in the fixed timestep mode and not enough time has elapsed
             // to perform an update we sleep off the the remaining time to save battery
             // life and/or release CPU time to other threads and processes.
@@ -448,6 +449,7 @@ namespace Microsoft.Xna.Framework
 #endif
                 goto RetryTick;
             }
+#endif
 
             // Do not allow any update to take longer than our maximum.
             if (_accumulatedElapsedTime > _maxElapsedTime)

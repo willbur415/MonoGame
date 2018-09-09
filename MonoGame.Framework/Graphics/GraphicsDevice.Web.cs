@@ -104,7 +104,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private static BufferBindingInfo[] _bufferBindingInfos;
         private static bool[] _newEnabledVertexAttributes;
-        internal static readonly List<int> _enabledVertexAttributes = new List<int>();
+        internal static readonly Dictionary<int, bool> _enabledVertexAttributes = new Dictionary<int, bool>();
         internal static bool _attribsDirty;
 
         internal FramebufferHelper framebufferHelper;
@@ -145,13 +145,13 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             for (var x = 0; x < attrs.Length; x++)
             {
-                if (attrs[x] && !_enabledVertexAttributes.Contains(x))
+                if (attrs[x] && !_enabledVertexAttributes.ContainsKey(x))
                 {
-                    _enabledVertexAttributes.Add(x);
+                    _enabledVertexAttributes[x] = true;
                     gl.enableVertexAttribArray(x);
                     GraphicsExtensions.CheckGLError();
                 }
-                else if (!attrs[x] && _enabledVertexAttributes.Contains(x))
+                else if (!attrs[x] && _enabledVertexAttributes.ContainsKey(x))
                 {
                     _enabledVertexAttributes.Remove(x);
                     gl.disableVertexAttribArray(x);
@@ -879,17 +879,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
             gl.bindBuffer(glc.ARRAY_BUFFER, vertexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ARRAY_BUFFER, vertexData, glc.STATIC_DRAW);
+            gl.bufferData(glc.ARRAY_BUFFER, new Uint8Array(vertexData, (vertexOffset * 4 * 6).As<uint>(), (numVertices * 4 * 6).As<uint>()), glc.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
             gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, indexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, indexData.As<ArrayBuffer>(), glc.STATIC_DRAW);
+            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, indexData.As<Int16Array>().subarray(indexOffset.As<uint>()), glc.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
 
             _vertexBuffersDirty = true;
             _indexBufferDirty = true;
 
-            var mode = (uint) GraphicsExtensions.GetPrimitiveTypeGL(primitiveType);
+            var mode = GraphicsExtensions.GetPrimitiveTypeGL(primitiveType);
             vertexDeclaration.GraphicsDevice = this;
             vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
 

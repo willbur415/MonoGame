@@ -5,6 +5,14 @@
     <RootNamespace>Microsoft.Xna.Framework</RootNamespace>
     <AssemblyName>MonoGame.Framework</AssemblyName>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <PackageIconUrl>https://pbs.twimg.com/profile_images/487954549441691649/O3KsHAsb_400x400.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/cra0zy/MonoGame/tree/bridge</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/cra0zy/MonoGame/tree/bridge</RepositoryUrl>
+    <Description>Alpha version of MonoGame webgl version using Bridge.NET</Description>
+    <PackageTags>monogame;web;webgl;bridge;bridge.net</PackageTags>
+    <Version>3.7.0.1</Version>
+    <Authors>cra0zy</Authors>
+    <PackageId>MonoGame.Framework.Bridge</PackageId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>bin\Debug</OutputPath>
@@ -382,7 +390,9 @@
     <Compile Include="Input\GamePad.cs" />
     <Compile Include="Input\Joystick.cs" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Content Include="MonoGame.Framework.Bridge.targets" PackagePath="build" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Retyped.dom" Version="2.8.6733" />
     <PackageReference Include="Retyped.gamepad" Version="0.1.6733" />

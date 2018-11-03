@@ -10,6 +10,90 @@ using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Content
 {
+    public class CustomReader : IDisposable
+    {
+        public CustomReader(Stream stream)
+        {
+            //var tmp = new MemoryStream()
+        }
+
+        public bool ReadBoolean()
+        {
+            throw new NotImplementedException();
+        }
+
+        public char ReadChar()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ushort ReadUInt16()
+        {
+            throw new NotImplementedException();
+        }
+
+        public uint ReadUInt32()
+        {
+            throw new NotImplementedException();
+        }
+
+        public UInt64 ReadUInt64()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string ReadString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public short ReadInt16()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int ReadInt32()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Int64 ReadInt64()
+        {
+            throw new NotImplementedException();
+        }
+
+        public float ReadSingle()
+        {
+            throw new NotImplementedException();
+        }
+
+        public sbyte ReadSByte()
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte ReadByte()
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] ReadBytes(int len)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Read7BitEncodedInt()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+
+        }
+    }
+
+    //public sealed class ContentReader : CustomReader
     public sealed class ContentReader : BinaryReader
     {
         private ContentManager contentManager;

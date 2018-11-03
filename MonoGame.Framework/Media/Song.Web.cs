@@ -12,27 +12,19 @@ namespace Microsoft.Xna.Framework.Media
     public sealed partial class Song : IEquatable<Song>, IDisposable
     {
         private HTMLAudioElement _audio;
-        private bool _loaded;
 
         private void PlatformInitialize(string fileName)
         {
+            Content.ContentManager.BlockContentLoaading = true;
+
             _audio = new HTMLAudioElement();
-            _audio.oncanplaythrough += (e) => _loaded = true;
+            _audio.oncanplaythrough += (e) => Content.ContentManager.BlockContentLoaading = false;
             _audio.src = fileName;
             _audio.load();
 
             _duration = TimeSpan.FromSeconds(_audio.duration);
 
             _audio.onended += (e) => MediaPlayer.OnSongFinishedPlaying(null, null);
-        }
-
-        public static async Task<Song> FromURL(string url)
-        {
-            var ret = new Song(url);
-            while (!ret._loaded)
-                await Task.Delay(10);
-
-            return ret;
         }
         
         internal void SetEventHandler(FinishedPlayingHandler handler) { }

@@ -22,9 +22,8 @@ namespace TestWebGame
         Texture2D texBall;
         SoundEffect _seffect;
         SoundEffectInstance _sinstance;
-        Effect effect;
         bool loading = true;
-        SpriteFont font;
+        //SpriteFont font;
         RenderTarget2D target;
         
         public Game1()
@@ -50,11 +49,11 @@ namespace TestWebGame
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
-        protected override async void LoadContent()
+        protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            effect = await Content.LoadAsync<Effect>("effect");
+            // effect = await Content.LoadAsync<Effect>("effect");
 
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
@@ -62,7 +61,6 @@ namespace TestWebGame
 
             MediaPlayer.Volume = 0.1f;
 
-            font = await Content.LoadAsync<SpriteFont>("font2");
 
             target = new RenderTarget2D(GraphicsDevice, 640, 480);
 
@@ -71,11 +69,16 @@ namespace TestWebGame
 
         public async void LoadContentAsync()
         {
-            song = await Song.FromURL("Content/awake.ogg");
-            texBall = await Texture2D.FromURL(GraphicsDevice, "Content/Hacker.png");
-            _seffect = Content.Load<SoundEffect>("horsey");
+            song = await Content.LoadAsync<Song>("awake");
+            //font = await Content.LoadAsync<SpriteFont>("font2");
+            texBall = await Content.LoadAsync<Texture2D>("hacker");
+            // Texture2D.FromURL(GraphicsDevice, "Content/Hacker.png");
+            _seffect = Content.Load<SoundEffect>("horse");
 
             loading = false;
+
+            MediaPlayer.Play(song);
+            playing = true;
         }
 
         /// <summary>
@@ -163,7 +166,7 @@ namespace TestWebGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
             spriteBatch.Draw(texBall, new Rectangle(0, 0, 100, 100), new Rectangle(50, 50, 100, 100), Color.White);
-            spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
+            //spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
             spriteBatch.End();
             //GraphicsDevice.SetRenderTarget(null);
 

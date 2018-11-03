@@ -164,26 +164,6 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new NotImplementedException();
         }
 
-        public static async Task<Texture2D> FromURL(GraphicsDevice graphicsDevice, string url)
-        {
-            var loaded = false;
-            var image = new HTMLImageElement();
-
-            image.onload += (e) => 
-            {
-                loaded = true;
-            };
-            image.src = url;
-
-            while (!loaded)
-                await Task.Delay(10);
-
-            var ret = new Texture2D(graphicsDevice, (int)image.width, (int)image.height);
-            ret.PlatformSetData(image);
-
-            return ret;
-        }
-
         private void PlatformSaveAsJpeg(Stream stream, int width, int height)
         {
             throw new NotImplementedException();

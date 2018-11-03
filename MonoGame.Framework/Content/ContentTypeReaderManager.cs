@@ -108,7 +108,7 @@ namespace Microsoft.Xna.Framework.Content
                 var hBasicEffectReader = new BasicEffectReader();
                 var hVertexBufferReader = new VertexBufferReader();
                 var hAlphaTestEffectReader = new AlphaTestEffectReader();
-                // var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteEffects>();
+                var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteEffects>();
                 var hArrayFloatReader = new ArrayReader<float>();
                 var hArrayVector2Reader = new ArrayReader<Vector2>();
                 var hListVector2Reader = new ListReader<Vector2>();
@@ -119,7 +119,7 @@ namespace Microsoft.Xna.Framework.Content
                 var hExternalReferenceReader = new ExternalReferenceReader();
                 var hSoundEffectReader = new SoundEffectReader();
                 var hSongReader = new SongReader();
-                // var hModelReader = new ModelReader();
+                var hModelReader = new ModelReader();
                 var hInt32Reader = new Int32Reader();
                 var hEffectReader = new EffectReader();
                 var hSingleReader = new SingleReader();

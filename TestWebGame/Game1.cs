@@ -22,6 +22,7 @@ namespace TestWebGame
         Texture2D texBall;
         SoundEffect _seffect;
         SoundEffectInstance _sinstance;
+        Model _model;
         bool loading = true;
         //SpriteFont font;
         RenderTarget2D target;
@@ -73,7 +74,8 @@ namespace TestWebGame
             //font = await Content.LoadAsync<SpriteFont>("font2");
             texBall = await Content.LoadAsync<Texture2D>("hacker");
             // Texture2D.FromURL(GraphicsDevice, "Content/Hacker.png");
-            _seffect = Content.Load<SoundEffect>("horse");
+            //_seffect = Content.Load<SoundEffect>("horse");
+            _model = await Content.LoadAsync<Model>("helicopter");
 
             loading = false;
 

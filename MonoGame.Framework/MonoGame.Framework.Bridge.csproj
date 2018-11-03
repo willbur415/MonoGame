@@ -24,6 +24,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Content\ContentReaders\VideoReader.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Input\Keys.cs" />
     <Compile Include="Input\KeyState.cs" />
     <Compile Include="Input\ButtonState.cs" />
@@ -389,6 +392,15 @@
     <Compile Include="Input\GamePad.Web.cs" />
     <Compile Include="Input\GamePad.cs" />
     <Compile Include="Input\Joystick.cs" />
+    <Compile Include="Graphics\Model.cs" />
+    <Compile Include="Graphics\ModelBone.cs" />
+    <Compile Include="Graphics\ModelBoneCollection.cs" />
+    <Compile Include="Graphics\ModelEffectCollection.cs" />
+    <Compile Include="Graphics\ModelMesh.cs" />
+    <Compile Include="Graphics\ModelMeshCollection.cs" />
+    <Compile Include="Graphics\ModelMeshPart.cs" />
+    <Compile Include="Graphics\ModelMeshPartCollection.cs" />
+    <Compile Include="Content\ContentReaders\ModelReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MonoGame.Framework.Bridge.targets" PackagePath="build" />

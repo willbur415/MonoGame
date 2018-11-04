@@ -24,7 +24,7 @@ namespace TestWebGame
         SoundEffectInstance _sinstance;
         Model _model;
         bool loading = true;
-        //SpriteFont font;
+        SpriteFont font;
         RenderTarget2D target;
         
         public Game1()
@@ -71,11 +71,11 @@ namespace TestWebGame
         public async void LoadContentAsync()
         {
             song = await Content.LoadAsync<Song>("awake");
-            //font = await Content.LoadAsync<SpriteFont>("font2");
+            // font = await Content.LoadAsync<SpriteFont>("File");
             texBall = await Content.LoadAsync<Texture2D>("hacker");
             // Texture2D.FromURL(GraphicsDevice, "Content/Hacker.png");
             //_seffect = Content.Load<SoundEffect>("horse");
-            _model = await Content.LoadAsync<Model>("helicopter");
+            // _model = await Content.LoadAsync<Model>("helicopter");
 
             loading = false;
 
@@ -168,7 +168,7 @@ namespace TestWebGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
             spriteBatch.Draw(texBall, new Rectangle(0, 0, 100, 100), new Rectangle(50, 50, 100, 100), Color.White);
-            //spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
+            // spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
             spriteBatch.End();
             //GraphicsDevice.SetRenderTarget(null);
 

@@ -24,9 +24,9 @@ namespace Microsoft.Xna.Framework.Graphics
             int w = width;
             int h = height;
             int level = 0;
+            
             while (true)
             {
-
                 if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
                 {
                     int imageSize = 0;
@@ -132,26 +132,6 @@ namespace Microsoft.Xna.Framework.Graphics
         private void PlatformSetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
         {
             throw new NotImplementedException();
-        }
-
-        private void PlatformSetData(HTMLImageElement image)
-        {
-            var prevTexture = GraphicsExtensions.GetBoundTexture2D();
-            if (prevTexture != glTexture)
-            {
-                gl.bindTexture(glc.TEXTURE_2D, glTexture);
-                GraphicsExtensions.CheckGLError();
-            }
-
-            gl.texImage2D(glc.TEXTURE_2D, 0, glc.RGBA, glc.RGBA, glc.UNSIGNED_BYTE, image.As<Retyped.webgl2.ImageBitmap>());
-            GraphicsExtensions.CheckGLError();
-            
-            // Restore the bound texture.
-            if (prevTexture != glTexture)
-            {
-                gl.bindTexture(glc.TEXTURE_2D, prevTexture);
-                GraphicsExtensions.CheckGLError();
-            }
         }
 
         private void PlatformGetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct

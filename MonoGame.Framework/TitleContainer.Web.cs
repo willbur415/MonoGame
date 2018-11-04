@@ -24,8 +24,6 @@ namespace Microsoft.Xna.Framework
 
         private static async Task<Stream> PlatformOpenStreamAsync(string safeName)
         {
-            System.Console.WriteLine(safeName);
-
             var loaded = false;
             var request = new XMLHttpRequest();
 
@@ -39,7 +37,6 @@ namespace Microsoft.Xna.Framework
 
             while (!loaded)
                 await Task.Delay(10);
-            System.Console.WriteLine("loaded");
 
             return new MemoryStream((new Uint8Array(request.response.As<ArrayBuffer>())).As<byte[]>());
         }

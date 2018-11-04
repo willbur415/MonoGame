@@ -218,9 +218,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
         public static void GetGLFormat (this SurfaceFormat format,
             GraphicsDevice graphicsDevice,
-            out int glInternalFormat,
-            out int glFormat,
-            out int glType)
+            out double glInternalFormat,
+            out double glFormat,
+            out double glType)
 		{
 			glInternalFormat = (int)glc.RGBA;
 			glFormat = (int)glc.RGBA;
@@ -228,39 +228,41 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		    var supportsSRgb = graphicsDevice.GraphicsCapabilities.SupportsSRgb;
 			
-			switch (format) {
-			case SurfaceFormat.Color:
-				glInternalFormat = (int)glc.RGBA;
-				glFormat = (int)glc.RGBA;
-				glType = (int)glc.UNSIGNED_BYTE;
-				break;
-            case SurfaceFormat.ColorSRgb:
-                glInternalFormat = (int)gl.SRGB;
-                glFormat = (int)glc.RGBA;
-                glType = (int)glc.UNSIGNED_BYTE;
-				break;
-			case SurfaceFormat.Bgr565:
-				glInternalFormat = (int)glc.RGB;
-				glFormat = (int)glc.RGB;
-				glType = (int)glc.UNSIGNED_SHORT_5_6_5;
-				break;
-			case SurfaceFormat.Bgra4444:
-				glInternalFormat = (int)glc.RGBA;
-				glFormat = (int)glc.RGBA;
-				glType = (int)glc.UNSIGNED_SHORT_4_4_4_4;
-				break;
-			case SurfaceFormat.Bgra5551:
-				glInternalFormat = (int)glc.RGBA;
-				glFormat = (int)glc.RGBA;
-				glType = (int)glc.UNSIGNED_SHORT_5_5_5_1;
-				break;
-			case SurfaceFormat.Alpha8:
-				glInternalFormat = (int)glc.LUMINANCE;
-				glFormat = (int)glc.LUMINANCE;
-				glType = (int)glc.UNSIGNED_BYTE;
-				break;
-            default:
-				throw new NotSupportedException();
+			switch (format)
+            {
+                case SurfaceFormat.Color:
+                    glInternalFormat = glc.RGBA;
+                    glFormat = glc.RGBA;
+                    glType = glc.UNSIGNED_BYTE;
+                    break;
+                case SurfaceFormat.ColorSRgb:
+                    glInternalFormat = gl.SRGB;
+                    glFormat = glc.RGBA;
+                    glType = glc.UNSIGNED_BYTE;
+                    break;
+                case SurfaceFormat.Bgr565:
+                    glInternalFormat = glc.RGB;
+                    glFormat = glc.RGB;
+                    glType = glc.UNSIGNED_SHORT_5_6_5;
+                    break;
+                case SurfaceFormat.Bgra4444:
+                    glInternalFormat = glc.RGBA;
+                    glFormat = glc.RGBA;
+                    glType = glc.UNSIGNED_SHORT_4_4_4_4;
+                    break;
+                case SurfaceFormat.Bgra5551:
+                    glInternalFormat = glc.RGBA;
+                    glFormat = glc.RGBA;
+                    glType = glc.UNSIGNED_SHORT_5_5_5_1;
+                    break;
+                case SurfaceFormat.Alpha8:
+                    glInternalFormat = glc.LUMINANCE;
+                    glFormat = glc.LUMINANCE;
+                    glType = glc.UNSIGNED_BYTE;
+                    break;
+                    break;
+                default:
+                    throw new NotSupportedException();
 			}
 		}
 

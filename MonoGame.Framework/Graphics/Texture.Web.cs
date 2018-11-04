@@ -13,9 +13,9 @@ namespace Microsoft.Xna.Framework.Graphics
         internal WebGLTexture glTexture;
         internal double glTarget;
         internal double glTextureUnit = glc.TEXTURE0;
-        internal int glInternalFormat;
-        internal int glFormat;
-        internal int glType;
+        internal double glInternalFormat;
+        internal double glFormat;
+        internal double glType;
         internal SamplerState glLastSamplerState;
 
         private void PlatformGraphicsDeviceResetting()

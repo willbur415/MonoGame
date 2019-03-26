@@ -14,8 +14,6 @@ namespace Microsoft.Xna.Framework
         public GtkGamePlatform(Game game) : base(game)
         {
             Window = new GtkGameWindow(game);
-
-            _soundControllerInstance = OpenALSoundController.GetInstance;
         }
 
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Asynchronous;

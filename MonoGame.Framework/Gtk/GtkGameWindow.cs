@@ -34,6 +34,8 @@ namespace Microsoft.Xna.Framework
             _eventArea.MotionNotifyEvent += EventBox_MotionNotifyEvent;
 
             TempGLArea = _glarea = new GLArea();
+            _glarea.UseEs = true;
+            _glarea.SetRequiredVersion(2, 0);
             _glarea.AutoRender = true;
             _glarea.HasDepthBuffer = true;
             _glarea.HasStencilBuffer = false;

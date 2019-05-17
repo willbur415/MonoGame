@@ -1,4 +1,5 @@
-﻿// MonoGame - Copyright (C) The MonoGame Team
+﻿using System.Threading.Tasks;
+// MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
@@ -28,10 +29,11 @@ namespace Microsoft.Xna.Framework
             _game = game;
 
             _eventArea = new EventBox();
-            _eventArea.AddEvents((int)Gdk.EventMask.PointerMotionMask);
+            _eventArea.AddEvents((int)Gdk.EventMask.AllEventsMask);
             _eventArea.ButtonPressEvent += EventArea_ButtonPressEvent;
             _eventArea.ButtonReleaseEvent += EventArea_ButtonReleaseEvent;
             _eventArea.MotionNotifyEvent += EventBox_MotionNotifyEvent;
+            _eventArea.ScrollEvent += EventBox_Scroll;
 
             TempGLArea = _glarea = new GLArea();
             _glarea.UseEs = true;
@@ -130,11 +132,31 @@ namespace Microsoft.Xna.Framework
 
         private void EventBox_MotionNotifyEvent(object sender, MotionNotifyEventArgs args)
         {
-            int outx, outy;
-            _eventArea.Toplevel.TranslateCoordinates(_eventArea, (int)args.Event.X, (int)args.Event.Y, out outx, out outy);
+            MouseState.X = (int)args.Event.X;
+            MouseState.Y = (int)args.Event.Y;
+        }
 
-            MouseState.X = outx;
-            MouseState.Y = outy;
+        private void EventBox_Scroll(object o, ScrollEventArgs e)
+        {
+            switch (e.Event.Direction)
+            {
+                case Gdk.ScrollDirection.Smooth:
+                    MouseState.HorizontalScrollWheelValue += (int)e.Event.DeltaX;
+                    MouseState.ScrollWheelValue -= (int)e.Event.DeltaY;
+                    return;
+                case Gdk.ScrollDirection.Left:
+                    MouseState.HorizontalScrollWheelValue -= 1;
+                    return;
+                case Gdk.ScrollDirection.Right:
+                    MouseState.HorizontalScrollWheelValue += 1;
+                    return;
+                case Gdk.ScrollDirection.Up:
+                    MouseState.ScrollWheelValue += 1;
+                    return;
+                case Gdk.ScrollDirection.Down:
+                    MouseState.ScrollWheelValue -= 1;
+                    return;
+            }
         }
 
         private void GLArea_SizeAllocated(object sender, EventArgs args)
@@ -152,12 +174,16 @@ namespace Microsoft.Xna.Framework
             OnClientSizeChanged();
         }
 
-        private void GLArea_Rendered(object sender, EventArgs args)
+        private async void GLArea_Rendered(object sender, EventArgs args)
         {
             if (_isExiting > 0)
                 return;
 
             _game.RunOneFrame();
+
+            if (_game.IsFixedTimeStep)
+                await Task.Delay((int)_game.TargetElapsedTime.TotalMilliseconds);
+            
             _glarea.QueueRender();
         }
 

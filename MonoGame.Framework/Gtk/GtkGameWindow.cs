@@ -37,8 +37,8 @@ namespace Microsoft.Xna.Framework
 
             TempGLArea = _glarea = new GLArea();
             _glarea.UseEs = true;
-            _glarea.SetRequiredVersion(2, 0);
             _glarea.AutoRender = true;
+            _glarea.SetRequiredVersion(2, 0);
             _glarea.HasDepthBuffer = true;
             _glarea.HasStencilBuffer = false;
             _glarea.SizeAllocated += GLArea_SizeAllocated;
@@ -87,6 +87,8 @@ namespace Microsoft.Xna.Framework
                     MouseState.XButton2 = ButtonState.Pressed;
                     break;
             }
+
+            _glarea.QueueRender();
         }
 
         private void EventArea_ButtonReleaseEvent(object sender, ButtonReleaseEventArgs args)
@@ -109,6 +111,8 @@ namespace Microsoft.Xna.Framework
                     MouseState.XButton2 = ButtonState.Released;
                     break;
             }
+
+            _glarea.QueueRender();
         }
 
         [GLib.ConnectBefore]
@@ -120,6 +124,8 @@ namespace Microsoft.Xna.Framework
                 _keys.Add(xnakey);
                 Keyboard.SetKeys(_keys);
             }
+
+            _glarea.QueueRender();
         }
 
         [GLib.ConnectBefore]
@@ -128,16 +134,22 @@ namespace Microsoft.Xna.Framework
             var xnakey = KeyboardUtil.ToXna(args.Event.HardwareKeycode);
             _keys.Remove(xnakey);
             Keyboard.SetKeys(_keys);
+
+            _glarea.QueueRender();
         }
 
         private void EventBox_MotionNotifyEvent(object sender, MotionNotifyEventArgs args)
         {
             MouseState.X = (int)args.Event.X;
             MouseState.Y = (int)args.Event.Y;
+
+            _glarea.QueueRender();
         }
 
         private void EventBox_Scroll(object o, ScrollEventArgs e)
         {
+            _glarea.QueueRender();
+
             switch (e.Event.Direction)
             {
                 case Gdk.ScrollDirection.Smooth:
@@ -172,19 +184,16 @@ namespace Microsoft.Xna.Framework
             _game.GraphicsDevice.Viewport = new Viewport(0, 0, _glarea.AllocatedWidth, _glarea.AllocatedHeight);
 
             OnClientSizeChanged();
+
+            _glarea.QueueRender();
         }
 
-        private async void GLArea_Rendered(object sender, EventArgs args)
+        private void GLArea_Rendered(object sender, EventArgs args)
         {
             if (_isExiting > 0)
                 return;
 
             _game.RunOneFrame();
-
-            if (_game.IsFixedTimeStep)
-                await Task.Delay((int)_game.TargetElapsedTime.TotalMilliseconds);
-            
-            _glarea.QueueRender();
         }
 
         public void StartRunLoop()

@@ -164,6 +164,7 @@ namespace Microsoft.Xna.Framework.Input
                 _map.Add(45, Keys.K);
                 _map.Add(46, Keys.L);
                 _map.Add(47, Keys.OemSemicolon);
+                _map.Add(48, Keys.OemQuotes);
                 _map.Add(49, Keys.OemTilde);
                 _map.Add(50, Keys.LeftShift);
                 _map.Add(51, Keys.OemBackslash);

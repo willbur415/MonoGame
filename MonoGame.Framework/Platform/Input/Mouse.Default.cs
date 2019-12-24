@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Microsoft.Xna.Framework.Input
 {
@@ -31,6 +32,10 @@ namespace Microsoft.Xna.Framework.Input
         public static void PlatformSetCursor(MouseCursor cursor)
         {
 
+        }
+
+        private static void PlatformSetCursor(Texture2D texture, int originx = 0, int originy = 0)
+        {
         }
     }
 }

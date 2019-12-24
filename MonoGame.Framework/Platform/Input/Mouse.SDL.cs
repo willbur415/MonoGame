@@ -14,6 +14,7 @@ namespace Microsoft.Xna.Framework.Input
         internal static int ScrollY;
 
         private static Dictionary<MouseCursor, IntPtr> _cursors;
+        private static IntPtr _prevTexCursor;
 
         static Mouse()
         {
@@ -78,21 +79,20 @@ namespace Microsoft.Xna.Framework.Input
             Sdl.Mouse.WarpInWindow(PrimaryWindow.Handle, x, y);
         }
 
-        private static void PlatformSetCursor(MouseCursor cursor, Texture2D texture = null, int originx = 0, int originy = 0)
+        private static void PlatformSetCursor(MouseCursor cursor)
         {
-            if (cursor != MouseCursor.Texture)
-            {
-                Sdl.Mouse.SetCursor(_cursors[cursor]);
-                return;
-            }
+            Sdl.Mouse.SetCursor(_cursors[cursor]);
+        }
 
+        private static void PlatformSetCursor(Texture2D texture, int originx = 0, int originy = 0)
+        {
             var handle = IntPtr.Zero;
             var surface = IntPtr.Zero;
 
-            if (_cursors.TryGetValue(cursor, out handle) && handle != IntPtr.Zero)
+            if (_prevTexCursor != IntPtr.Zero)
             {
-                Sdl.Mouse.FreeCursor(handle);
-                handle = IntPtr.Zero;
+                Sdl.Mouse.FreeCursor(_prevTexCursor);
+                _prevTexCursor = IntPtr.Zero;
             }
 
             try
@@ -114,7 +114,6 @@ namespace Microsoft.Xna.Framework.Input
                 if (handle != IntPtr.Zero)
                     Sdl.Mouse.SetCursor(handle);
             }
-
         }
     }
 }

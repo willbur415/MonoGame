@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Microsoft.Xna.Framework.Input
 {
@@ -65,6 +66,17 @@ namespace Microsoft.Xna.Framework.Input
         public static void SetCursor(MouseCursor cursor)
         {
             PlatformSetCursor(cursor);
+        }
+
+        /// <summary>
+        /// Sets the cursor image to the specified MouseCursor.
+        /// </summary>
+        /// <param name="texture">Texture to use as the cursor image.</param>
+        /// <param name="originx">X cordinate of the image that will be used for mouse position.</param>
+        /// <param name="originy">Y cordinate of the image that will be used for mouse position.</param>
+        public static void SetCursor(Texture2D texture, int originx = 0, int originy = 0)
+        {
+            PlatformSetCursor(texture, originx, originy);
         }
     }
 }

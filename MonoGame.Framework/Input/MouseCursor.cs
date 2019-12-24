@@ -67,11 +67,6 @@ namespace Microsoft.Xna.Framework.Input
         /// <summary>
         /// Gets the hand cursor, usually used for web links.
         /// </summary>
-        Hand,
-
-        /// <summary>
-        /// Try to use a custom Texture2D.
-        /// </summary>
-        Texture
+        Hand
     }
 }

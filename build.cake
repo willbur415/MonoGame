@@ -138,14 +138,14 @@ Task("BuildTools")
     .IsDependentOn("Prep")
     .Does(() =>
 {
-    DotNetCoreRestore("Tools/2MGFX/2MGFX.csproj");
-    PackProject("Tools/2MGFX/2MGFX.csproj");
-
-    DotNetCoreRestore("Tools/MGCB/MGCB.csproj");
-    PackProject("Tools/MGCB/MGCB.csproj");
-    
     DotNetCoreRestore("Tools/MonoGame.Content.Builder/MonoGame.Content.Builder.csproj");
     PackProject("Tools/MonoGame.Content.Builder/MonoGame.Content.Builder.csproj");
+    
+    DotNetCoreRestore("Tools/MonoGame.Effect.Compiler/MonoGame.Effect.Compiler.csproj");
+    PackProject("Tools/MonoGame.Effect.Compiler/MonoGame.Effect.Compiler.csproj");
+    
+    DotNetCoreRestore("Tools/MonoGame.Content.Builder.Task/MonoGame.Content.Builder.Task.csproj");
+    PackProject("Tools/MonoGame.Content.Builder.Task/MonoGame.Content.Builder.Task.csproj");
 
     DotNetCoreRestore("Tools/MonoGame.Packaging.Flatpak/MonoGame.Packaging.Flatpak.csproj");
     PackProject("Tools/MonoGame.Packaging.Flatpak/MonoGame.Packaging.Flatpak.csproj");

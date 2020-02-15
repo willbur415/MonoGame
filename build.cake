@@ -79,7 +79,7 @@ Task("BuildDesktopGL")
     .IsDependentOn("Prep")
     .Does(() =>
 {
-    DotNetCoreRestore("MonoGame.Framework.DesktopGL.sln");
+    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.DesktopGL.csproj");
     PackProject("MonoGame.Framework/MonoGame.Framework.DesktopGL.csproj");
 });
 
@@ -88,7 +88,7 @@ Task("BuildWindowsDX")
     .WithCriteria(() => IsRunningOnWindows())
     .Does(() =>
 {
-    DotNetCoreRestore("MonoGame.Framework.WindowsDX.sln");
+    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.WindowsDX.csproj");
     PackProject("MonoGame.Framework/MonoGame.Framework.WindowsDX.csproj");
 });
 
@@ -103,10 +103,10 @@ Task("BuildAndroid")
     if (DirectoryExists("/usr/lib/xamarin.android"))
         return true;
 
-    return DirectoryExists("/Developer/MonoAndroid");
+    return DirectoryExists("/Library/Frameworks/Xamarin.Android.framework");
 }).Does(() =>
 {
-    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.AndroidCore.csproj");
+    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.Android.csproj");
 
     var buildSettings = msPackSettings;
     if (DirectoryExists("/usr/lib/xamarin.android"))
@@ -116,18 +116,18 @@ Task("BuildAndroid")
         buildSettings = buildSettings.WithProperty("DesignTimeBuild", "true");
     }
 
-    MSBuild("MonoGame.Framework/MonoGame.Framework.AndroidCore.csproj", buildSettings);
+    MSBuild("MonoGame.Framework/MonoGame.Framework.Android.csproj", buildSettings);
 });
 
 Task("BuildiOS")
     .IsDependentOn("Prep")
     .WithCriteria(() =>
 {
-    return DirectoryExists("/Developer/MonoTouch");
+    return DirectoryExists("/Library/Frameworks/Xamarin.iOS.framework");
 }).Does(() =>
 {
-    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.iOSCore.csproj");
-    MSBuild("MonoGame.Framework/MonoGame.Framework.iOSCore.csproj", msPackSettings);
+    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.iOS.csproj");
+    MSBuild("MonoGame.Framework/MonoGame.Framework.iOS.csproj", msPackSettings);
 });
 
 Task("BuildUWP")

@@ -76,7 +76,7 @@ This package provides you with MonoGame Framework that works on Android.</Descri
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="MonoGame.Framework.AndroidCore.targets" Pack="true" PackagePath="build" />
+    <None Include="MonoGame.Framework.Android.targets" Pack="true" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>

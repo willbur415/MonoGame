@@ -17,7 +17,7 @@ var configuration = Argument("build-configuration", "Release");
 
 var majorVersion = "3.0";
 if (version == null)
-    version = EnvironmentVariable("BUILD_NUMBER") ?? "1.0.0.0";
+    version = EnvironmentVariable("BUILD_NUMBER") ?? "3.8.0.1";
 
 MSBuildSettings msPackSettings;
 DotNetCoreMSBuildSettings dnBuildSettings;
@@ -99,24 +99,11 @@ Task("BuildAndroid")
     if (IsRunningOnWindows())
         return GetMSBuildWith("Component.Xamarin");
 
-    // Xamarin Android on Linux needs to be installed in this specific dir
-    if (DirectoryExists("/usr/lib/xamarin.android"))
-        return true;
-
     return DirectoryExists("/Library/Frameworks/Xamarin.Android.framework");
 }).Does(() =>
 {
     DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.Android.csproj");
-
-    var buildSettings = msPackSettings;
-    if (DirectoryExists("/usr/lib/xamarin.android"))
-    {
-        // Some weird bug when packing xamarin andoid assembly from Linux
-        // Easy workaround at least :)
-        buildSettings = buildSettings.WithProperty("DesignTimeBuild", "true");
-    }
-
-    MSBuild("MonoGame.Framework/MonoGame.Framework.Android.csproj", buildSettings);
+    PackProject("MonoGame.Framework/MonoGame.Framework.Android.csproj");
 });
 
 Task("BuildiOS")
@@ -127,7 +114,7 @@ Task("BuildiOS")
 }).Does(() =>
 {
     DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.iOS.csproj");
-    MSBuild("MonoGame.Framework/MonoGame.Framework.iOS.csproj", msPackSettings);
+    PackProject("MonoGame.Framework/MonoGame.Framework.iOS.csproj");
 });
 
 Task("BuildUWP")
@@ -135,8 +122,8 @@ Task("BuildUWP")
     .WithCriteria(() => GetMSBuildWith("Microsoft.VisualStudio.Component.Windows10SDK.17763"))
     .Does(() =>
 {
-    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.WindowsUniversal.csproj");
-    MSBuild("MonoGame.Framework/MonoGame.Framework.WindowsUniversal.csproj", msPackSettings);
+    DotNetCoreRestore("MonoGame.Framework/MonoGame.Framework.UWP.csproj");
+    PackProject("MonoGame.Framework/MonoGame.Framework.UWP.csproj");
 });
 
 Task("BuildContentPipeline")
@@ -144,7 +131,7 @@ Task("BuildContentPipeline")
     .Does(() =>
 {
     DotNetCoreRestore("MonoGame.Framework.Content.Pipeline/MonoGame.Framework.Content.Pipeline.csproj");
-    MSBuild("MonoGame.Framework.Content.Pipeline/MonoGame.Framework.Content.Pipeline.csproj", msPackSettings);
+    PackProject("MonoGame.Framework.Content.Pipeline/MonoGame.Framework.Content.Pipeline.csproj");
 });
 
 Task("BuildTools")
@@ -169,13 +156,14 @@ Task("PackVSTemplates")
     {
         DeleteFiles(vsdir.CombineWithFilePath("*.zip").FullPath);
         var projdirs = GetDirectories(vsdir.CombineWithFilePath("*").FullPath);
-    foreach (var projdir in projdirs)
-    {
-        var outputPath = vsdir.CombineWithFilePath(projdir.GetDirectoryName() + ".zip");
-            Zip(projdir, outputPath);
+        foreach (var projdir in projdirs)
+        {
+            var outputPath = vsdir.CombineWithFilePath(projdir.GetDirectoryName() + ".zip");
+                Zip(projdir, outputPath);
+        }
     }
-    }
-    // pack core templates as a nuget
+    
+    // Pack dotnet templates
     DotNetCoreRestore("ProjectTemplates/DotNetTemplate/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
     PackProject("ProjectTemplates/DotNetTemplate/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
 });

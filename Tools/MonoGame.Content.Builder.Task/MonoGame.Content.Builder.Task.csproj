@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <BaseOutputPath>..\..\Artifacts\Tools\MonoGame.Content.Builder.Task</BaseOutputPath>
+    <BaseOutputPath>..\..\Artifacts\MonoGame.Content.Builder.Task</BaseOutputPath>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>

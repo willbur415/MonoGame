@@ -3,8 +3,11 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <BaseOutputPath>..\..\Artifacts\MonoGame.Content.Builder.Editor\Wpf</BaseOutputPath>
     <DefineConstants>WINDOWS;WPF</DefineConstants>
     <ApplicationIcon>App.ico</ApplicationIcon>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>mgcb-editor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +30,6 @@
     </ProjectReference>
   </ItemGroup>
 
-  <Import Project="PipelineTool.targets" />
+  <Import Project="MonoGame.Content.Builder.Editor.targets" />
 
 </Project>

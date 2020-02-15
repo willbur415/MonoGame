@@ -3,7 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net471</TargetFramework>
+    <BaseOutputPath>..\..\Artifacts\MonoGame.Content.Builder.Editor\Mac</BaseOutputPath>
     <DefineConstants>MONOMAC;MAC</DefineConstants>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>mgcb-editor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +27,6 @@
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.5.0-rc.5" />
     <PackageReference Include="Eto.Platform.Mac64" Version="2.5.0-rc.5" />
-    <PackageReference Include="GtkSharp" Version="3.22.25.56" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +36,6 @@
     </ProjectReference>
   </ItemGroup>
 
-  <Import Project="PipelineTool.targets" />
+  <Import Project="MonoGame.Content.Builder.Editor.targets" />
 
 </Project>

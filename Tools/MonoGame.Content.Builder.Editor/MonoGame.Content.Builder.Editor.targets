@@ -1,7 +1,7 @@
 <Project>
 
   <ItemGroup>
-    <Compile Include="..\MGCB\CommandLineParser.cs" />
+    <Compile Include="..\MonoGame.Content.Builder\CommandLineParser.cs" />
   </ItemGroup>
 
   <ItemGroup>

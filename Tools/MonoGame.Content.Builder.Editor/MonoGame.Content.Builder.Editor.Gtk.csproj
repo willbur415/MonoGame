@@ -3,7 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <BaseOutputPath>..\..\Artifacts\MonoGame.Content.Builder.Editor\Gtk</BaseOutputPath>
     <DefineConstants>GTK</DefineConstants>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>mgcb-editor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +21,6 @@
     <Compile Remove="Global.Windows.cs" />
     <Compile Remove="Styles.Mac.cs" />
     <Compile Remove="Styles.Windows.cs" />
-    <Compile Remove="Properties\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +36,6 @@
     </ProjectReference>
   </ItemGroup>
 
-  <Import Project="PipelineTool.targets" />
+  <Import Project="MonoGame.Content.Builder.Editor.targets" />
 
 </Project>

@@ -8,7 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using MGCB;
+using MonoGame.Content.Builder;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using PathHelper = MonoGame.Framework.Content.Pipeline.Builder.PathHelper;

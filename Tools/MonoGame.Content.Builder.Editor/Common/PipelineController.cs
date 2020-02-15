@@ -11,7 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using MGCB;
+using MonoGame.Content.Builder;
 using PathHelper = MonoGame.Framework.Content.Pipeline.Builder.PathHelper;
 
 namespace MonoGame.Tools.Pipeline
@@ -490,19 +490,19 @@ namespace MonoGame.Tools.Pipeline
         {
             foreach (var root in _mgcbSearchPaths)
             {
-                var mgcbPath = Path.Combine(root, "MGCB.exe");
+                var mgcbPath = Path.Combine(root, "mgcb.exe");
                 if (File.Exists(mgcbPath))
                     return Path.GetFullPath(mgcbPath);
 
                 if (Global.Unix)
                 {
-                    mgcbPath = Path.Combine(root, "MGCB");
+                    mgcbPath = Path.Combine(root, "mgcb");
                     if (File.Exists(mgcbPath))
                         return Path.GetFullPath(mgcbPath);
                 }
             }
 
-            throw new FileNotFoundException("MGCB is not in the search path!");
+            throw new FileNotFoundException("mgcb is not in the search path!");
         }
 
         private void DoBuild(string commands)

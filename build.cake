@@ -151,7 +151,7 @@ Task("BuildTools")
 Task("PackVSTemplates")
     .Does(() =>
 {
-    var vsdirs = GetDirectories("./ProjectTemplates/VisualStudio20*");
+    var vsdirs = GetDirectories("./Templates/VisualStudio20*");
     foreach (var vsdir in vsdirs)
     {
         DeleteFiles(vsdir.CombineWithFilePath("*.zip").FullPath);
@@ -163,9 +163,8 @@ Task("PackVSTemplates")
         }
     }
     
-    // Pack dotnet templates
-    DotNetCoreRestore("ProjectTemplates/DotNetTemplate/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
-    PackProject("ProjectTemplates/DotNetTemplate/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
+    DotNetCoreRestore("Templates/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
+    PackProject("Templates/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
 });
 
 Task("PackWindows")

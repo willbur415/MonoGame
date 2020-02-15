@@ -7,6 +7,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>mgcb</ToolCommandName>
     <PackageId>dotnet-mgcb</PackageId>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

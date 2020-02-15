@@ -173,22 +173,6 @@ Task("PackWindows")
     .IsDependentOn("PackVSTemplates")
     .Does(() =>
 {
-    // The old build script passes defines through an nsh file, NSIS needs it to exist or it will crash
-    // TODO remove this
-    if (!FileExists("./Installers/Windows/header.nsh"))
-        System.IO.File.Create("./Installers/Windows/header.nsh").Dispose();
-
-    var settings = new MakeNSISSettings();
-    settings.ToolPath = "C:/Program Files (x86)/NSIS/makensis.exe";
-    settings.WorkingDirectory = "./Installers/Windows";
-    settings.Defines = new Dictionary<string, string>()
-    {
-        { "FrameworkPath", Context.Environment.WorkingDirectory.CombineWithFilePath("Installers/").FullPath },
-        { "VERSION", majorVersion},
-        { "INSTALLERVERSION", version },
-    };
-
-    MakeNSIS("./Installers/Windows/MonoGame.nsi", settings);
 });
 
 Task("PackLinux")

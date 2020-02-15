@@ -1,16 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <BaseOutputPath>..\..\Artifacts\Tools\MonoGame.Content.Builder</BaseOutputPath>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>mgcb</ToolCommandName>
+    <PackageId>dotnet-mgcb</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="MonoGame.Content.Builder.props" PackagePath="build" />
-    <Content Include="MonoGame.Content.Builder.targets" PackagePath="build" />
-    <Content Include="version\Version.props" PackagePath="build\version\$(PackageVersion)" />
+    <ProjectReference Include="..\..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
+    <ProjectReference Include="..\..\MonoGame.Framework.Content.Pipeline\MonoGame.Framework.Content.Pipeline.csproj" />
   </ItemGroup>
 
 </Project>
+

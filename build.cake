@@ -143,9 +143,12 @@ Task("BuildTools")
 
     DotNetCoreRestore("Tools/MGCB/MGCB.csproj");
     PackProject("Tools/MGCB/MGCB.csproj");
-
+    
     DotNetCoreRestore("Tools/MonoGame.Content.Builder/MonoGame.Content.Builder.csproj");
     PackProject("Tools/MonoGame.Content.Builder/MonoGame.Content.Builder.csproj");
+
+    DotNetCoreRestore("Tools/MonoGame.Packaging.Flatpak/MonoGame.Packaging.Flatpak.csproj");
+    PackProject("Tools/MonoGame.Packaging.Flatpak/MonoGame.Packaging.Flatpak.csproj");
 });
 
 Task("PackVSTemplates")

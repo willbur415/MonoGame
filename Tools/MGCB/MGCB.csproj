@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <BaseOutputPath>..\..\Artifacts\Tools\MGCB</BaseOutputPath>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>mgcb</ToolCommandName>
     <PackageId>dotnet-mgcb</PackageId>

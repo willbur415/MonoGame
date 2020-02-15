@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <BaseOutputPath>..\..\Artifacts\Tools\2MGFX</BaseOutputPath>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>2mgfx</ToolCommandName>
     <PackageId>dotnet-2mgfx</PackageId>

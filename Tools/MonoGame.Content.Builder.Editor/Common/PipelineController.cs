@@ -29,18 +29,13 @@ namespace MonoGame.Tools.Pipeline
 
         private static readonly string [] _mgcbSearchPaths = new []       
         {
-            "/Library/Frameworks/MonoGame.framework/Current/Tools",
 #if DEBUG
-            "../../../../MGCB/bin/Debug/netcoreapp3.0",
-            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../../MGCB/bin/Debug/netcoreapp3.0"),
-            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../../../../../MGCB/bin/Debug/netcoreapp3.0"),
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../MonoGame.Content.Builder/Debug"),
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../../../../MonoGame.Content.Builder/Debug"),
 #else
-            "../../../../MGCB/bin/Release/netcoreapp3.0",
-            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../../MGCB/bin/Release/netcoreapp3.0"),
-            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../../../../../MGCB/bin/Release/netcoreapp3.0"),
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../MonoGame.Content.Builder/Release"),
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "../../../../../../MonoGame.Content.Builder/Release"),
 #endif
-            "../MGCB",
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
 
         };
 
@@ -114,7 +109,7 @@ namespace MonoGame.Tools.Pipeline
             {
                 root = Path.Combine(root, "..", "Resources");
             }
-            LoadTemplates(Path.Combine(root, "Templates"));
+            LoadTemplates(Path.Combine(root, "../../../Templates"));
             UpdateMenu();
 
             view.UpdateRecentList(PipelineSettings.Default.ProjectHistory);

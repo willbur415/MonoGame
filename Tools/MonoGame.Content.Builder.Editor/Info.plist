@@ -8,7 +8,7 @@
         	<string>false</string>
     	</dict>
 	<key>CFBundleName</key>
-	<string>Pipeline.MacOS</string>
+	<string>MonoGame Content Builder Editor</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
@@ -20,7 +20,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>MonoGame Content Pipeline Tool</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.monogame.pipeline</string>
+	<string>net.monogame.mgcb-editor</string>
 	<key>CFBundleShortVersionString</key>
 	<string>3.3</string>
 	<key>CFBundleIconFile</key>

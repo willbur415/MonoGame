@@ -151,7 +151,15 @@ Task("BuildTools")
     PackProject("Tools/MonoGame.Packaging.Flatpak/MonoGame.Packaging.Flatpak.csproj");
 });
 
+Task("PackDotNetTemplates")
+    .Does(() =>
+{
+    DotNetCoreRestore("Templates/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
+    PackProject("Templates/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
+});
+
 Task("PackVSTemplates")
+    .IsDependentOn("PackDotNetTemplates")
     .Does(() =>
 {
     var vsdirs = GetDirectories("./Templates/VisualStudio20*");
@@ -166,8 +174,6 @@ Task("PackVSTemplates")
         }
     }
     
-    DotNetCoreRestore("Templates/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
-    PackProject("Templates/MonoGame.Templates.CSharp/MonoGame.Templates.CSharp.csproj");
 });
 
 Task("PackWindows")
@@ -180,12 +186,14 @@ Task("PackWindows")
 
 Task("PackLinux")
     .IsDependentOn("BuildAll")
+    .IsDependentOn("PackDotNetTemplates")
     .Does(() =>
 {
 });
 
 Task("PackMac")
     .IsDependentOn("BuildAll")
+    .IsDependentOn("PackDotNetTemplates")
     .Does(() =>
 {
 });
@@ -204,13 +212,13 @@ Task("BuildAll")
     .IsDependentOn("BuildContentPipeline")
     .IsDependentOn("BuildTools");
 
-Task("PackInstallers")
+Task("Pack")
     .IsDependentOn("PackWindows")
     .IsDependentOn("PackLinux")
     .IsDependentOn("PackMac");
 
 Task("Default")
-    .IsDependentOn("PackInstallers");
+    .IsDependentOn("Pack");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION

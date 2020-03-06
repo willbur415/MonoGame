@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using static WebHelper;
 using static Retyped.dom;
 using static Retyped.es5;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -39,9 +38,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 ibo = gl.createBuffer();
                 GraphicsExtensions.CheckGLError();
-                gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, ibo);
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
                 GraphicsExtensions.CheckGLError();
-                gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, new Int16Array(0), _isDynamic ? glc.STREAM_DRAW : glc.STATIC_DRAW);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(0), _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -65,14 +64,14 @@ namespace Microsoft.Xna.Framework.Graphics
             var elementSizeInByte = (IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4);
             var bufferSize = IndexCount * elementSizeInByte;
             
-            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, ibo);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
             GraphicsExtensions.CheckGLError();
             
             if (options == SetDataOptions.Discard)
             {
                 // By assigning NULL data to the buffer this gives a hint
                 // to the device to discard the previous content.
-                gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, new Int16Array(0), _isDynamic ? glc.STREAM_DRAW : glc.STATIC_DRAW);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(0), _isDynamic ? gl.STREAM_DRAW : gl.STATIC_DRAW);
                 GraphicsExtensions.CheckGLError();
             }
             
@@ -81,14 +80,14 @@ namespace Microsoft.Xna.Framework.Graphics
                 var arr = new Uint16Array((uint)elementCount);
                 for (uint i = 0; i < elementCount; i++)
                     arr[i] = data[i + startIndex].As<ushort>();
-                gl.bufferSubData(glc.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
             }
             else
             {
                 var arr = new Uint32Array((uint)elementCount);
                 for (uint i = 0; i < elementCount; i++)
                     arr[i] = data[i + startIndex].As<uint>();
-                gl.bufferSubData(glc.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, offsetInBytes, arr);
             }
             GraphicsExtensions.CheckGLError();
         }

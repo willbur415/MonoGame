@@ -7,7 +7,6 @@ using static Retyped.dom;
 using static Retyped.es5;
 using static WebHelper;
 using Math = System.Math;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -15,19 +14,19 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
         private void PlatformConstruct(GraphicsDevice graphicsDevice, int size, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
-            this.glTarget = glc.TEXTURE_CUBE_MAP;
+            this.glTarget = gl.TEXTURE_CUBE_MAP;
 
             this.glTexture = gl.createTexture();
             GraphicsExtensions.CheckGLError();
-            gl.bindTexture(glc.TEXTURE_CUBE_MAP, this.glTexture);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.glTexture);
             GraphicsExtensions.CheckGLError();
-            gl.texParameteri(glc.TEXTURE_CUBE_MAP, glc.TEXTURE_MIN_FILTER, mipMap ? glc.LINEAR_MIPMAP_LINEAR : glc.LINEAR);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, mipMap ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
             GraphicsExtensions.CheckGLError();
-            gl.texParameteri(glc.TEXTURE_CUBE_MAP, glc.TEXTURE_MAG_FILTER, glc.LINEAR);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             GraphicsExtensions.CheckGLError();
-            gl.texParameteri(glc.TEXTURE_CUBE_MAP, glc.TEXTURE_WRAP_S, glc.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             GraphicsExtensions.CheckGLError();
-            gl.texParameteri(glc.TEXTURE_CUBE_MAP, glc.TEXTURE_WRAP_T, glc.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             GraphicsExtensions.CheckGLError();
 
 
@@ -37,7 +36,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 var target = GetGLCubeFace((CubeMapFace)i);
 
-                if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
+                if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
                 {
                     var imageSize = 0;
                     switch (format)
@@ -65,19 +64,19 @@ namespace Microsoft.Xna.Framework.Graphics
                         default:
                             throw new NotSupportedException();
                     }
-                    gl.compressedTexImage2D(target, 0, glInternalFormat, size, size, 0, null);
+                    gl.compressedTexImage2D(target, 0, glInternalFormat, size, size, 0, new Int8Array(0));
                     GraphicsExtensions.CheckGLError();
                 }
                 else
                 {
-                    gl.texImage2D(target, 0, glInternalFormat, size, size, 0, glFormat, glType, (new ImageData(size, size).As<Retyped.webgl2.ImageBitmap>()));
+                    gl.texImage2D(target, 0, glInternalFormat, size, size, 0, glFormat, glType, new Int8Array(0).As<ArrayBufferView>());
                     GraphicsExtensions.CheckGLError();
                 }
             }
 
             if (mipMap)
             {
-                gl.generateMipmap(glc.TEXTURE_CUBE_MAP);
+                gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -91,13 +90,13 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             var subarr = new Uint8Array(data.As<ArrayBuffer>(), startIndex.As<uint>(), elementCount.As<uint>());
 
-            gl.bindTexture(glc.TEXTURE_CUBE_MAP, this.glTexture);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.glTexture);
             GraphicsExtensions.CheckGLError();
 
             var target = GetGLCubeFace(face);
-            if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
+            if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
             {
-                gl.compressedTexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height, glInternalFormat, subarr.As<ArrayBufferView>());
+                gl.compressedTexSubImage2D(target, level, rect.X, rect.Y, rect.Width, rect.Height, glInternalFormat, subarr);
                 GraphicsExtensions.CheckGLError();
             }
             else
@@ -112,17 +111,17 @@ namespace Microsoft.Xna.Framework.Graphics
 			switch (face)
             {
                 case CubeMapFace.PositiveX:
-                    return glc.TEXTURE_CUBE_MAP_POSITIVE_X;
+                    return gl.TEXTURE_CUBE_MAP_POSITIVE_X;
                 case CubeMapFace.NegativeX:
-                    return glc.TEXTURE_CUBE_MAP_NEGATIVE_X;
+                    return gl.TEXTURE_CUBE_MAP_NEGATIVE_X;
                 case CubeMapFace.PositiveY:
-                    return glc.TEXTURE_CUBE_MAP_POSITIVE_Y;
+                    return gl.TEXTURE_CUBE_MAP_POSITIVE_Y;
                 case CubeMapFace.NegativeY:
-                    return glc.TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                    return gl.TEXTURE_CUBE_MAP_NEGATIVE_Y;
                 case CubeMapFace.PositiveZ:
-                    return glc.TEXTURE_CUBE_MAP_POSITIVE_Z;
+                    return gl.TEXTURE_CUBE_MAP_POSITIVE_Z;
                 case CubeMapFace.NegativeZ:
-                    return glc.TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                    return gl.TEXTURE_CUBE_MAP_NEGATIVE_Z;
 			}
 			throw new ArgumentException();
 		}

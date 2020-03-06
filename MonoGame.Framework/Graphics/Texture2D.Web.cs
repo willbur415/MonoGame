@@ -9,7 +9,6 @@ using static Retyped.dom;
 using static Retyped.es5;
 using static WebHelper;
 using Math = System.Math;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -17,7 +16,7 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         private void PlatformConstruct(int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
-            this.glTarget = glc.TEXTURE_2D;
+            this.glTarget = gl.TEXTURE_2D;
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
 
             GenerateGLTextureIfRequired();
@@ -27,7 +26,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             while (true)
             {
-                if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
+                if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
                 {
                     int imageSize = 0;
                     // PVRTC has explicit calculations for imageSize
@@ -51,7 +50,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                 }
 
-                gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, glFormat, glType, (new ImageData(w, h).As<Retyped.webgl2.ImageBitmap>()));
+                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, glFormat, glType, (new ImageData(w, h).As<ImageBitmap>()));
                 GraphicsExtensions.CheckGLError();
 
                 if ((w == 1 && h == 1) || !mipmap)
@@ -73,19 +72,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 // For best compatibility and to keep the default wrap mode of XNA, only set ClampToEdge if either
                 // dimension is not a power of two.
-                var wrap = glc.REPEAT;
+                var wrap = gl.REPEAT;
                 if (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0))
-                    wrap = glc.CLAMP_TO_EDGE;
+                    wrap = gl.CLAMP_TO_EDGE;
 
-                gl.bindTexture(glc.TEXTURE_2D, glTexture);
+                gl.bindTexture(gl.TEXTURE_2D, glTexture);
                 GraphicsExtensions.CheckGLError();
-                gl.texParameteri(glc.TEXTURE_2D, glc.TEXTURE_MIN_FILTER, (_levelCount > 1) ? glc.LINEAR_MIPMAP_LINEAR : glc.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, (_levelCount > 1) ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
                 GraphicsExtensions.CheckGLError();
-                gl.texParameteri(glc.TEXTURE_2D, glc.TEXTURE_MAG_FILTER, glc.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                 GraphicsExtensions.CheckGLError();
-                gl.texParameteri(glc.TEXTURE_2D, glc.TEXTURE_WRAP_S, wrap);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
                 GraphicsExtensions.CheckGLError();
-                gl.texParameteri(glc.TEXTURE_2D, glc.TEXTURE_WRAP_T, wrap);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -100,12 +99,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (prevTexture != glTexture)
             {
-                gl.bindTexture(glc.TEXTURE_2D, glTexture);
+                gl.bindTexture(gl.TEXTURE_2D, glTexture);
                 GraphicsExtensions.CheckGLError();
             }
 
             GenerateGLTextureIfRequired();
-            gl.pixelStorei(glc.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
+            gl.pixelStorei(gl.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
 
             ArrayBufferView arrayBuffer = null;
             var size = Utilities.ReflectionHelpers.SizeOf<T>.Get();
@@ -139,17 +138,17 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new NotImplementedException();
             }
 
-            if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
-                gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, arrayBuffer);
+            if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
+                gl.compressedTexImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, arrayBuffer.As<Int8Array>());
             else
-                gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arrayBuffer);
+                gl.texImage2D(gl.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arrayBuffer);
 
             GraphicsExtensions.CheckGLError();
 
             // Restore the bound texture.
             if (prevTexture != glTexture)
             {
-                gl.bindTexture(glc.TEXTURE_2D, prevTexture);
+                gl.bindTexture(gl.TEXTURE_2D, prevTexture);
                 GraphicsExtensions.CheckGLError();
             }
         }
@@ -161,12 +160,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
             if (prevTexture != glTexture)
             {
-                gl.bindTexture(glc.TEXTURE_2D, glTexture);
+                gl.bindTexture(gl.TEXTURE_2D, glTexture);
                 GraphicsExtensions.CheckGLError();
             }
 
             GenerateGLTextureIfRequired();
-            gl.pixelStorei(glc.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
+            gl.pixelStorei(gl.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
 
             ArrayBufferView arrayBuffer = null;
             var size = Utilities.ReflectionHelpers.SizeOf<T>.Get();
@@ -200,16 +199,16 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new NotImplementedException();
             }
 
-            if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
-                gl.compressedTexSubImage2D(glc.TEXTURE_2D, level, rect.X, rect.Y, rect.Width, rect.Height, glInternalFormat, arrayBuffer);
+            if (glFormat == gl.COMPRESSED_TEXTURE_FORMATS)
+                gl.compressedTexSubImage2D(gl.TEXTURE_2D, level, rect.X, rect.Y, rect.Width, rect.Height, glInternalFormat, arrayBuffer.As<Int8Array>());
             else
-                gl.texSubImage2D(glc.TEXTURE_2D, level, rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, arrayBuffer);
+                gl.texSubImage2D(gl.TEXTURE_2D, level, rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, arrayBuffer);
             GraphicsExtensions.CheckGLError();
             
             // Restore the bound texture.
             if (prevTexture != glTexture)
             {
-                gl.bindTexture(glc.TEXTURE_2D, prevTexture);
+                gl.bindTexture(gl.TEXTURE_2D, prevTexture);
                 GraphicsExtensions.CheckGLError();
             }
         }

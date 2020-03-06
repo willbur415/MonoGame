@@ -4,7 +4,6 @@
 
 using static Retyped.dom;
 using static WebHelper;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -12,7 +11,7 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         internal WebGLTexture glTexture;
         internal double glTarget;
-        internal double glTextureUnit = glc.TEXTURE0;
+        internal double glTextureUnit = gl.TEXTURE0;
         internal double glInternalFormat;
         internal double glFormat;
         internal double glType;

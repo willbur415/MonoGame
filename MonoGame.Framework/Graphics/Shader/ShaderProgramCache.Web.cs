@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using static Retyped.dom;
 using static WebHelper;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -99,7 +98,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             pixelShader.ApplySamplerTextureUnits(program);
 
-            var linked = (bool)gl.getProgramParameter(program, glc.LINK_STATUS);
+            var linked = (bool)gl.getProgramParameter(program, gl.LINK_STATUS);
             GraphicsExtensions.LogGLError("VertexShaderCache.Link(), GL.GetProgram");
 
             if (!linked)

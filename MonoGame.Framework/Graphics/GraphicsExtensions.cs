@@ -16,7 +16,6 @@ using OpenTK.Graphics;
 #endif
 #if WEB
 using static WebHelper;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 #endif
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -903,7 +902,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             var error = gl.getError();
 
-            if (error != glc.NO_ERROR)
+            if (error != gl.NO_ERROR)
                 throw new MonoGameGLException("GL.GetError() returned " + error);
         }
 #elif OPENGL

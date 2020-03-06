@@ -13,7 +13,6 @@ using System.Linq;
 using static Retyped.dom;
 using static WebHelper;
 using static Retyped.es5;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -164,24 +163,17 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             _programCache = new ShaderProgramCache(this);
 
-            MaxTextureSlots = (int)gl.getParameter(glc.MAX_TEXTURE_IMAGE_UNITS);
+            MaxTextureSlots = (int)gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
             GraphicsExtensions.CheckGLError();
 
-            _maxTextureSize = (int)gl.getParameter(glc.MAX_TEXTURE_SIZE);
+            _maxTextureSize = (int)gl.getParameter(gl.MAX_TEXTURE_SIZE);
             GraphicsExtensions.CheckGLError();
 
-            MaxVertexAttributes = (int)gl.getParameter(glc.MAX_VERTEX_ATTRIBS);
+            MaxVertexAttributes = (int)gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
             GraphicsExtensions.CheckGLError();
 
             _maxVertexBufferSlots = MaxVertexAttributes;
             _newEnabledVertexAttributes = new bool[MaxVertexAttributes];
-
-            int maxDrawBuffers = (int)gl.getParameter(gl.MAX_DRAW_BUFFERS);
-            GraphicsExtensions.CheckGLError ();
-
-			_drawBuffers = new double[maxDrawBuffers];
-			for (int i = 0; i < maxDrawBuffers; i++)
-				_drawBuffers[i] = glc.COLOR_ATTACHMENT0 + i;
         }
 
         private void PlatformInitialize()
@@ -244,7 +236,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     _lastClearColor = color;
                 }
 
-                bufferMask = bufferMask | (int)glc.COLOR_BUFFER_BIT;
+                bufferMask = bufferMask | (int)gl.COLOR_BUFFER_BIT;
             }
 			if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
             {
@@ -254,7 +246,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
                     _lastClearStencil = stencil;
                 }
-                bufferMask = bufferMask | (int)glc.STENCIL_BUFFER_BIT;
+                bufferMask = bufferMask | (int)gl.STENCIL_BUFFER_BIT;
 			}
 
 			if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer) 
@@ -265,7 +257,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
                     _lastClearDepth = depth;
                 }
-				bufferMask = bufferMask | (int)glc.DEPTH_BUFFER_BIT;
+				bufferMask = bufferMask | (int)gl.DEPTH_BUFFER_BIT;
 			}
 
             gl.clear(bufferMask);
@@ -433,7 +425,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal void PlatformCreateRenderTarget(IRenderTarget renderTarget, int width, int height, bool mipMap, SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)
         {
-            WebGLRenderbuffer color = null;
+            /*WebGLRenderbuffer color = null;
             WebGLRenderbuffer depth = null;
             WebGLRenderbuffer stencil = null;
             
@@ -478,7 +470,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             renderTarget.GLColorBuffer = color;
             renderTarget.GLDepthBuffer = depth;
-            renderTarget.GLStencilBuffer = stencil;
+            renderTarget.GLStencilBuffer = stencil;*/
         }
 
         internal void PlatformDeleteRenderTarget(IRenderTarget renderTarget)
@@ -543,7 +535,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     for (var i = 0; i < this._currentRenderTargetCount; ++i)
                     {
                         var rt = this._currentRenderTargetBindings[i].RenderTarget as IRenderTarget;
-                        this.framebufferHelper.FramebufferTexture2D((int)(glc.COLOR_ATTACHMENT0 + i), (int) rt.GetFramebufferTarget(renderTargetBinding), rt.GLTexture);
+                        this.framebufferHelper.FramebufferTexture2D((int)(gl.COLOR_ATTACHMENT0 + i), (int) rt.GetFramebufferTarget(renderTargetBinding), rt.GLTexture);
                     }
                     this.glResolveFramebuffers.Add((RenderTargetBinding[])this._currentRenderTargetBindings.Clone(), glResolveFramebuffer);
                 }
@@ -554,7 +546,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 // The only fragment operations which affect the resolve are the pixel ownership test, the scissor test, and dithering.
                 if (this._lastRasterizerState.ScissorTestEnable)
                 {
-                    gl.disable(glc.SCISSOR_TEST);
+                    gl.disable(gl.SCISSOR_TEST);
                     GraphicsExtensions.CheckGLError();
                 }
                 var glFramebuffer = this.glFramebuffers[this._currentRenderTargetBindings];
@@ -569,7 +561,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     this.framebufferHelper.InvalidateReadFramebuffer();
                 if (this._lastRasterizerState.ScissorTestEnable)
                 {
-                    gl.enable(glc.SCISSOR_TEST);
+                    gl.enable(gl.SCISSOR_TEST);
                     GraphicsExtensions.CheckGLError();
                 }
             }
@@ -588,7 +580,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private IRenderTarget PlatformApplyRenderTargets()
         {
-            if (!this.glFramebuffers.TryGetValue(this._currentRenderTargetBindings, out WebGLFramebuffer glFramebuffer))
+            /*if (!this.glFramebuffers.TryGetValue(this._currentRenderTargetBindings, out WebGLFramebuffer glFramebuffer))
             {
                 this.framebufferHelper.GenFramebuffer(out glFramebuffer);
                 this.framebufferHelper.BindFramebuffer(glFramebuffer);
@@ -622,9 +614,9 @@ namespace Microsoft.Xna.Framework.Graphics
             _rasterizerStateDirty = true;
 
             // Textures will need to be rebound to render correctly in the new render target.
-            Textures.Dirty();
+            Textures.Dirty();*/
 
-            return _currentRenderTargetBindings[0].RenderTarget as IRenderTarget;
+            return null; // _currentRenderTargetBindings[0].RenderTarget as IRenderTarget;
         }
         
         internal void OnPresentationChanged()
@@ -750,7 +742,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
                 if (_indexBuffer != null)
                 {
-                    gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, _indexBuffer.ibo);
+                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _indexBuffer.ibo);
                     GraphicsExtensions.CheckGLError();
                 }
                 _indexBufferDirty = false;
@@ -804,9 +796,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var buffer = gl.createBuffer();
             GraphicsExtensions.CheckGLError();
-            gl.bindBuffer(glc.ARRAY_BUFFER, buffer);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ARRAY_BUFFER, vertexArrayBuffer, glc.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, vertexArrayBuffer, gl.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
 
             var mode = (uint) GraphicsExtensions.GetPrimitiveTypeGL(primitiveType);
@@ -817,7 +809,7 @@ namespace Microsoft.Xna.Framework.Graphics
             gl.drawArrays(mode, 0, vertexCount);
             GraphicsExtensions.CheckGLError();
 
-            gl.bindBuffer(glc.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
             GraphicsExtensions.CheckGLError();
             gl.deleteBuffer(buffer);
             GraphicsExtensions.CheckGLError();
@@ -842,13 +834,13 @@ namespace Microsoft.Xna.Framework.Graphics
             var vertexBuffer = gl.createBuffer();
             var indexBuffer = gl.createBuffer();
 
-            gl.bindBuffer(glc.ARRAY_BUFFER, vertexBuffer);
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ARRAY_BUFFER, vertexArrayBuffer, glc.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, vertexArrayBuffer, gl.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
-            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, uintIndexData, glc.STATIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, uintIndexData, gl.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
 
             _vertexBuffersDirty = true;
@@ -859,11 +851,11 @@ namespace Microsoft.Xna.Framework.Graphics
             vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
 
             GraphicsExtensions.CheckGLError();
-            gl.drawElements(mode, count, glc.UNSIGNED_SHORT, 0);
+            gl.drawElements(mode, count, gl.UNSIGNED_SHORT, 0);
             GraphicsExtensions.CheckGLError();
 
-            gl.bindBuffer(glc.ARRAY_BUFFER, null);
-            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             gl.deleteBuffer(vertexBuffer);
             gl.deleteBuffer(indexBuffer);
         }
@@ -877,13 +869,13 @@ namespace Microsoft.Xna.Framework.Graphics
             var vertexBuffer = gl.createBuffer();
             var indexBuffer = gl.createBuffer();
 
-            gl.bindBuffer(glc.ARRAY_BUFFER, vertexBuffer);
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ARRAY_BUFFER, new Uint8Array(vertexData, (vertexOffset * 4 * 6).As<uint>(), (numVertices * 4 * 6).As<uint>()), glc.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(vertexData, (vertexOffset * 4 * 6).As<uint>(), (numVertices * 4 * 6).As<uint>()), gl.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
-            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.bufferData(glc.ELEMENT_ARRAY_BUFFER, indexData.As<Int16Array>().subarray(indexOffset.As<uint>()), glc.STATIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData.As<Int16Array>().subarray(indexOffset.As<uint>()), gl.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
 
             _vertexBuffersDirty = true;
@@ -894,11 +886,11 @@ namespace Microsoft.Xna.Framework.Graphics
             vertexDeclaration.Apply(_vertexShader, vertexOffset, ShaderProgramHash);
 
             GraphicsExtensions.CheckGLError();
-            gl.drawElements(mode, count, glc.UNSIGNED_SHORT, 0);
+            gl.drawElements(mode, count, gl.UNSIGNED_SHORT, 0);
             GraphicsExtensions.CheckGLError();
 
-            gl.bindBuffer(glc.ARRAY_BUFFER, null);
-            gl.bindBuffer(glc.ELEMENT_ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             gl.deleteBuffer(vertexBuffer);
             gl.deleteBuffer(indexBuffer);
         }

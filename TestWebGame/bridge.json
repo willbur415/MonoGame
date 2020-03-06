@@ -1,12 +1,12 @@
 {
-  "output": "$(OutDir)/bridge/",
-  "outputFormatting": "Minified",
+  "output": "$(OutDir)/",
+  "outputFormatting": "Formatted",
   "usetypedarrays": true,
   "console": {
       "enabled": true
   },
   "sourceMap": {
-      "enabled": false
+      "enabled": true
   },
   "reflection": {
       "disabled": false

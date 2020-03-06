@@ -14,7 +14,7 @@ using IntPtr = Microsoft.Xna.Framework.IntPtr;
 
 static class WebHelper
 {
-    public static Retyped.webgl2.WebGL2RenderingContext gl;
+    public static WebGLRenderingContext gl;
 }
 
 namespace Microsoft.Xna.Framework
@@ -43,12 +43,12 @@ namespace Microsoft.Xna.Framework
             _canvas.style.msUserSelect = "none";
 
             // TODO: Move "GL context" creation outside the game window
-            var possiblecontexts = new[] { "webgl2", "experimental-webgl2" };
+            var possiblecontexts = new[] { "webgl", "experimental-webgl", "webkit-3d", "moz-webgl" };
             foreach(var context in possiblecontexts)
             {
                 try
                 {
-                    WebHelper.gl = _canvas.getContext(context).As<Retyped.webgl2.WebGL2RenderingContext>();
+                    WebHelper.gl = _canvas.getContext(context).As<WebGLRenderingContext>();
                     if (WebHelper.gl != null)
                         break;
                 }
@@ -63,7 +63,7 @@ namespace Microsoft.Xna.Framework
                 d2d.fillStyle = "#000000";
                 d2d.font = "30px Arial";
                 d2d.textAlign = "center";
-                d2d.fillText("This device does not support WebGL 2  :(", _canvas.width / 2, _canvas.height / 2);
+                d2d.fillText("This device does not support WebGL  :(", _canvas.width / 2, _canvas.height / 2);
 
                 throw new Exception("Failed to get WebGL context :|");
             }

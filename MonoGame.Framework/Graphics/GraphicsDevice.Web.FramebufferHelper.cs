@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Security;
 using static WebHelper;
 using static Retyped.dom;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -63,7 +62,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void BindRenderbuffer(WebGLRenderbuffer renderbuffer)
             {
-                gl.bindRenderbuffer(glc.RENDERBUFFER, renderbuffer);
+                gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
@@ -75,7 +74,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void RenderbufferStorageMultisample(double samples, double internalFormat, double width, double height)
             {
-                gl.renderbufferStorage(glc.RENDERBUFFER, internalFormat, width, height);
+                gl.renderbufferStorage(gl.RENDERBUFFER, internalFormat, width, height);
                 GraphicsExtensions.CheckGLError();
             }
 
@@ -87,32 +86,29 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void BindFramebuffer(WebGLFramebuffer framebuffer)
             {
-                gl.bindFramebuffer(glc.FRAMEBUFFER, framebuffer);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
             internal virtual void BindReadFramebuffer(WebGLFramebuffer readFramebuffer)
             {
-                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, readFramebuffer);
-                GraphicsExtensions.CheckGLError();
+
             }
 
             static readonly double[] FramebufferAttachements = {
-                glc.COLOR_ATTACHMENT0,
-                glc.DEPTH_ATTACHMENT,
-                glc.STENCIL_ATTACHMENT,
+                gl.COLOR_ATTACHMENT0,
+                gl.DEPTH_ATTACHMENT,
+                gl.STENCIL_ATTACHMENT,
             };
 
             internal virtual void InvalidateDrawFramebuffer()
             {
-                Debug.Assert(this.SupportsInvalidateFramebuffer);
-                gl.invalidateFramebuffer(glc.FRAMEBUFFER, FramebufferAttachements);
+
             }
 
             internal virtual void InvalidateReadFramebuffer()
             {
-                Debug.Assert(this.SupportsInvalidateFramebuffer);
-                gl.invalidateFramebuffer(glc.FRAMEBUFFER, FramebufferAttachements);
+
             }
 
             internal virtual void DeleteFramebuffer(WebGLFramebuffer framebuffer)
@@ -123,13 +119,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void FramebufferTexture2D(double attachement, double target, WebGLTexture texture, double level = 0, double samples = 0)
             {
-                gl.framebufferTexture2D(glc.FRAMEBUFFER, attachement, target, texture, level);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, attachement, target, texture, level);
                 GraphicsExtensions.CheckGLError();
             }
 
             internal virtual void FramebufferRenderbuffer(double attachement, WebGLRenderbuffer renderbuffer, double level = 0)
             {
-                gl.framebufferRenderbuffer(glc.FRAMEBUFFER, attachement, glc.RENDERBUFFER, renderbuffer);
+                gl.framebufferRenderbuffer(gl.FRAMEBUFFER, attachement, gl.RENDERBUFFER, renderbuffer);
                 GraphicsExtensions.CheckGLError();
             }
 
@@ -142,12 +138,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
             internal virtual void BlitFramebuffer(double iColorAttachment, double width, double height)
             {
-                gl.readBuffer(glc.COLOR_ATTACHMENT0 + iColorAttachment);
-                GraphicsExtensions.CheckGLError();
-                gl.drawBuffers(new[] { glc.COLOR_ATTACHMENT0 + iColorAttachment });
-                GraphicsExtensions.CheckGLError();
-                gl.blitFramebuffer(0, 0, width, height, 0, 0, width, height, glc.COLOR_BUFFER_BIT, glc.NEAREST);
-                GraphicsExtensions.CheckGLError();
+                
 
             }
 

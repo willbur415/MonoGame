@@ -25,7 +25,6 @@ namespace TestWebGame
         Model _model;
         bool loading = true;
         SpriteFont font;
-        RenderTarget2D target;
         
         public Game1()
         {
@@ -61,9 +60,6 @@ namespace TestWebGame
             divdata = Retyped.dom.document.getElementById("testoutput") as Retyped.dom.HTMLDivElement;
 
             MediaPlayer.Volume = 0.1f;
-
-
-            target = new RenderTarget2D(GraphicsDevice, 640, 480);
 
             LoadContentAsync();
         }

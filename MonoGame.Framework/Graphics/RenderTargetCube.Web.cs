@@ -5,7 +5,6 @@
 using System;
 using static Retyped.dom;
 using static WebHelper;
-using glc = Retyped.webgl2.WebGL2RenderingContext;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -27,7 +26,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         double IRenderTarget.GetFramebufferTarget(RenderTargetBinding renderTargetBinding)
         {
-            return glc.TEXTURE_CUBE_MAP_POSITIVE_X + renderTargetBinding.ArraySlice;
+            return gl.TEXTURE_CUBE_MAP_POSITIVE_X + renderTargetBinding.ArraySlice;
         }
 
         private void PlatformConstruct(GraphicsDevice graphicsDevice, bool mipMap, DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage)

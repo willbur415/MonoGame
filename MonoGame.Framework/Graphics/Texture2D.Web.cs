@@ -19,12 +19,12 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             this.glTarget = glc.TEXTURE_2D;
             format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
-            
+
             GenerateGLTextureIfRequired();
             int w = width;
             int h = height;
             int level = 0;
-            
+
             while (true)
             {
                 if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
@@ -95,12 +95,6 @@ namespace Microsoft.Xna.Framework.Graphics
             int w, h;
             GetSizeForLevel(Width, Height, level, out w, out h);
 
-            // var elementSizeInByte = ReflectionHelpers.SizeOf<T>.Get();
-            // var dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            // Use try..finally to make sure dataHandle is freed in case of an error
-
-            // var startBytes = startIndex * elementSizeInByte;
-            // var dataPtr = new IntPtr(dataHandle.AddrOfPinnedObject().ToInt64() + startBytes);
             // Store the current bound texture.
             var prevTexture = GraphicsExtensions.GetBoundTexture2D();
 
@@ -113,14 +107,45 @@ namespace Microsoft.Xna.Framework.Graphics
             GenerateGLTextureIfRequired();
             gl.pixelStorei(glc.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
 
-            var subarr = new Uint8Array(data.As<ArrayBuffer>(), startIndex.As<uint>(), elementCount.As<uint>());
-            if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
-                gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, subarr);
+            ArrayBufferView arrayBuffer = null;
+            var size = Utilities.ReflectionHelpers.SizeOf<T>.Get();
+
+            if (size == 1)
+            {
+                var subarr = new Uint8Array(data.As<ArrayBuffer>(), startIndex.As<uint>(), elementCount.As<uint>());
+                arrayBuffer = subarr.As<ArrayBufferView>();
+            }
+            else if (size == 4 && typeof(T) == typeof(Color))
+            {
+                var subarr = new Uint8Array(4 * elementCount.As<uint>());
+                uint subarrindex = 0;
+
+                for (uint i = startIndex.As<uint>(); i < startIndex.As<uint>() + elementCount; i++)
+                {
+                    var col = data[i].As<Color>();
+
+                    subarr[subarrindex + 0] = col.R;
+                    subarr[subarrindex + 1] = col.G;
+                    subarr[subarrindex + 2] = col.B;
+                    subarr[subarrindex + 3] = col.A;
+
+                    subarrindex += 4;
+                }
+
+                arrayBuffer = subarr.As<ArrayBufferView>();
+            }
             else
-                gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, subarr.As<ArrayBufferView>());
+            {
+                throw new NotImplementedException();
+            }
+
+            if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
+                gl.compressedTexImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, arrayBuffer);
+            else
+                gl.texImage2D(glc.TEXTURE_2D, level, glInternalFormat, w, h, 0, glFormat, glType, arrayBuffer);
 
             GraphicsExtensions.CheckGLError();
-            
+
             // Restore the bound texture.
             if (prevTexture != glTexture)
             {
@@ -131,7 +156,62 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private void PlatformSetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
         {
-            throw new NotImplementedException();
+            // Store the current bound texture.
+            var prevTexture = GraphicsExtensions.GetBoundTexture2D();
+
+            if (prevTexture != glTexture)
+            {
+                gl.bindTexture(glc.TEXTURE_2D, glTexture);
+                GraphicsExtensions.CheckGLError();
+            }
+
+            GenerateGLTextureIfRequired();
+            gl.pixelStorei(glc.UNPACK_ALIGNMENT, Math.Min(_format.GetSize(), 8));
+
+            ArrayBufferView arrayBuffer = null;
+            var size = Utilities.ReflectionHelpers.SizeOf<T>.Get();
+
+            if (size == 1)
+            {
+                var subarr = new Uint8Array(data.As<ArrayBuffer>(), startIndex.As<uint>(), elementCount.As<uint>());
+                arrayBuffer = subarr.As<ArrayBufferView>();
+            }
+            else if (size == 4 && typeof(T) == typeof(Color))
+            {
+                var subarr = new Uint8Array(4 * elementCount.As<uint>());
+                uint subarrindex = 0;
+
+                for (uint i = startIndex.As<uint>(); i < startIndex.As<uint>() + elementCount; i++)
+                {
+                    var col = data[i].As<Color>();
+
+                    subarr[subarrindex + 0] = col.R;
+                    subarr[subarrindex + 1] = col.G;
+                    subarr[subarrindex + 2] = col.B;
+                    subarr[subarrindex + 3] = col.A;
+
+                    subarrindex += 4;
+                }
+
+                arrayBuffer = subarr.As<ArrayBufferView>();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            if (glFormat == glc.COMPRESSED_TEXTURE_FORMATS)
+                gl.compressedTexSubImage2D(glc.TEXTURE_2D, level, rect.X, rect.Y, rect.Width, rect.Height, glInternalFormat, arrayBuffer);
+            else
+                gl.texSubImage2D(glc.TEXTURE_2D, level, rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, arrayBuffer);
+            GraphicsExtensions.CheckGLError();
+            
+            // Restore the bound texture.
+            if (prevTexture != glTexture)
+            {
+                gl.bindTexture(glc.TEXTURE_2D, prevTexture);
+                GraphicsExtensions.CheckGLError();
+            }
         }
 
         private void PlatformGetData<T>(int level, int arraySlice, Rectangle rect, T[] data, int startIndex, int elementCount) where T : struct
@@ -158,6 +238,6 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             throw new NotImplementedException();
         }
-	}
+    }
 }
 

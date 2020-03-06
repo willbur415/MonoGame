@@ -18,7 +18,8 @@ namespace Microsoft.Xna.Framework.Utilities
             {
                 if (typeof(T) == typeof(Color))
                     _size = 4;
-                _size = 4;
+                else
+                    _size = 1;
             }
 
             static public int Get()

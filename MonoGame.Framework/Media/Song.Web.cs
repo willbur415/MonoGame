@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework.Media
 
             _audio = new HTMLAudioElement();
             _audio.oncanplaythrough += (e) => Content.ContentManager.BlockContentLoaading = false;
-            _audio.src = fileName;
+            _audio.src = fileName.EndsWith(".mp3") ? fileName : fileName + ".mp3";
             _audio.load();
 
             _duration = TimeSpan.FromSeconds(_audio.duration);

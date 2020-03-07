@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using Bridge;
 using static Retyped.dom;
 using static Retyped.es5;
 
@@ -11,7 +12,7 @@ namespace Microsoft.Xna.Framework.Audio
 {
     public partial class SoundEffectInstance : IDisposable
     {
-        internal static AudioContext Context = new AudioContext();
+        internal static AudioContext Context = Script.Eval<AudioContext>("var AudioContext = window.AudioContext || window.webkitAudioContext || false; new AudioContext");
 
         private AudioBuffer _buffer;
         private AudioBufferSourceNode _source;

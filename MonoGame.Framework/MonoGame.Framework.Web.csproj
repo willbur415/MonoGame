@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <DefineConstants>OPENGL;OPENAL;XNADESIGNPROVIDED;LINUX;WEB;SUPPORTS_EFX;NETSTANDARD;STBSHARP_INTERNAL</DefineConstants>
+    <DefineConstants>WEBGL;XNADESIGNPROVIDED;WEB;SUPPORTS_EFX;NETSTANDARD;STBSHARP_INTERNAL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework.</Description>
     <PackageTags>monogame;.net core;core;.net standard;standard;web</PackageTags>

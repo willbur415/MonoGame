@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Platform\Input\Keyboard.Default.cs" />
     <Compile Include="Platform\Graphics\GraphicsDevice.Web.cs" />
+    <Compile Include="Platform\Graphics\IRenderTarget.Web.cs" />
+    <Compile Include="Platform\Graphics\GraphicsDevice.Web.FramebufferHelper.cs" />
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\Web\WebGamePlatform.cs" />
     <Compile Include="Platform\Web\WebGameWindow.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="Platform\Graphics\TextureCube.Web.cs" />
     <Compile Include="Platform\Graphics\Shader\ConstantBuffer.Web.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Web.cs" />
+    <Compile Include="Platform\Graphics\Shader\ShaderProgramCache.Web.cs" />
     <Compile Include="Platform\Graphics\States\BlendState.Web.cs" />
     <Compile Include="Platform\Graphics\States\DepthStencilState.Web.cs" />
     <Compile Include="Platform\Graphics\States\RasterizerState.Web.cs" />
@@ -85,4 +88,14 @@
     <Compile Include="Platform\Graphics\Effect\EffectResource.OpenGL.cs" />
     <Compile Include="Platform\Graphics\GraphicsDebug.Default.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Platform\Graphics\Effect\Resources\AlphaTestEffect.ogl.mgfxo" />
+    <EmbeddedResource Include="Platform\Graphics\Effect\Resources\BasicEffect.ogl.mgfxo" />
+    <EmbeddedResource Include="Platform\Graphics\Effect\Resources\DualTextureEffect.ogl.mgfxo" />
+    <EmbeddedResource Include="Platform\Graphics\Effect\Resources\EnvironmentMapEffect.ogl.mgfxo" />
+    <EmbeddedResource Include="Platform\Graphics\Effect\Resources\SkinnedEffect.ogl.mgfxo" />
+    <EmbeddedResource Include="Platform\Graphics\Effect\Resources\SpriteEffect.ogl.mgfxo" />
+  </ItemGroup>
+
 </Project>

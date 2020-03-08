@@ -54,7 +54,12 @@ namespace TestGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            if (_tex != null)
+                _spriteBatch.Draw(_tex, Vector2.Zero, Color.White);
+
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }

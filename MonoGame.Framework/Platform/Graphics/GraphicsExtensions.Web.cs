@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Graphics
     internal static partial class GraphicsExtensions
     {
         [Conditional("DEBUG")]
-		[DebuggerHidden]
+        [DebuggerHidden]
         public static void CheckGLError()
         {
             var error = gl.GetError();
@@ -21,7 +21,20 @@ namespace Microsoft.Xna.Framework.Graphics
                 throw new MonoGameGLException("GL.GetError() returned " + error);
         }
 
-		public static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)
+        [Conditional("DEBUG")]
+        public static void LogGLError(string location)
+        {
+            try
+            {
+                GraphicsExtensions.CheckGLError();
+            }
+            catch (MonoGameGLException ex)
+            {
+                Debug.WriteLine("MonoGameGLException at " + location + " - " + ex.Message);
+            }
+        }
+
+        public static int OpenGLNumberOfElements(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -65,7 +78,7 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new ArgumentException();
         }
 
-		public static int OpenGLVertexAttribPointerType(this VertexElementFormat elementFormat)
+        public static int OpenGLVertexAttribPointerType(this VertexElementFormat elementFormat)
         {
             switch (elementFormat)
             {
@@ -77,7 +90,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 case VertexElementFormat.Color:
                 case VertexElementFormat.Byte4:
-					return (int)WebGL2RenderingContextBase.UNSIGNED_BYTE;
+                    return (int)WebGL2RenderingContextBase.UNSIGNED_BYTE;
 
                 case VertexElementFormat.Short2:
                 case VertexElementFormat.Short4:
@@ -112,10 +125,10 @@ namespace Microsoft.Xna.Framework.Graphics
                     return false;
             }
         }
-		
-		public static double GetBlendEquationMode (this BlendFunction function)
-		{
-			switch (function)
+
+        public static uint GetBlendEquationMode(this BlendFunction function)
+        {
+            switch (function)
             {
                 case BlendFunction.Add:
                     return WebGL2RenderingContextBase.FUNC_ADD;
@@ -126,12 +139,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
                 default:
                     throw new ArgumentException();
-			}
-		}
+            }
+        }
 
-		public static double GetBlendFactorSrc (this Blend blend)
-		{
-			switch (blend)
+        public static uint GetBlendFactorSrc(this Blend blend)
+        {
+            switch (blend)
             {
                 case Blend.BlendFactor:
                     return WebGL2RenderingContextBase.CONSTANT_COLOR;
@@ -163,11 +176,11 @@ namespace Microsoft.Xna.Framework.Graphics
                     throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
             }
 
-		}
+        }
 
-		public static double GetBlendFactorDest (this Blend blend)
-		{
-			switch (blend)
+        public static uint GetBlendFactorDest(this Blend blend)
+        {
+            switch (blend)
             {
                 case Blend.BlendFactor:
                     return WebGL2RenderingContextBase.CONSTANT_COLOR;
@@ -196,11 +209,11 @@ namespace Microsoft.Xna.Framework.Graphics
                 case Blend.Zero:
                     return WebGL2RenderingContextBase.ZERO;
                 default:
-				    throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
-			}
-		}
+                    throw new ArgumentOutOfRangeException("blend", "The specified blend function is not implemented.");
+            }
+        }
 
-        public static double GetDepthFunction(this CompareFunction compare)
+        public static uint GetDepthFunction(this CompareFunction compare)
         {
             switch (compare)
             {
@@ -224,19 +237,19 @@ namespace Microsoft.Xna.Framework.Graphics
             }
         }
 
-        public static void GetGLFormat (this SurfaceFormat format,
+        public static void GetGLFormat(this SurfaceFormat format,
             GraphicsDevice graphicsDevice,
             out uint glInternalFormat,
             out uint glFormat,
             out uint glType)
-		{
-			glInternalFormat = (int)WebGL2RenderingContextBase.RGBA;
-			glFormat = (int)WebGL2RenderingContextBase.RGBA;
-			glType = (int)WebGL2RenderingContextBase.UNSIGNED_BYTE;
+        {
+            glInternalFormat = (int)WebGL2RenderingContextBase.RGBA;
+            glFormat = (int)WebGL2RenderingContextBase.RGBA;
+            glType = (int)WebGL2RenderingContextBase.UNSIGNED_BYTE;
 
-		    var supportsSRgb = graphicsDevice.GraphicsCapabilities.SupportsSRgb;
-			
-			switch (format)
+            var supportsSRgb = graphicsDevice.GraphicsCapabilities.SupportsSRgb;
+
+            switch (format)
             {
                 case SurfaceFormat.Color:
                     glInternalFormat = WebGL2RenderingContextBase.RGBA;
@@ -270,8 +283,8 @@ namespace Microsoft.Xna.Framework.Graphics
                     break;
                 default:
                     throw new NotSupportedException();
-			}
-		}
+            }
+        }
 
         public static int GetPrimitiveTypeGL(PrimitiveType primitiveType)
         {
@@ -290,9 +303,9 @@ namespace Microsoft.Xna.Framework.Graphics
             throw new ArgumentException();
         }
 
-		public static WebGLTexture GetBoundTexture2D()
+        public static WebGLTexture GetBoundTexture2D()
         {
-			var ret = gl.GetParameter(WebGL2RenderingContextBase.TEXTURE_BINDING_2D);
+            var ret = gl.GetParameter(WebGL2RenderingContextBase.TEXTURE_BINDING_2D);
             GraphicsExtensions.CheckGLError();
 
             return ret as WebGLTexture;

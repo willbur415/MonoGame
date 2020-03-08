@@ -2,21 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	<NoWarn>NU1701;NU1604</NoWarn>
     <MonoWasmLinkMode>Full</MonoWasmLinkMode>
-    <MonoWasmLinkSkip>glTFLoader</MonoWasmLinkSkip>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\WebGL.NET\src\WebGLDotNET\WebGLDotNET.csproj" />
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.Web.csproj" />
   </ItemGroup>
  
   <ItemGroup>
-    <PackageReference Include="glTF2Loader" Version="1.1.3-alpha" />
-    <PackageReference Include="Humanizer.Core" Version="2.6.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="WaveEngine.Common" Version="2.5.0.39" />
     <PackageReference Include="WebAssembly.Bindings" Version="0.2.2" />
     <PackageReference Include="WebAssembly.Net.Http" Version="0.2.2" />
     <PackageReference Include="WebAssembly.Net.WebSockets" Version="0.2.2" />

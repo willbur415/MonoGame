@@ -5,23 +5,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
-using XnaKeys = Microsoft.Xna.Framework.Input.Keys;
-
-using JSIL;
-using JSIL.Meta;
-
-using MonoGame.Web;
 
 namespace Microsoft.Xna.Framework
 {
-    using MonoGame.Web;
-
-    public interface IHasCallback
-    {
-        void Callback();
-    }
-
-    class WebGamePlatform : GamePlatform, IHasCallback
+    class WebGamePlatform : GamePlatform
     {
         private WebGameWindow _view;
 
@@ -49,11 +36,7 @@ namespace Microsoft.Xna.Framework
 
         public override void StartRunLoop()
         {
-            ResetWindowBounds();
-            _view.window.setInterval((Action)(() => {
-                _view.ProcessEvents();
-                Game.Tick();
-            }), 25);
+
         }
 
         public override bool BeforeUpdate(GameTime gameTime)
@@ -78,17 +61,7 @@ namespace Microsoft.Xna.Framework
 
         internal void ResetWindowBounds()
         {
-            var graphicsDeviceManager = (GraphicsDeviceManager)Game.Services.GetService(typeof(IGraphicsDeviceManager));
 
-            if (graphicsDeviceManager.IsFullScreen)
-            {
-                
-            }
-            else
-            {
-                _view.glcanvas.style.width = graphicsDeviceManager.PreferredBackBufferWidth + "px";
-                _view.glcanvas.style.height = graphicsDeviceManager.PreferredBackBufferHeight + "px";
-            }
         }
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)

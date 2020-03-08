@@ -55,6 +55,7 @@
     <Compile Include="Platform\Input\Mouse.Default.cs" />
     <Compile Include="Platform\Input\MouseCursor.Default.cs" />
     <Compile Include="Platform\Graphics\GraphicsCapabilities.Web.cs" />
+    <Compile Include="Platform\Graphics\GraphicsExtensions.Web.cs" />
     <Compile Include="Platform\Graphics\RenderTarget2D.Web.cs" />
     <Compile Include="Platform\Graphics\RenderTargetCube.Web.cs" />
     <Compile Include="Platform\Graphics\SamplerStateCollection.Web.cs" />

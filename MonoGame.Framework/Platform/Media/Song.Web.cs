@@ -12,7 +12,7 @@ namespace Microsoft.Xna.Framework.Media
     {
         private void PlatformInitialize(string fileName)
         {
-
+            Console.WriteLine("Called: " + fileName);
         }
 
         internal void SetEventHandler(FinishedPlayingHandler handler) { }

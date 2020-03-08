@@ -8,7 +8,10 @@ namespace TestGame
     {
         static async void Main()
         {
-            JSObject canvas;
+            var g = new Game1();
+            g.Run();
+
+            /*JSObject canvas;
 
             using (var document = (JSObject)Runtime.GetGlobalObject("document"))
             using (var body = (JSObject)document.GetObjectProperty("body"))
@@ -79,7 +82,7 @@ void main(void) {
                 WebGLRenderingContextBase.TRIANGLES,
                 indices.Length,
                 WebGLRenderingContextBase.UNSIGNED_SHORT,
-                0);
+                0);*/
         }
     }
 }

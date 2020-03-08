@@ -5,14 +5,32 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
+using WebAssembly;
+using WebGLDotNET;
+
+static class WebHelper
+{
+    public static WebGL2RenderingContext gl;
+}
 
 namespace Microsoft.Xna.Framework
 {
     class WebGameWindow : GameWindow
     {
-        public WebGameWindow(WebGamePlatform platform)
-        {
+        private JSObject _canvas;
 
+        public WebGameWindow(Game game)
+        {
+            using (var document = (JSObject)Runtime.GetGlobalObject("document"))
+            using (var body = (JSObject)document.GetObjectProperty("body"))
+            {
+                _canvas = (JSObject)document.Invoke("createElement", "canvas");
+                _canvas.SetObjectProperty("width", 800);
+                _canvas.SetObjectProperty("height", 480);
+                body.Invoke("appendChild", _canvas);
+            }
+
+            WebHelper.gl = new WebGL2RenderingContext(_canvas);
         }
 
         public override void BeginScreenDeviceChange(bool willBeFullScreen)

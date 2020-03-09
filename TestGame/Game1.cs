@@ -11,6 +11,8 @@ namespace TestGame
         private SpriteBatch _spriteBatch;
         private Texture2D _tex;
         private Song _song;
+        bool loading = true;
+        SpriteFont font;
 
         public Game1()
         {
@@ -36,8 +38,11 @@ namespace TestGame
         {
             _song = await Content.LoadAsync<Song>("awake");
             _tex = await Content.LoadAsync<Texture2D>("hacker");
+            font = await Content.LoadAsync<SpriteFont>("font");
 
             MediaPlayer.Play(_song);
+
+            loading = false;
         }
 
         protected override void Update(GameTime gameTime)
@@ -50,14 +55,35 @@ namespace TestGame
             base.Update(gameTime);
         }
 
+        int frame = 0;
+        int frameCounter = 0;
+        int _lastTime = 0;
+
         protected override void Draw(GameTime gameTime)
         {
+            if (loading)
+            {
+                GraphicsDevice.Clear(Color.YellowGreen);
+                return;
+            }
+
+            if (gameTime.TotalGameTime.Seconds > _lastTime)
+            {
+                _lastTime = gameTime.TotalGameTime.Seconds;
+                frame = frameCounter;
+                frameCounter = 0;
+            }
+            else
+            {
+                frameCounter++;
+            }
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
 
-            if (_tex != null)
-                _spriteBatch.Draw(_tex, Vector2.Zero, Color.White);
+            _spriteBatch.Draw(_tex, Vector2.Zero, Color.White);
+            _spriteBatch.DrawString(font, "Fps: " + frame + System.Environment.NewLine + "Well spritefonts are working as well...", Vector2.Zero, Color.White);
 
             _spriteBatch.End();
 

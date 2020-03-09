@@ -17,7 +17,7 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             var error = gl.GetError();
 
-            if (error != WebGLRenderingContextBase.NO_ERROR)
+            if (error != WebGL2RenderingContextBase.NO_ERROR)
                 throw new MonoGameGLException("GL.GetError() returned " + error);
         }
 

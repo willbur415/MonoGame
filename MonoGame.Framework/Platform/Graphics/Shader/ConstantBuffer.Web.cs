@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using WebAssembly.Core;
 using WebGLDotNET;
 using static WebHelper;
 
@@ -71,7 +72,14 @@ namespace Microsoft.Xna.Framework.Graphics
             // and cast this correctly... else it doesn't work as i guess
             // GL is checking the type of the uniform.
 
-            gl.Uniform4fv(_location, _buffer, 0, (uint)_buffer.Length);
+            var arr = new Float32Array(_buffer.Length / 4);
+
+            for (int i = 0; i < _buffer.Length; i += 4)
+            {
+                arr[i / 4] = System.BitConverter.ToSingle(_buffer, i);
+            }
+
+            gl.Uniform4fv(_location, arr, 0, (uint)_buffer.Length / 4);
             
             GraphicsExtensions.CheckGLError();
 

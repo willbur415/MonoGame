@@ -9,8 +9,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input.Touch;
 using System.Diagnostics;
-using static WebHelper;
+using WebAssembly.Core;
 using WebGLDotNET;
+using static WebHelper;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -774,17 +775,26 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             ApplyState(true);
 
+            var vertexArrayBuffer = ConvertVertices(vertexData, vertexOffset, numVertices, vertexDeclaration);
             var count = GetElementCountArray(primitiveType, primitiveCount);
             var vertexBuffer = gl.CreateBuffer();
             var indexBuffer = gl.CreateBuffer();
 
             gl.BindBuffer(WebGL2RenderingContextBase.ARRAY_BUFFER, vertexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.BufferData(WebGL2RenderingContextBase.ARRAY_BUFFER, vertexData, WebGL2RenderingContextBase.STATIC_DRAW);
+            gl.BufferData(WebGL2RenderingContextBase.ARRAY_BUFFER, vertexArrayBuffer, WebGL2RenderingContextBase.STATIC_DRAW);
             GraphicsExtensions.CheckGLError();
             gl.BindBuffer(WebGL2RenderingContextBase.ELEMENT_ARRAY_BUFFER, indexBuffer);
             GraphicsExtensions.CheckGLError();
-            gl.BufferData(WebGL2RenderingContextBase.ELEMENT_ARRAY_BUFFER, indexData, WebGL2RenderingContextBase.STATIC_DRAW);
+
+            var indexArray = new Int16Array(indexData.Length);
+            for (int i = 0; i < indexData.Length; i++)
+            {
+                indexArray[i] = indexData[i];
+            }
+
+            gl.BufferData(WebGL2RenderingContextBase.ELEMENT_ARRAY_BUFFER, indexArray, WebGL2RenderingContextBase.STATIC_DRAW);
+
             GraphicsExtensions.CheckGLError();
 
             _vertexBuffersDirty = true;
@@ -832,5 +842,124 @@ namespace Microsoft.Xna.Framework.Graphics
             presentationParameters.MultiSampleCount = 0;
             quality = 0;
         }
+
+        private ITypedArray ConvertVertices<T>(T[] vertices, int startVertex, int numVertices, VertexDeclaration decl)
+        {
+            var result =  new ArrayBuffer(numVertices * decl.VertexStride);
+            var fa = new Float32Array(result);
+            var fi = new Uint32Array(result);
+            int pos = 0;
+
+            if (vertices[0] is VertexPositionColorTexture) // hardcoding types gives us a bit of performance
+            {
+                for (int i = 0; i < numVertices; i++)
+                {
+                    var tmp = (VertexPositionColorTexture)(object)vertices[i];
+                    fa[pos + 0] = tmp.Position.X;
+                    fa[pos + 1] = tmp.Position.Y;
+                    fa[pos + 2] = tmp.Position.Z;
+                    fi[pos + 3] = tmp.Color.PackedValue;
+                    fa[pos + 4] = tmp.TextureCoordinate.X;
+                    fa[pos + 5] = tmp.TextureCoordinate.Y;
+
+                    pos += 6;
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+                /*var props = object.GetOwnPropertyNames(vertices[0]).Where(p => p[0] != '$').ToArray();
+                var propertyIndex = 0;
+
+                foreach (var el in decl.InternalVertexElements)
+                {
+                    var prop = props[propertyIndex++];
+                    CopyVertexElement(vertices, startVertex, numVertices, result, prop, el.Offset, el.VertexElementFormat, decl.VertexStride);
+                }*/
+            }
+
+            return fa;
+        }
+
+        /*private void CopyVertexElement<T>(T[] vertices, int startVertex, int numVertices, ArrayBuffer buf, string property, int offset, VertexElementFormat format, int stride)
+        {
+            // Note that this implementation assumes vertex element format matches the actual struct implementation
+            // E.g. Vector4 element must map to a Vector4 field
+            // TODO: This could be made more robust by trying to guess how many bytes each property is
+            // E.g. if we have Short4 format and 2 fields, assume both are 32-bit instead of 4 16-bit fields
+            switch (format)
+            {
+                case VertexElementFormat.Byte4:
+                    // assumes struct with 4 byte fields
+                    var props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var byte4 = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var byteView = new Uint8Array(buf, (uint) startIndex);
+                        byteView[0] = (byte) byte4[props[0]];
+                        byteView[1] = (byte) byte4[props[1]];
+                        byteView[2] = (byte) byte4[props[2]];
+                        byteView[3] = (byte) byte4[props[3]];
+                    }
+                    break;
+                case VertexElementFormat.Color:
+                    // assumes struct field with uint field
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var color = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var uintView = new Uint32Array(buf, (uint) startIndex);
+                        uintView[0] = (uint) color[props[0]];
+                    }
+                    break;
+                case VertexElementFormat.HalfVector2:
+                case VertexElementFormat.HalfVector4:
+                    // TODO
+                    throw new NotImplementedException();
+                case VertexElementFormat.NormalizedShort2:
+                case VertexElementFormat.Short2:
+                case VertexElementFormat.NormalizedShort4:
+                case VertexElementFormat.Short4:
+                    // assumes struct field with n short fields
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var shorts = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var shortView = new Int16Array(buf, (uint) startIndex);
+                        for (var ci = 0; ci < props.Length; ci++)
+                            shortView[(uint) ci] = (short) shorts[props[ci]];
+                    }
+                    break;
+                case VertexElementFormat.Single:
+                    // assumes direct float field
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var floatVal = vertices[startVertex + i][property];
+                        var startIndex = offset + i * stride;
+                        var floatView = new Float32Array(buf, (uint) startIndex);
+                        floatView[0] = (float) floatVal;
+                    }
+                    break;
+                case VertexElementFormat.Vector2:
+                case VertexElementFormat.Vector3:
+                case VertexElementFormat.Vector4:
+                    // assumes struct field with n float fields
+                    props = object.GetOwnPropertyNames(vertices[0][property]).Where(p => p[0] != '$').ToArray();
+                    for (var i = 0; i < numVertices; i++)
+                    {
+                        var startIndex = offset + i * stride;
+                        var floatView = new Float32Array(buf, (uint) startIndex);
+                        var vec = vertices[startVertex + i][property];
+                        for (var ci = 0; ci < props.Length; ci++)
+                            floatView[(uint) ci] = (float) vec[props[ci]];
+                    }
+
+                    break;
+            }
+        }*/
     }
 }
